@@ -173,6 +173,11 @@ namespace GMDG.NoProduct.Utility
             _currentState?.Tick();
         }
 
+        public IState GetState()
+        {
+            return _currentState;
+        }
+
         public void SetState(IState state)
         {
             if (state == _currentState)
@@ -251,7 +256,10 @@ namespace GMDG.NoProduct.Utility
     public class Static
     {
         private Transform transform;
-
+        public Transform Transform
+        {
+            get { return transform; }
+        }
         public Vector3 Position
         {
             get { return transform.position; }
@@ -277,7 +285,10 @@ namespace GMDG.NoProduct.Utility
         private Static staticInfo;
         private Vector3 velocity;
         private float angularVelocity;
-
+        public Transform Transform
+        {
+            get { return staticInfo.Transform; }
+        }
         public Vector3 Position
         {
             get { return staticInfo.Position; }
@@ -440,6 +451,11 @@ namespace GMDG.NoProduct.Utility
     {
         private Transform transform;
 
+        public Transform Transform
+        {
+            get { return transform; }
+        }
+
         public Vector2 Position
         {
             get { return transform.position; }
@@ -466,6 +482,10 @@ namespace GMDG.NoProduct.Utility
         private Vector2 velocity;
         private float angularVelocity;
 
+        public Transform Transform
+        {
+            get { return staticInfo.Transform; }
+        }
         public Vector2 Position
         {
             get { return staticInfo.Position; }

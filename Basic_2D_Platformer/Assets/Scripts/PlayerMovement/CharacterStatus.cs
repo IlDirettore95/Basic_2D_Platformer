@@ -14,16 +14,17 @@ namespace GMDG.Basic_2D_Platformer.PlayerMovement
             _kinematicStatus = new Kinematic2D(transform);
             _stateMachine = new StateMachine();
 
-            Idle idle = new Idle();
-            Walking walking = new Walking();
-            Falling falling = new Falling();
+            Idle idle = new Idle(_kinematicStatus);
+            Walking walking = new Walking(_kinematicStatus);
+            Falling falling = new Falling(_kinematicStatus);
 
-            _stateMachine.AddTransition(idle, walking, () => { return false; });
-        }
+            Func<bool> IsMoving = () => _kinematicStatus.Velocity.x != 0;
+            Func<bool> IsIdle = () => _kinematicStatus.Velocity.x == 0;
 
-        public void UpdateKinematic(KinematicSteeringOutput2D steering)
-        {
-            Kinematic2D.Update(_kinematicStatus, steering);
+            _stateMachine.AddTransition(idle, walking, IsMoving);
+            _stateMachine.AddTransition(walking, idle, IsMoving);
+
+            _stateMachine.SetState(idle);
         }
 
         public void UpdateState()
@@ -33,50 +34,57 @@ namespace GMDG.Basic_2D_Platformer.PlayerMovement
 
         private class Idle : IState
         {
-            public void OnEnter()
-            {
-                throw new System.NotImplementedException();
-            }
+            public Idle(Kinematic2D kinematicStatus) { }
 
-            public void OnExit()
-            {
-                throw new System.NotImplementedException();
-            }
+            public void OnEnter() { }
 
-            public void Tick() 
-            { }
+            public void OnExit() { }
+
+            public void Tick() { }
         }
 
         private class Walking : IState
         {
-            public void OnEnter()
-            {
-                throw new System.NotImplementedException();
+            private float _walkingSpeed = 3f;
+            private Kinematic2D _kinematicStatus;
+
+            public Walking(Kinematic2D kinematicStatus) 
+            { 
+                _kinematicStatus = kinematicStatus;
             }
 
-            public void OnExit()
-            {
-                throw new System.NotImplementedException();
-            }
+            public void OnEnter() { }
+
+            public void OnExit() { }
 
             public void Tick()
-            { }
+            { 
+                Vector2 velocity = Vector2.zero;
+
+                if(Input.GetKey(KeyCode.A))
+                {
+                    velocity += Vector2.left;
+                }
+                if (Input.GetKey(KeyCode.D))
+                {
+                    velocity += Vector2.right;
+                }
+
+                velocity *= _walkingSpeed;
+
+                Kinematic2D.Update(_kinematicStatus, new KinematicSteeringOutput2D(velocity, 0));
+            }
         }
 
         private class Falling : IState
         {
-            public void OnEnter()
-            {
-                throw new System.NotImplementedException();
-            }
+            public Falling(Kinematic2D kinematicStatus) { }
 
-            public void OnExit()
-            {
-                throw new System.NotImplementedException();
-            }
+            public void OnEnter() { }
 
-            public void Tick()
-            { }
+            public void OnExit() { }
+
+            public void Tick() { }
         }
     }
 }
