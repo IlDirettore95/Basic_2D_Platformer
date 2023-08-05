@@ -53,8 +53,9 @@ namespace GMDG.Basic_2D_Platformer.PlayerMovement
             GUIStyle style = new GUIStyle();
             style.fontSize = 24;
             GUI.Box(new Rect(10, 10, 300, 40), "State: " + _stateMachine.GetState().GetType().Name, style);
-            GUI.Box(new Rect(10, 50, 300, 40), "IsGrounded: " + _sensors.IsGrounded, style);
-            GUI.Box(new Rect(10, 90, 300, 40), "IsOnEdge: " + _sensors.IsOnEdge, style);
+            GUI.Box(new Rect(10, 50, 300, 60), string.Format("IsGrounded: {0} {1}\tDistance: {2}", _sensors.IsGrounded, Environment.NewLine, _sensors.DistanceFromGround), style);
+            GUI.Box(new Rect(10, 110, 300, 40), "IsOnEdge: " + _sensors.IsOnEdge, style);
+            GUI.Box(new Rect(10, 150, 300, 60), string.Format("DistanceFromCollision: {0}", _sensors.DistanceFromCollision), style);
         }
 
         private void UpdateSensors()

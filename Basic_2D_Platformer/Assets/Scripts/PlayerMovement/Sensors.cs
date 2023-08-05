@@ -18,6 +18,8 @@ namespace GMDG.Basic_2D_Platformer.PlayerMovement
         public float HorizontalInput { get; private set; }
         public float VerticalInput { get; private set; }
 
+        public float DistanceFromCollision { get; private set; }
+
         public Sensors(Kinematic2D kinematicStatus, CapsuleCollider2D collider, MovementData data) 
         { 
             _kinematicStatus = kinematicStatus;
@@ -60,8 +62,6 @@ namespace GMDG.Basic_2D_Platformer.PlayerMovement
 
         private bool CheckGrounded()
         {
-            if (_kinematicStatus.Velocity.y > 0) return false;
-
             Transform transform = _kinematicStatus.Transform;
 
             RaycastHit2D[] hits;
@@ -71,7 +71,9 @@ namespace GMDG.Basic_2D_Platformer.PlayerMovement
                 if (hits[i].collider == _collider) continue;
                 Debug.DrawLine(transform.position, hits[i].point, Color.blue);
                 DistanceFromGround = hits[i].distance;
+                if (_kinematicStatus.Velocity.y > 0) return false;
                 if (hits[i].distance > _collider.size.y / 2 + _data.CollisionThreashold) return false;
+                transform.position += Vector3.up * (_collider.size.y / 2 + _data.CollisionThreashold / 2 - hits[i].distance);
                 return true;
             }
             DistanceFromGround = float.PositiveInfinity;
@@ -88,17 +90,18 @@ namespace GMDG.Basic_2D_Platformer.PlayerMovement
             {
                 if (hits[i].collider == _collider) continue;
                 Debug.DrawLine(transform.position, hits[i].point, Color.red);
-                if (hits[i].distance > velocity.magnitude * Time.deltaTime) break;
-
-                transform.position += (Vector3)velocity.normalized * (hits[i].distance - _data.CollisionThreashold);
-                velocity = Vector3.zero;
-
-                if(velocity.y < 0)
+                DistanceFromCollision = hits[i].distance;
+                if (_kinematicStatus.Velocity.y < 0 && !IsGrounded && hits[i].distance <= _data.CollisionThreashold)
                 {
-                    Debug.Log(IsOnEdge);
-                    IsOnEdge = !IsGrounded;
+                    IsOnEdge = true;
                 }
-
+                else
+                {
+                    IsOnEdge = false;
+                }
+                if (hits[i].distance > velocity.magnitude * Time.deltaTime + _data.CollisionThreashold) break;
+                transform.position += (Vector3)velocity.normalized * (hits[i].distance - _data.CollisionThreashold / 2);
+                velocity = Vector2.zero;
                 break;
             }
 
