@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,6 +11,6 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
         public int ID;
         public GameObject Prefab;
         public int Weight;
-        public TileScriptableObject[] PossibleNeighbours;
+        public List<TileScriptableObject> PossibleNeighbours;
     }
 }

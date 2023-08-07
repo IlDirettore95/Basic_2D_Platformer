@@ -13,6 +13,7 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
             WorldGenerator generator = (WorldGenerator)target;
             if (GUILayout.Button("GenerateMap"))
             {
+                generator.Delete();
                 generator.Initialize();
                 generator.Generate();
             }

@@ -204,7 +204,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_BackGroundColor: {r: 0, g: 0, b: 0, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -229,7 +229,7 @@ Camera:
   far clip plane: 1000
   field of view: 34
   orthographic: 1
-  orthographic size: 5
+  orthographic size: 20
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -386,7 +386,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9034b1e7bdd9f8542af2e037016fbc64, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GridSize: {x: 5, y: 5}
+  GridSize: {x: 10, y: 10}
+  CellSize: {x: 3, y: 3}
+  IsGenerationSimulated: 1
+  timeup: 0
   _tiles:
-  - {fileID: 11400000, guid: 8614e33dac02688409b9e3752959a80c, type: 2}
-  - {fileID: 11400000, guid: 93056a978bbdc5f4ca9c0e6e96d057f4, type: 2}
+  - {fileID: 11400000, guid: b4d024483d739b848adf22b3babf83ce, type: 2}
+  - {fileID: 11400000, guid: 4d7a8795627972545a35201b2bace6b1, type: 2}
+  - {fileID: 11400000, guid: 0346920c6db7f424091c886581a5d607, type: 2}
+  - {fileID: 11400000, guid: 9757451663c52064ba9f86799312659c, type: 2}
+  - {fileID: 11400000, guid: 79f0183d2ab16384f85f382653363949, type: 2}

@@ -10,9 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0fb01cf660a97a1429786de2d744914c, type: 3}
-  m_Name: Ground_Tile
+  m_Name: Land_Tile
   m_EditorClassIdentifier: 
-  ID: 1
-  Prefab: {fileID: 0}
-  Weight: 0
-  PossibleNeighbours: []
+  ID: 4
+  Prefab: {fileID: 5630822566900989312, guid: 0cb759feb93da88409bfbd2fbe9f74f9, type: 3}
+  Weight: 20
+  PossibleNeighbours:
+  - {fileID: 11400000}
+  - {fileID: 11400000, guid: 4d7a8795627972545a35201b2bace6b1, type: 2}
+  - {fileID: 11400000, guid: 79f0183d2ab16384f85f382653363949, type: 2}
