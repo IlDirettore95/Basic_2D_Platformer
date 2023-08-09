@@ -386,13 +386,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9034b1e7bdd9f8542af2e037016fbc64, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GridSize: {x: 10, y: 10}
+  GridSize: {x: 3, y: 3}
   CellSize: {x: 3, y: 3}
+  MaxIterations: 1
+  Seed: 0
   IsGenerationSimulated: 1
-  timeup: 0
+  Timeup: 0
   _tiles:
-  - {fileID: 11400000, guid: b4d024483d739b848adf22b3babf83ce, type: 2}
-  - {fileID: 11400000, guid: 4d7a8795627972545a35201b2bace6b1, type: 2}
-  - {fileID: 11400000, guid: 0346920c6db7f424091c886581a5d607, type: 2}
-  - {fileID: 11400000, guid: 9757451663c52064ba9f86799312659c, type: 2}
-  - {fileID: 11400000, guid: 79f0183d2ab16384f85f382653363949, type: 2}
+  - {fileID: 11400000, guid: ff7124489c915f741bfe1831d4d20b47, type: 2}
+  - {fileID: 11400000, guid: a3d9a8e6ff197a2418761882b73b71ff, type: 2}
+  - {fileID: 11400000, guid: e92a0571c49890d4a9c3aa7d1efd59bd, type: 2}
+  - {fileID: 11400000, guid: 4e00049d1834c8444994f3fe07788ad6, type: 2}
+  - {fileID: 11400000, guid: bbae4339a184b5a459c01bf49fdb5aed, type: 2}
+  - {fileID: 11400000, guid: 96212d177977b6445b7d433d80edb2b3, type: 2}

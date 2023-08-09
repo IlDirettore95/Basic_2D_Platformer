@@ -1,5 +1,4 @@
 using GMDG.NoProduct.Utility;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,13 +11,16 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
     {
         public Vector2Int GridSize;
         public Vector2Int CellSize;
+        public int MaxIterations = 0;
+        public int Seed = 0;
         public bool IsGenerationSimulated = false;
-        public float timeup = 0;
+        public float Timeup = 0;
 
         [SerializeField] private TileScriptableObject[] _tiles;
 
         private Utility2D.Grid2D _grid;
         private Dictionary<Vector2, List<TileScriptableObject>> _waves;
+        private List<Utility2D.Direction2D> _directions;
 
         #region UnityCallbacks
 
@@ -28,7 +30,7 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
             Initialize();
             if (IsGenerationSimulated)
             {
-                GenerateSimulated(timeup);
+                GenerateSimulated(Timeup);
             }
             else
             {
@@ -45,14 +47,18 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
                 Debug.LogError("GridSize must be positive!"); 
                 return; 
             }
-            if (_tiles.GroupBy(tile => tile.ID).Any(group => group.Count() > 1)) 
-            { 
-                Debug.LogError("All tiles must have distinct IDs!"); 
-                return; 
-            }
+
+            UnityEngine.Random.InitState(Seed <= 0 ? UnityEngine.Random.Range(0, int.MaxValue) : Seed);
 
             _grid = new Utility2D.Grid2D(GridSize, CellSize, Vector2.zero);
             _waves = new Dictionary<Vector2, List<TileScriptableObject>>();
+            _directions = new List<Utility2D.Direction2D>()
+            { 
+                Utility2D.Direction2D.NORTH, 
+                Utility2D.Direction2D.EAST, 
+                Utility2D.Direction2D.SOUTH, 
+                Utility2D.Direction2D.WEST
+            };
 
             for (int i = 0; i < _grid.YLength; i++)
             {
@@ -66,7 +72,7 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
 
         public void Generate()
         {
-            int numberOfWavesToCollapse = _waves.Count;
+            int numberOfWavesToCollapse = MaxIterations <= 0? _waves.Count : MaxIterations;
 
             while (numberOfWavesToCollapse > 0) 
             {
@@ -86,7 +92,7 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
                 Instantiate(chosenTile.Prefab, chosenPosition, Quaternion.identity, gameObject.transform);
 
                 //Propagation
-                PropagateConstraints(chosenPosition, chosenTile.PossibleNeighbours);
+                //PropagateConstraints(chosenPosition, chosenTile.Constraints);
 
                 numberOfWavesToCollapse--;
             }
@@ -133,7 +139,9 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
                 Instantiate(chosenTile.Prefab, chosenPosition, Quaternion.identity, gameObject.transform);
 
                 //Propagation
-                PropagateConstraints(chosenPosition, chosenTile.PossibleNeighbours);
+                Dictionary<Vector2, bool> positionsVisitedByPropagation = new Dictionary<Vector2, bool>();
+                positionsVisitedByPropagation[chosenPosition] = true;
+                //PropagateConstraints(chosenPosition, chosenTile.Constraints, positionsVisitedByPropagation);
 
                 numberOfWavesToCollapse--;
                 if (timeup == 0) yield return null;
@@ -168,28 +176,52 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
             return collapsedWave;
         }
 
-        private void PropagateConstraints(Vector2 chosenPosition, List<TileScriptableObject> possibleNeighbours)
+        //private void PropagateConstraints(Vector2 chosenPosition, List<Constraint> constraint, Dictionary<Vector2, bool> positionsVisitedByPropagation)
+        //{
+        //    for (int i = 0; i < constraint.Count; i++) 
+        //    {
+        //        Utility2D.Direction2D direction = constraint[i].Direction;
+        //        Vector2 tileInDirection = chosenPosition + new Vector2Int(Utility2D.GridDirections2D[direction].y, Utility2D.GridDirections2D[direction].x) * CellSize;
+        //        List<TileScriptableObject> possibleNeighbours = constraint[i].PossibleNeighbours;
+        //        if (!_waves.TryGetValue(tileInDirection, out List<TileScriptableObject> neighboursSuperpositions)) return;
+                
+        //        for (int j = 0; j < neighboursSuperpositions.Count; j++)
+        //        {
+        //            if (possibleNeighbours.Contains(neighboursSuperpositions[j])) continue;
+
+        //            neighboursSuperpositions.RemoveAt(j);
+        //            j--;
+        //        }
+
+        //        positionsVisitedByPropagation[tileInDirection] = true;
+
+        //        for (int j = 0; j < neighboursSuperpositions.Count; j++)
+        //        {
+        //            if (positionsVisitedByPropagation.TryGetValue(tileInDirection))
+        //            PropagateConstraints(tileInDirection, neighboursSuperpositions[j].Constraints, positionsVisitedByPropagation);
+        //        }
+        //    }
+        //}
+
+        private void PropagateContraints(Vector2 chosenPosition)
         {
-            PropagateConstraint(chosenPosition, Utility2D.Direction2D.NORTH, possibleNeighbours);
-            PropagateConstraint(chosenPosition, Utility2D.Direction2D.SOUTH, possibleNeighbours);
-            PropagateConstraint(chosenPosition, Utility2D.Direction2D.EAST, possibleNeighbours);
-            PropagateConstraint(chosenPosition, Utility2D.Direction2D.WEST, possibleNeighbours);
+            //List<Constraint> constraints = _waves[chosenPosition][0].Constraints[0].;
         }
 
-        private void PropagateConstraint(Vector2 chosenPosition, Utility2D.Direction2D direction, List<TileScriptableObject> possibleNeighbours)
-        {
-            Vector2 tileInDirection;
-            List<TileScriptableObject> neighbours;
-            tileInDirection = chosenPosition + Utility2D.GridDirections2D[direction] * CellSize;
-            if (!_waves.TryGetValue(tileInDirection, out neighbours)) return;
-            for (int i = 0; i < neighbours.Count; i++)
-            {
-                if (possibleNeighbours.Contains(neighbours[i])) continue;
+        //private void PropagateConstraint(Vector2 chosenPosition, Utility2D.Direction2D direction, List<TileScriptableObject> possibleNeighbours)
+        //{
+        //    Vector2 tileInDirection;
+        //    Vector2Int directionInGrid = Utility2D.GridDirections2D[direction];
+        //    tileInDirection = chosenPosition + new Vector2Int(directionInGrid.y, directionInGrid.x) * CellSize;
+        //    if (!_waves.TryGetValue(tileInDirection, out List<TileScriptableObject> neighbours)) return;
+        //    for (int i = 0; i < neighbours.Count; i++)
+        //    {
+        //        if (possibleNeighbours.Contains(neighbours[i])) continue;
 
-                neighbours.RemoveAt(i);
-                i--;
-            }
-        }
+        //        neighbours.RemoveAt(i);
+        //        i--;
+        //    }
+        //}
 
         private float FindWavesWithLowestEntropy(out Vector2 chosenPosition)
         {
@@ -239,7 +271,7 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
 
                 for (int i = 0; i < _waves[position].Count; i++)
                 {
-                    stringList += _waves[position][i].ID;
+                    stringList += _waves[position][i].name;
                     stringList += ", ";
                 }
                 stringList += string.Format("({0})", Entropy(position));

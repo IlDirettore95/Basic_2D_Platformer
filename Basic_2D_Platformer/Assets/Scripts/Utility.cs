@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEditor;
+using System.Runtime.CompilerServices;
 
 namespace GMDG.NoProduct.Utility
 {
@@ -579,6 +580,29 @@ namespace GMDG.NoProduct.Utility
                         CellsPositions[i, j] = cellPosition;
                     }
                 }
+            }
+
+            public Vector2 GetPosition(int i, int j)
+            {
+                if (i < 0 || j < 0 || i > YLength - 1 || j > XLength - 1)
+                {
+                    throw new ArgumentException();
+                }
+
+                return CellsPositions[i, j];
+            }
+
+            public Vector2Int GetIndicies(Vector2 position)
+            {
+                for (int i = 0; i < CellsPositions.GetLength(0); i++)
+                {
+                    for (int j = 0; j < CellsPositions.GetLength(1); j++)
+                    {
+                        if (CellsPositions[i, j] == position) return new Vector2Int(i, j);
+                    }
+                }
+
+                return new Vector2Int(-1, -1);
             }
 
             public void Draw()
