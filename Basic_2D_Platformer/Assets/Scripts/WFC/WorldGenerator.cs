@@ -1,4 +1,5 @@
 using GMDG.NoProduct.Utility;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,10 +17,12 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
         public bool IsGenerationSimulated = false;
         public float Timeup = 0;
 
-        [SerializeField] private TileScriptableObject[] _tiles;
+        [SerializeField] private TileScriptableObject[] _possibleTiles;
 
         private Utility2D.Grid2D _grid;
         private Dictionary<Vector2, List<TileScriptableObject>> _waves;
+        //private Dictionary<Vector2, bool> _visitedPositionsByPropagation;
+        private Dictionary<Vector2, TileScriptableObject> _collapsedPositions;
         private List<Utility2D.Direction2D> _directions;
 
         #region UnityCallbacks
@@ -28,14 +31,7 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
         {
             Delete();
             Initialize();
-            if (IsGenerationSimulated)
-            {
-                GenerateSimulated(Timeup);
-            }
-            else
-            {
-                Generate();
-            }
+            Generate(Timeup);
         }
 
         #endregion
@@ -52,6 +48,8 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
 
             _grid = new Utility2D.Grid2D(GridSize, CellSize, Vector2.zero);
             _waves = new Dictionary<Vector2, List<TileScriptableObject>>();
+            //_visitedPositionsByPropagation = new Dictionary<Vector2, bool>();
+            _collapsedPositions = new Dictionary<Vector2, TileScriptableObject>();
             _directions = new List<Utility2D.Direction2D>()
             { 
                 Utility2D.Direction2D.NORTH, 
@@ -65,41 +63,12 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
                 for (int j = 0; j < _grid.XLength; j++)
                 {
                     Vector2 worldPosition = _grid.CellsPositions[i, j];
-                    _waves[worldPosition] = new List<TileScriptableObject>(_tiles);
+                    _waves[worldPosition] = new List<TileScriptableObject>(_possibleTiles);
                 }
             }
         }
 
-        public void Generate()
-        {
-            int numberOfWavesToCollapse = MaxIterations <= 0? _waves.Count : MaxIterations;
-
-            while (numberOfWavesToCollapse > 0) 
-            {
-                // Observation
-                // 1. Find element
-                float positionEntropy = FindWavesWithLowestEntropy(out Vector2 chosenPosition);
-                if (positionEntropy <= 0 || positionEntropy == float.PositiveInfinity)
-                {
-                    Debug.Log("FALLITO!");
-                    break;
-                }
-
-                // 2. Collapse
-                List<TileScriptableObject> superPositions = _waves[chosenPosition];
-                TileScriptableObject chosenTile = CollapseWave(chosenPosition);
-
-                Instantiate(chosenTile.Prefab, chosenPosition, Quaternion.identity, gameObject.transform);
-
-                //Propagation
-                //PropagateConstraints(chosenPosition, chosenTile.Constraints);
-
-                numberOfWavesToCollapse--;
-            }
-
-        }
-
-        public void GenerateSimulated(float timeup)
+        public void Generate(float timeup)
         {
             StartCoroutine(GenerateCoroutine(timeup));
         }
@@ -108,6 +77,9 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
         {
             _grid = null;
             _waves = null;
+            //_visitedPositionsByPropagation = null;
+            _collapsedPositions = null;
+            _directions = null;
 
             for (int i = 0; i < gameObject.transform.childCount;)
             {
@@ -123,7 +95,7 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
 
         private IEnumerator GenerateCoroutine(float timeup)
         {
-            int numberOfWavesToCollapse = _waves.Count;
+            int numberOfWavesToCollapse = MaxIterations <= 0 ? _waves.Count : MaxIterations;
 
             while (numberOfWavesToCollapse > 0)
             {
@@ -133,17 +105,18 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
                 if (positionEntropy <= 0 || positionEntropy == float.PositiveInfinity) break;
 
                 // 2. Collapse
-                List<TileScriptableObject> superPositions = _waves[chosenPosition];
                 TileScriptableObject chosenTile = CollapseWave(chosenPosition);
-
                 Instantiate(chosenTile.Prefab, chosenPosition, Quaternion.identity, gameObject.transform);
 
                 //Propagation
-                Dictionary<Vector2, bool> positionsVisitedByPropagation = new Dictionary<Vector2, bool>();
-                positionsVisitedByPropagation[chosenPosition] = true;
-                //PropagateConstraints(chosenPosition, chosenTile.Constraints, positionsVisitedByPropagation);
+                //foreach (Vector2 position in _visitedPositionsByPropagation.Keys)
+                //{
+                //    _visitedPositionsByPropagation[position] = false;
+                //}
+                PropagateContraints(chosenPosition);
 
                 numberOfWavesToCollapse--;
+                if (!IsGenerationSimulated) continue;
                 if (timeup == 0) yield return null;
                 yield return new WaitForSecondsRealtime(timeup);
             }
@@ -169,59 +142,56 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
                 if (randomChoice > 0) continue;
 
                 collapsedWave = superPositions[i];
-                _waves.Remove(chosenPosition);
                 break;
             }
+
+            _waves.Remove(chosenPosition);
+            //_visitedPositionsByPropagation.Remove(chosenPosition);
+            _collapsedPositions.Add(chosenPosition, collapsedWave);
 
             return collapsedWave;
         }
 
-        //private void PropagateConstraints(Vector2 chosenPosition, List<Constraint> constraint, Dictionary<Vector2, bool> positionsVisitedByPropagation)
-        //{
-        //    for (int i = 0; i < constraint.Count; i++) 
-        //    {
-        //        Utility2D.Direction2D direction = constraint[i].Direction;
-        //        Vector2 tileInDirection = chosenPosition + new Vector2Int(Utility2D.GridDirections2D[direction].y, Utility2D.GridDirections2D[direction].x) * CellSize;
-        //        List<TileScriptableObject> possibleNeighbours = constraint[i].PossibleNeighbours;
-        //        if (!_waves.TryGetValue(tileInDirection, out List<TileScriptableObject> neighboursSuperpositions)) return;
-                
-        //        for (int j = 0; j < neighboursSuperpositions.Count; j++)
-        //        {
-        //            if (possibleNeighbours.Contains(neighboursSuperpositions[j])) continue;
-
-        //            neighboursSuperpositions.RemoveAt(j);
-        //            j--;
-        //        }
-
-        //        positionsVisitedByPropagation[tileInDirection] = true;
-
-        //        for (int j = 0; j < neighboursSuperpositions.Count; j++)
-        //        {
-        //            if (positionsVisitedByPropagation.TryGetValue(tileInDirection))
-        //            PropagateConstraints(tileInDirection, neighboursSuperpositions[j].Constraints, positionsVisitedByPropagation);
-        //        }
-        //    }
-        //}
-
         private void PropagateContraints(Vector2 chosenPosition)
         {
-            //List<Constraint> constraints = _waves[chosenPosition][0].Constraints[0].;
+            List<TileScriptableObject> superPositions;
+            
+            if (_waves.ContainsKey(chosenPosition))
+            {
+                superPositions = _waves[chosenPosition];
+            }
+            else
+            {
+                superPositions = new List<TileScriptableObject>
+                {
+                    _collapsedPositions[chosenPosition]
+                };
+            }
+
+            for (int i = 0; i < _directions.Count; i++)
+            {
+                Vector2Int directionInGrid = Utility2D.GridDirections2D[_directions[i]];
+                Vector2 positionInDirection = chosenPosition + new Vector2Int(directionInGrid.y, directionInGrid.x) * CellSize;
+                if (CantPropagate(positionInDirection, out List<TileScriptableObject> neighbourSuperPositions)) continue;
+                
+                List<TileScriptableObject> possibleNeighbourSuperpositions = new List<TileScriptableObject>();
+                for (int j = 0; j < superPositions.Count; j++)
+                {
+                    possibleNeighbourSuperpositions = new List<TileScriptableObject>(possibleNeighbourSuperpositions.Union(superPositions[j].Constraints[i].PossibleNeighbours));
+                }
+
+                int numberOfNeighbourSuperpositions = neighbourSuperPositions.Count;
+                for (int j = 0; j < neighbourSuperPositions.Count; j++)
+                {
+                    if (possibleNeighbourSuperpositions.Contains(neighbourSuperPositions[j])) continue;
+                    neighbourSuperPositions.RemoveAt(j);
+                    j--;
+                }
+                //_visitedPositionsByPropagation[positionInDirection] = true;
+                if (neighbourSuperPositions.Count == numberOfNeighbourSuperpositions) continue;
+                PropagateContraints(positionInDirection);
+            }
         }
-
-        //private void PropagateConstraint(Vector2 chosenPosition, Utility2D.Direction2D direction, List<TileScriptableObject> possibleNeighbours)
-        //{
-        //    Vector2 tileInDirection;
-        //    Vector2Int directionInGrid = Utility2D.GridDirections2D[direction];
-        //    tileInDirection = chosenPosition + new Vector2Int(directionInGrid.y, directionInGrid.x) * CellSize;
-        //    if (!_waves.TryGetValue(tileInDirection, out List<TileScriptableObject> neighbours)) return;
-        //    for (int i = 0; i < neighbours.Count; i++)
-        //    {
-        //        if (possibleNeighbours.Contains(neighbours[i])) continue;
-
-        //        neighbours.RemoveAt(i);
-        //        i--;
-        //    }
-        //}
 
         private float FindWavesWithLowestEntropy(out Vector2 chosenPosition)
         {
@@ -231,6 +201,7 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
 
             foreach (Vector2 position in _waves.Keys) 
             { 
+                //if (IsCollapsed(position)) continue;
                 float positionEntropy = Entropy(position);
 
                 if (positionEntropy < minEntropy)
@@ -257,6 +228,14 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
         {
             return _waves[position].Count;
         }
+
+        private bool CantPropagate(Vector2 position, out List<TileScriptableObject> neighbourSuperPositions)
+        {
+            neighbourSuperPositions = null;
+            //return (_visitedPositionsByPropagation.ContainsKey(position) && _visitedPositionsByPropagation[position]) || !_waves.TryGetValue(position, out neighbourSuperPositions);
+            return !_waves.TryGetValue(position, out neighbourSuperPositions);
+        }
+
 
         #region EditorCallbacks
 
@@ -287,4 +266,3 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
         #endregion
     }
 }
-

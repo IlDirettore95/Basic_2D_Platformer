@@ -15,7 +15,7 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
             {
                 generator.Delete();
                 generator.Initialize();
-                generator.Generate();
+                generator.Generate(0);
             }
             if (GUILayout.Button("DeleteMap"))
             {
