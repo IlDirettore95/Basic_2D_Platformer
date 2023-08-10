@@ -2,6 +2,8 @@ using UnityEngine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
+using UnityEditor;
 
 namespace GMDG.NoProduct.Utility
 {
@@ -559,24 +561,47 @@ namespace GMDG.NoProduct.Utility
             private Cell2D[,] cells;
             private Vector2 gridPosition;
 
-            public Grid2D(int y, int x, Vector2 cellSize, Vector2 gridPosition)
+            public Grid2D(Vector2Int gridSize, Vector2 cellSize, Vector2 gridPosition)
             {
-                cells = new Cell2D[y, x];
-                CellsPositions = new Vector2[y, x];
+                cells = new Cell2D[gridSize.y, gridSize.x];
+                CellsPositions = new Vector2[gridSize.y, gridSize.x];
                 this.gridPosition = gridPosition;
 
-                float yTranslation = (y - 1) * cellSize.y / 2;
-                float xTranslation = (x - 1) * cellSize.x / 2;
+                float yTranslation = (gridSize.y - 1) * cellSize.y / 2;
+                float xTranslation = (gridSize.x - 1) * cellSize.x / 2;
 
-                for (int i = 0; i < y; i++)
+                for (int i = 0; i < gridSize.y; i++)
                 {
-                    for (int j = 0; j < x; j++)
+                    for (int j = 0; j < gridSize.x; j++)
                     {
                         Vector2 cellPosition = new Vector2(j * cellSize.x - xTranslation, i * cellSize.y - yTranslation) + gridPosition;
                         cells[i, j] = new Cell2D(cellSize, cellPosition, new Vector2Int(i, j));
                         CellsPositions[i, j] = cellPosition;
                     }
                 }
+            }
+
+            public Vector2 GetPosition(int i, int j)
+            {
+                if (i < 0 || j < 0 || i > YLength - 1 || j > XLength - 1)
+                {
+                    throw new ArgumentException();
+                }
+
+                return CellsPositions[i, j];
+            }
+
+            public Vector2Int GetIndicies(Vector2 position)
+            {
+                for (int i = 0; i < CellsPositions.GetLength(0); i++)
+                {
+                    for (int j = 0; j < CellsPositions.GetLength(1); j++)
+                    {
+                        if (CellsPositions[i, j] == position) return new Vector2Int(i, j);
+                    }
+                }
+
+                return new Vector2Int(-1, -1);
             }
 
             public void Draw()
@@ -612,10 +637,16 @@ namespace GMDG.NoProduct.Utility
 
                 public void Draw()
                 {
-                    Debug.DrawLine(positionInWorld + new Vector2(-size.x / 2, size.y / 2), positionInWorld + new Vector2(size.x / 2, size.y / 2), Color.black, float.PositiveInfinity);
-                    Debug.DrawLine(positionInWorld + new Vector2(size.x / 2, size.y / 2), positionInWorld + new Vector2(size.x / 2, -size.y / 2), Color.black, float.PositiveInfinity);
-                    Debug.DrawLine(positionInWorld + new Vector2(size.x / 2, -size.y / 2), positionInWorld + new Vector2(-size.x / 2, -size.y / 2), Color.black, float.PositiveInfinity);
-                    Debug.DrawLine(positionInWorld + new Vector2(-size.x / 2, -size.y / 2), positionInWorld + new Vector2(-size.x / 2, size.y / 2), Color.black, float.PositiveInfinity);
+                    GUIStyle style = new GUIStyle();
+                    style.alignment = TextAnchor.LowerRight;
+                    style.fontSize = 10;
+                    style.normal.textColor = Color.gray;
+                    Handles.Label(positionInWorld, string.Format("{0},{1}", positionInGrid.x, positionInGrid.y), style);
+                    Handles.color = Color.black;
+                    Handles.DrawLine(positionInWorld + new Vector2(-size.x / 2, size.y / 2), positionInWorld + new Vector2(size.x / 2, size.y / 2));
+                    Handles.DrawLine(positionInWorld + new Vector2(size.x / 2, size.y / 2), positionInWorld + new Vector2(size.x / 2, -size.y / 2));
+                    Handles.DrawLine(positionInWorld + new Vector2(size.x / 2, -size.y / 2), positionInWorld + new Vector2(-size.x / 2, -size.y / 2));
+                    Handles.DrawLine(positionInWorld + new Vector2(-size.x / 2, -size.y / 2), positionInWorld + new Vector2(-size.x / 2, size.y / 2));
                 }
             }
         }
@@ -623,26 +654,30 @@ namespace GMDG.NoProduct.Utility
         public enum Direction2D
         {
             NORTH,
+            NORTH_EAST,
             EAST,
+            SOUTH_EAST,
             SOUTH,
-            WEST
+            SOUTH_WEST,
+            WEST,
+            NORTH_WEST
         }
 
         public static Dictionary<Direction2D, Vector2Int> VectorsDirections2D = new Dictionary<Direction2D, Vector2Int>()
-    {
-        { Direction2D.NORTH, Vector2Int.up },
-        { Direction2D.EAST, Vector2Int.right },
-        { Direction2D.SOUTH, Vector2Int.down },
-        { Direction2D.WEST, Vector2Int.left }
-    };
+        {
+            { Direction2D.NORTH, Vector2Int.up },
+            { Direction2D.EAST, Vector2Int.right },
+            { Direction2D.SOUTH, Vector2Int.down },
+            { Direction2D.WEST, Vector2Int.left }
+        };
 
         public static Dictionary<Direction2D, Vector2Int> GridDirections2D = new Dictionary<Direction2D, Vector2Int>()
-    {
-        { Direction2D.NORTH, new Vector2Int(-1, 0) },
-        { Direction2D.EAST, new Vector2Int(0, 1) },
-        { Direction2D.SOUTH, new Vector2Int(1, 0) },
-        { Direction2D.WEST, new Vector2Int(0, -1) }
-    };
+        {
+            { Direction2D.NORTH, new Vector2Int(1, 0) },
+            { Direction2D.EAST, new Vector2Int(0, 1) },
+            { Direction2D.SOUTH, new Vector2Int(-1, 0) },
+            { Direction2D.WEST, new Vector2Int(0, -1) }
+        };
     }
 
     #region SpriteAnimation
@@ -698,7 +733,6 @@ namespace GMDG.NoProduct.Utility
             }
         }
     }
-
     #endregion
 
     #region General

@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fb01cf660a97a1429786de2d744914c, type: 3}
+  m_Name: CoastW
+  m_EditorClassIdentifier: 
+  Prefab: {fileID: 4961506687982599348, guid: d781bd18b71da0a4b9da41f30b1a8769, type: 3}
+  Weight: 15
+  Constraints:
+  - Direction: 0
+    PossibleNeighbours:
+    - {fileID: 11400000, guid: ff7124489c915f741bfe1831d4d20b47, type: 2}
+    - {fileID: 11400000, guid: 4e00049d1834c8444994f3fe07788ad6, type: 2}
+    - {fileID: 11400000}
+    - {fileID: 11400000, guid: e92a0571c49890d4a9c3aa7d1efd59bd, type: 2}
+  - Direction: 4
+    PossibleNeighbours:
+    - {fileID: 11400000, guid: ff7124489c915f741bfe1831d4d20b47, type: 2}
+    - {fileID: 11400000, guid: e92a0571c49890d4a9c3aa7d1efd59bd, type: 2}
+    - {fileID: 11400000, guid: bbae4339a184b5a459c01bf49fdb5aed, type: 2}
+    - {fileID: 11400000}
+  - Direction: 2
+    PossibleNeighbours:
+    - {fileID: 11400000, guid: 96212d177977b6445b7d433d80edb2b3, type: 2}
+  - Direction: 6
+    PossibleNeighbours:
+    - {fileID: 11400000, guid: ff7124489c915f741bfe1831d4d20b47, type: 2}
+    - {fileID: 11400000, guid: 4e00049d1834c8444994f3fe07788ad6, type: 2}
+    - {fileID: 11400000, guid: bbae4339a184b5a459c01bf49fdb5aed, type: 2}
+    - {fileID: 11400000, guid: e92a0571c49890d4a9c3aa7d1efd59bd, type: 2}
