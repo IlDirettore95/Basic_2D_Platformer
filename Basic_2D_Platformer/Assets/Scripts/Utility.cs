@@ -4,7 +4,6 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEditor;
-using System.Runtime.CompilerServices;
 
 namespace GMDG.NoProduct.Utility
 {
@@ -734,24 +733,6 @@ namespace GMDG.NoProduct.Utility
             }
         }
     }
-
-    public class DebugUtility
-    {
-        public static void DrawString2D(string text, Vector2 worldPos, Color? color = null)
-        {
-            GameObject go = new GameObject("Cell " + text);
-            TextMeshPro textMesh = go.AddComponent<TextMeshPro>();
-            RectTransform transform = (RectTransform)go.transform;
-            transform.position = worldPos;
-            transform.sizeDelta = Vector2.one;
-            textMesh.verticalAlignment = VerticalAlignmentOptions.Middle;
-            textMesh.horizontalAlignment = HorizontalAlignmentOptions.Center;
-            textMesh.fontSize = 4;
-            textMesh.color = color ?? Color.red;
-            textMesh.text = text;
-        }
-    }
-
     #endregion
 
     #region General
