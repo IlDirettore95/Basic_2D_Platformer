@@ -11,13 +11,11 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
         {
             DrawDefaultInspector();
             WorldGenerator generator = (WorldGenerator)target;
-            if (GUILayout.Button("GenerateMap"))
+            if (GUILayout.Button("Generate"))
             {
-                generator.Delete();
-                generator.Initialize();
-                generator.Generate(0);
+                generator.Generate();
             }
-            if (GUILayout.Button("DeleteMap"))
+            if (GUILayout.Button("Delete"))
             {
                 generator.Delete();
             }

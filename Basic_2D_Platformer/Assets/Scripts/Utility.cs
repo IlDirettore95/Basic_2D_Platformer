@@ -2,7 +2,6 @@ using UnityEngine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using TMPro;
 using UnityEditor;
 
 namespace GMDG.NoProduct.Utility
@@ -554,18 +553,21 @@ namespace GMDG.NoProduct.Utility
     {
         public class Grid2D
         {
-            public Vector2[,] CellsPositions { get; private set; }
-            public int YLength { get { return CellsPositions.GetLength(0); } }
-            public int XLength { get { return CellsPositions.GetLength(1); } }
+            public Vector2[,] CellsPositions { get; }
+            public Vector2Int GridSize { get; }
+            public Vector2 CellSize { get; }
+            public Vector2 GridPosition { get; }
 
             private Cell2D[,] cells;
-            private Vector2 gridPosition;
 
             public Grid2D(Vector2Int gridSize, Vector2 cellSize, Vector2 gridPosition)
             {
+                GridSize = gridSize;
+                CellSize = cellSize;
+                GridPosition = gridPosition;
+
                 cells = new Cell2D[gridSize.y, gridSize.x];
                 CellsPositions = new Vector2[gridSize.y, gridSize.x];
-                this.gridPosition = gridPosition;
 
                 float yTranslation = (gridSize.y - 1) * cellSize.y / 2;
                 float xTranslation = (gridSize.x - 1) * cellSize.x / 2;
@@ -583,7 +585,7 @@ namespace GMDG.NoProduct.Utility
 
             public Vector2 GetPosition(int i, int j)
             {
-                if (i < 0 || j < 0 || i > YLength - 1 || j > XLength - 1)
+                if (i < 0 || j < 0 || i > GridSize.y - 1 || j > GridSize.x - 1)
                 {
                     throw new ArgumentException();
                 }
@@ -654,14 +656,34 @@ namespace GMDG.NoProduct.Utility
         public enum Direction2D
         {
             NORTH,
-            NORTH_EAST,
             EAST,
-            SOUTH_EAST,
             SOUTH,
-            SOUTH_WEST,
-            WEST,
-            NORTH_WEST
+            WEST
         }
+
+        public static List<Direction2D> Directions2D = new List<Direction2D>()
+        { 
+            Direction2D.NORTH,
+            Direction2D.EAST,
+            Direction2D.SOUTH,
+            Direction2D.WEST
+        };
+
+        public static Dictionary<Direction2D, Direction2D> OppositeDirections = new Dictionary<Direction2D, Direction2D>()
+        {
+            { Direction2D.NORTH, Direction2D.SOUTH },
+            { Direction2D.EAST, Direction2D.WEST },
+            { Direction2D.SOUTH, Direction2D.NORTH },
+            { Direction2D.WEST, Direction2D.EAST }
+        };
+
+        public static Dictionary<string, Direction2D> Directions2DString = new Dictionary<string, Direction2D>()
+        {
+            { "NORTH", Direction2D.NORTH },
+            { "EAST", Direction2D.EAST },
+            { "SOUTH", Direction2D.SOUTH },
+            { "WEST", Direction2D.WEST },
+        };
 
         public static Dictionary<Direction2D, Vector2Int> VectorsDirections2D = new Dictionary<Direction2D, Vector2Int>()
         {
@@ -778,4 +800,3 @@ namespace GMDG.NoProduct.Utility
 
     #endregion
 }
-

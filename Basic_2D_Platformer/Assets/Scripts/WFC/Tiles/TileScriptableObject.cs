@@ -12,13 +12,13 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
     {
         public GameObject Prefab;
         public int Weight;
-        public List<Constraint> Constraints;
+        //public List<Constraint> Constraints;
     }
 
-    [Serializable]
-    public class Constraint
-    {
-        public Utility2D.Direction2D Direction;
-        public List<TileScriptableObject> PossibleNeighbours;
-    }
+    //[Serializable]
+    //public class Constraint
+    //{
+    //    public Utility2D.Direction2D Direction;
+    //    public List<TileScriptableObject> PossibleNeighbours;
+    //}
 }
