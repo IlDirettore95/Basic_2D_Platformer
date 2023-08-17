@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
 using UnityEngine;
+using static GMDG.NoProduct.Utility.Utility2D;
 
 namespace GMDG.Basic2DPlatformer.PCG.WFC
 {
@@ -25,7 +26,7 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
 
             XmlNodeList levels = xmlDocument.DocumentElement.SelectNodes("/Levels/Level");
 
-            XmlNode level = levels[0];
+            XmlNode level = levels[1];
 
             // Settings
             XmlNode settings = level["Settings"];
@@ -42,7 +43,7 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
             Grid = new Utility2D.Grid2D(gridSize, cellSize, Vector2.zero);
 
             // Tiles
-            XmlNodeList tilesList = xmlDocument.DocumentElement.SelectNodes("/Levels/Level/Tiles/Tile");
+            XmlNodeList tilesList = level["Tiles"].SelectNodes("Tile");
             int totalFrequency = 0;
             foreach (XmlNode xmlTile in tilesList)
             {
@@ -54,7 +55,7 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
             }
 
             // Constraints
-            XmlNodeList constraintsList = xmlDocument.DocumentElement.SelectNodes("/Levels/Level/Constraints/Constraint");
+            XmlNodeList constraintsList = level["Constraints"].SelectNodes("Constraint");
 
             foreach (XmlNode xmlConstraint in constraintsList)
             {
@@ -81,16 +82,73 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
             XmlNodeList neighbours = xmlConstraint["Neighbours"].ChildNodes;
             string direction = xmlConstraint["Direction"].InnerText;
 
+            List<Direction2D> directions = new List<Direction2D>();
+
             if (direction.Equals("ALL"))
             {
-                foreach (Utility2D.Direction2D direction2D in Utility2D.Directions2D)
+                directions.Add(Direction2D.NORTH);
+                directions.Add(Direction2D.SOUTH);
+                directions.Add(Direction2D.EAST);
+                directions.Add(Direction2D.WEST);
+            }
+            else if (direction.Equals("NORTH"))
+            {
+                directions.Add(Direction2D.NORTH);
+            }
+            else if (direction.Equals("SOUTH"))
+            {
+                directions.Add(Direction2D.SOUTH);
+            }
+            else if (direction.Equals("EAST"))
+            {
+                directions.Add(Direction2D.EAST);
+            }
+            else if (direction.Equals("WEST"))
+            {
+                directions.Add(Direction2D.WEST);
+            }
+            else if (direction.Equals("VERTICAL"))
+            {
+                directions.Add(Direction2D.NORTH);
+                directions.Add(Direction2D.SOUTH);
+            }
+            else if (direction.Equals("HORIZONTAL"))
+            {
+                directions.Add(Direction2D.EAST);
+                directions.Add(Direction2D.WEST);
+            }
+            else if (direction.Equals("N_NORTH"))
+            {
+                directions.Add(Direction2D.SOUTH);
+                directions.Add(Direction2D.EAST);
+                directions.Add(Direction2D.WEST);
+            }
+            else if (direction.Equals("N_SOUTH"))
+            {
+                directions.Add(Direction2D.NORTH);
+                directions.Add(Direction2D.EAST);
+                directions.Add(Direction2D.WEST);
+            }
+            else if (direction.Equals("N_EAST"))
+            {
+                directions.Add(Direction2D.NORTH);
+                directions.Add(Direction2D.SOUTH);
+                directions.Add(Direction2D.WEST);
+            }
+            else if (direction.Equals("N_WEST"))
+            {
+                directions.Add(Direction2D.NORTH);
+                directions.Add(Direction2D.SOUTH);
+                directions.Add(Direction2D.EAST);
+            }
+
+            for (int i = 0; i < directions.Count; i++)
+            {
+                foreach (XmlNode neighbour in neighbours)
                 {
-                    foreach (XmlNode neighbour in neighbours)
-                    {
-                        string id = neighbour.InnerText;
-                        Tiles[tile].PossibleNeighbours[direction2D].Add(Tiles[id]);
-                        Tiles[id].PossibleNeighbours[Utility2D.OppositeDirections[direction2D]].Add(Tiles[tile]);
-                    }
+                    string id = neighbour.InnerText;
+                    Tiles[tile].PossibleNeighbours[directions[i]].Add(Tiles[id]);
+                    Tiles[id].PossibleNeighbours[Utility2D.OppositeDirections[directions[i]]].Add(Tiles[tile]);
                 }
             }
         }
@@ -107,10 +165,10 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
             foreach (string id in Tiles.Keys)
             {
                 text = string.Concat(text, string.Format("\tID: {0}\n", id));
-                text = string.Concat(text, string.Format("\tPrefabName: {0}\n", Tiles[id].Prefab.name));
+                //text = string.Concat(text, string.Format("\tPrefabName: {0}\n", Tiles[id].Prefab.name));
                 text = string.Concat(text, string.Format("\tRelative Frequency: {0}\n", Tiles[id].RelativeFrequency));
                 text = string.Concat(text, "\tConstraints\n");
-                foreach(Utility2D.Direction2D direction in Tiles[id].PossibleNeighbours.Keys)
+                foreach (Direction2D direction in Tiles[id].PossibleNeighbours.Keys)
                 {
                     text = string.Concat(text, string.Format("\t\tDirection: {0}\n", direction));
                     text = string.Concat(text, "\t\tNeighbours:\n");
@@ -131,12 +189,12 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
     {
         public GameObject Prefab;
         public float RelativeFrequency;
-        public Dictionary<Utility2D.Direction2D, HashSet<Tile>> PossibleNeighbours = new Dictionary<Utility2D.Direction2D, HashSet<Tile>>()
+        public Dictionary<Direction2D, HashSet<Tile>> PossibleNeighbours = new Dictionary<Direction2D, HashSet<Tile>>()
         {
-            { Utility2D.Direction2D.NORTH,  new HashSet<Tile>()},
-            { Utility2D.Direction2D.EAST,  new HashSet<Tile>()},
-            { Utility2D.Direction2D.SOUTH,  new HashSet<Tile>()},
-            { Utility2D.Direction2D.WEST,  new HashSet<Tile>()},
+            { Direction2D.NORTH,  new HashSet<Tile>()},
+            { Direction2D.EAST,  new HashSet<Tile>()},
+            { Direction2D.SOUTH,  new HashSet<Tile>()},
+            { Direction2D.WEST,  new HashSet<Tile>()},
         };
     }
 }

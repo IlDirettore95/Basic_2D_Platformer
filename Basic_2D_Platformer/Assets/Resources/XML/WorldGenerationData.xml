@@ -2,7 +2,7 @@
 <Levels>
   <Level ID = "1" >
     <Settings>
-      <GridSize><x>50</x><y>50</y></GridSize>
+      <GridSize><x>20</x><y>20</y></GridSize>
       <CellSize><x>1</x><y>1</y></CellSize>
     </Settings>
     <Tiles>
@@ -58,6 +58,100 @@
         <Direction>ALL</Direction>
         <Neighbours>
           <ID>LAND</ID>
+        </Neighbours>
+      </Constraint>
+    </Constraints>
+  </Level>
+  <Level ID = "2" >
+    <Settings>
+      <GridSize>
+        <x>20</x>
+        <y>20</y>
+      </GridSize>
+      <CellSize>
+        <x>1</x>
+        <y>1</y>
+      </CellSize>
+    </Settings>
+    <Tiles>
+      <Tile>
+        <ID>GROUND</ID>
+        <Prefab>Ground</Prefab>
+        <Frequency>2</Frequency>
+      </Tile>
+      <Tile>
+        <ID>AIR</ID>
+        <Prefab>Air</Prefab>
+        <Frequency>3</Frequency>
+      </Tile>
+      <Tile>
+        <ID>AIRCOIN</ID>
+        <Prefab>AirCoin</Prefab>
+        <Frequency>2</Frequency>
+      </Tile>
+      <Tile>
+        <ID>COIN</ID>
+        <Prefab>Coin</Prefab>
+        <Frequency>1</Frequency>
+      </Tile>
+    </Tiles>
+    <Constraints>
+      <Constraint>
+        <Tile>GROUND</Tile>
+        <Direction>ALL</Direction>
+        <Neighbours>
+          <ID>GROUND</ID>
+          <ID>AIR</ID>
+        </Neighbours>
+      </Constraint>
+      <Constraint>
+        <Tile>GROUND</Tile>
+        <Direction>NORTH</Direction>
+        <Neighbours>
+          <ID>AIRCOIN</ID>
+        </Neighbours>
+      </Constraint>
+      <Constraint>
+        <Tile>AIRCOIN</Tile>
+        <Direction>NORTH</Direction>
+        <Neighbours>
+          <ID>COIN</ID>
+        </Neighbours>
+      </Constraint>
+      <Constraint>
+        <Tile>AIRCOIN</Tile>
+        <Direction>SOUTH</Direction>
+        <Neighbours>
+          <ID>GROUND</ID>
+        </Neighbours>
+      </Constraint>
+      <Constraint>
+        <Tile>AIRCOIN</Tile>
+        <Direction>HORIZONTAL</Direction>
+        <Neighbours>
+          <ID>GROUND</ID>
+          <ID>AIR</ID>
+        </Neighbours>
+      </Constraint>
+      <Constraint>
+        <Tile>AIR</Tile>
+        <Direction>ALL</Direction>
+        <Neighbours>
+          <ID>AIR</ID>
+        </Neighbours>
+      </Constraint>
+      <Constraint>
+        <Tile>AIR</Tile>
+        <Direction>HORIZONTAL</Direction>
+        <Neighbours>
+          <ID>COIN</ID>
+        </Neighbours>
+      </Constraint>
+      <Constraint>
+        <Tile>COIN</Tile>
+        <Direction>NORTH</Direction>
+        <Neighbours>
+          <ID>AIR</ID>
         </Neighbours>
       </Constraint>
     </Constraints>
