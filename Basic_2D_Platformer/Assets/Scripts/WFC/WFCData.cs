@@ -40,7 +40,7 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
             float yCellSize = float.Parse(settings["CellSize"]["y"].InnerText);
             Vector2 cellSize = new Vector2(xCellSize, yCellSize);
 
-            Grid = new Utility2D.Grid2D(gridSize, cellSize, Vector2.zero);
+            Grid = new Grid2D(gridSize, cellSize, Vector2.zero);
 
             // Tiles
             XmlNodeList tilesList = level["Tiles"].SelectNodes("Tile");
@@ -57,10 +57,14 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
             // Constraints
             XmlNodeList constraintsList = level["Constraints"].SelectNodes("Constraint");
 
-            foreach (XmlNode xmlConstraint in constraintsList)
+            foreach (XmlNode xmlTile in tilesList)
             {
-                CreateConstraint(xmlConstraint);
+                foreach (XmlNode xmlConstraint in constraintsList)
+                {
+                    CreateConstraint(xmlConstraint);
+                }
             }
+
         }
 
         private void CreateTile(XmlNode xmlTile, ref int totalFrequency)
