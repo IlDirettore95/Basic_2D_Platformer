@@ -1,7 +1,7 @@
 using GMDG.NoProduct.Utility;
 using UnityEngine;
 
-namespace GMDG.Basic_2D_Platformer.PlayerMovement
+namespace GMDG.Basic2DPlatformer.PlayerMovement
 {
     public class Sensors
     {

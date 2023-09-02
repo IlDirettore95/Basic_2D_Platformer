@@ -2,7 +2,7 @@ using GMDG.NoProduct.Utility;
 using System;
 using UnityEngine;
 
-namespace GMDG.Basic_2D_Platformer.PlayerMovement
+namespace GMDG.Basic2DPlatformer.PlayerMovement
 {
     public class CharacterStatus
     {
