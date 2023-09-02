@@ -44,6 +44,19 @@ public class AudioManager : MonoBehaviour
 
     private void Awake()
     {
+        BuildManager();
+
+        EventManager.Instance.Subscribe(Event.OnSystemsLoaded, Activate);
+        enabled = false;
+    }
+
+    private void OnDestroy()
+    {
+        EventManager.Instance.Unsubscribe(Event.OnSystemsLoaded, Activate);
+    }
+
+    private void BuildManager()
+    {
         musicSource1 = gameObject.AddComponent<AudioSource>();
         musicSource1.loop = true;
         musicSource1.volume = 0f;
@@ -55,37 +68,21 @@ public class AudioManager : MonoBehaviour
         secondaryMusicSource = musicSource2;
 
         sfxAudioSources = new List<AudioSource>();
-        for(int i = 0; i < 10; i++)
+        for (int i = 0; i < 10; i++)
         {
             sfxAudioSources.Add(gameObject.AddComponent<AudioSource>());
             sfxAudioSources[i].loop = false;
         }
-
-        EventManager.Instance.Subscribe(Event.OnSystemsLoaded, (object[] args) => enabled = true);
-        enabled = false;
     }
 
-    private void OnEnable()
+    #region Listeners
+
+    private void Activate(object[] args)
     {
-        // Game Manager
-        EventManager.Instance.Subscribe(Event.OnWelcome, (object[] args) => PlayMusicCrossfade(mainMenuMusic, 0.8f, 2.5f, 0.5f));
-        EventManager.Instance.Subscribe(Event.OnGameplay, (object[] args) => PlayMusicCrossfade(gameMusic, 0.7f, 1f, 1f));
-
-        // UI
-        EventManager.Instance.Subscribe(Event.OnButtonClicked, (object[] args) => PlaySFX(buttonClick, 0.6f));
-        EventManager.Instance.Subscribe(Event.OnButtonOver, (object[] args) => PlaySFX(buttonOver, 0.8f));
+        enabled = true;
     }
 
-    private void OnDisable()
-    {
-        // Game Manager
-        EventManager.Instance.Unsubscribe(Event.OnWelcome, (object[] args) => PlayMusicCrossfade(mainMenuMusic, 0.8f, 2.5f, 0.5f));
-        EventManager.Instance.Unsubscribe(Event.OnGameplay, (object[] args) => PlayMusicCrossfade(gameMusic, 0.7f, 1f, 1f));
-
-        // UI
-        EventManager.Instance.Unsubscribe(Event.OnButtonClicked, (object[] args) => PlaySFX(buttonClick, 0.6f));
-        EventManager.Instance.Unsubscribe(Event.OnButtonOver, (object[] args) => PlaySFX(buttonOver, 0.8f));
-    }
+    #endregion
 
     #endregion
 

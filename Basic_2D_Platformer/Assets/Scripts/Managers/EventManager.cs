@@ -1,52 +1,70 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 public class EventManager
 {
-    private static EventManager instance;
+    private static EventManager _instance;
     public static EventManager Instance
     {
         get
         {
-            if (instance == null)
+            if (_instance == null)
             {
-                instance = new EventManager();
+                _instance = new EventManager();
             }
-            return instance;
+            return _instance;
         }
     }
 
-    private Dictionary<Event, Action<object[]>> listenersDictionary = new Dictionary<Event, Action<object[]>>();
+    private Dictionary<Event, Action<object[]>> _listenersDictionary = new Dictionary<Event, Action<object[]>>();
 
     private EventManager() { }
 
     public void Subscribe(Event eventName, Action<object[]> listener)
     {
-        if (!listenersDictionary.ContainsKey(eventName))
+        if (!_listenersDictionary.ContainsKey(eventName))
         {
-            listenersDictionary[eventName] = listener;
+            _listenersDictionary[eventName] = listener;
         }
         else
         {
-            listenersDictionary[eventName] += listener;
+            _listenersDictionary[eventName] += listener;
         }
     }
 
     public void Unsubscribe(Event eventName, Action<object[]> listener)
     {
-        if (listenersDictionary.ContainsKey(eventName))
+        if (_listenersDictionary.ContainsKey(eventName))
         {
-            listenersDictionary[eventName] -= listener;
+            _listenersDictionary[eventName] -= listener;
+
+            if (_listenersDictionary[eventName] == null)
+            {
+                _listenersDictionary.Remove(eventName);
+            }
         }
     }
 
     public void Publish(Event eventName, params object[] args)
     {
-        if (listenersDictionary.ContainsKey(eventName))
+        if (_listenersDictionary.ContainsKey(eventName))
         {
-            listenersDictionary[eventName]?.Invoke(args);
+            _listenersDictionary[eventName]?.Invoke(args);
         }
+    }
+
+    public override string ToString()
+    {
+        string text = string.Empty;
+
+        foreach (Event e in _listenersDictionary.Keys)
+        {
+            text += "Event registred: " + e + "\tListeners: " + _listenersDictionary[e]?.GetInvocationList().Length + Environment.NewLine;
+        }
+
+        return text;
     }
 }
 

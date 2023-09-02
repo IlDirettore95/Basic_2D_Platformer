@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -10,33 +8,22 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
-        EventManager.Instance.Subscribe(Event.OnSystemsLoaded, (object[] args) => enabled = true);
         enabled = false;
+
+        EventManager.Instance.Subscribe(Event.OnSystemsLoaded, Activate);
+        EventManager.Instance.Subscribe(Event.OnStartGameClicked, StartGameplay);
+        EventManager.Instance.Subscribe(Event.OnBackToMenuClicked, BackToMenu);
+        EventManager.Instance.Subscribe(Event.OnEndGameOverTrasition, StartGameOver);
+        EventManager.Instance.Subscribe(Event.OnEndVictoryTrasition, StartVictory);
     }
 
-    private void OnEnable()
+    private void OnDestroy()
     {
-        EventManager.Instance.Subscribe(Event.OnStartGameClicked, (object[] args) => 
-        {
-            ChangeState(State.Gameplay);
-            EventManager.Instance.Publish(Event.OnGameplay);
-        });
-        EventManager.Instance.Subscribe(Event.OnBackToMenuClicked, (object[] args) => 
-        {
-            Time.timeScale = 1f;
-            ChangeState(State.Welcome);
-            EventManager.Instance.Publish(Event.OnWelcome);
-        });
-        EventManager.Instance.Subscribe(Event.OnEndGameOverTrasition, (object[] args) => 
-        {
-            ChangeState(State.GameOver);
-            EventManager.Instance.Publish(Event.OnGameOver);
-        });
-        EventManager.Instance.Subscribe(Event.OnEndVictoryTrasition, (object[] args) => 
-        {
-            ChangeState(State.Victory);
-            EventManager.Instance.Publish(Event.OnVictory);
-        });
+        EventManager.Instance.Unsubscribe(Event.OnSystemsLoaded, Activate);
+        EventManager.Instance.Unsubscribe(Event.OnStartGameClicked, StartGameplay);
+        EventManager.Instance.Unsubscribe(Event.OnBackToMenuClicked, BackToMenu);
+        EventManager.Instance.Unsubscribe(Event.OnEndGameOverTrasition, StartGameOver);
+        EventManager.Instance.Unsubscribe(Event.OnEndVictoryTrasition, StartVictory);
     }
 
     private void Start()
@@ -76,6 +63,40 @@ public class GameManager : MonoBehaviour
                 Victory();
                 break;
         }
+    }
+
+    #endregion
+
+    #region Listeners
+
+    private void Activate(object[] args)
+    {
+        enabled = true;
+    }
+
+    private void StartGameplay(object[] args)
+    {
+        ChangeState(State.Gameplay);
+        EventManager.Instance.Publish(Event.OnGameplay);
+    }
+
+    private void BackToMenu(object[] args)
+    {
+        Time.timeScale = 1f;
+        ChangeState(State.Welcome);
+        EventManager.Instance.Publish(Event.OnWelcome);
+    }
+
+    private void StartGameOver(object[] args)
+    {
+        ChangeState(State.GameOver);
+        EventManager.Instance.Publish(Event.OnGameOver);
+    }
+
+    private void StartVictory(object[] args)
+    {
+        ChangeState(State.Victory);
+        EventManager.Instance.Publish(Event.OnVictory);
     }
 
     #endregion

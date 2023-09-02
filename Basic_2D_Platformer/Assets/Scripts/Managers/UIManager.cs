@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 public class UIManager : MonoBehaviour
@@ -19,30 +20,26 @@ public class UIManager : MonoBehaviour
 
     private void Awake()
     {
-        EventManager.Instance.Subscribe(Event.OnSystemsLoaded, (object[] args) => enabled = true);
         enabled = false;
-    }
 
-    private void OnEnable()
-    {
-        // Game Manager
+        EventManager.Instance.Subscribe(Event.OnSystemsLoaded, Activate);
         EventManager.Instance.Subscribe(Event.OnWelcome, ActiveWelcome);
         EventManager.Instance.Subscribe(Event.OnMainMenu, ActiveChoices);
-        EventManager.Instance.Subscribe(Event.OnGameplay, (object[] args) => mainMenu.SetActive(false));
+        EventManager.Instance.Subscribe(Event.OnGameplay, DeactiveMainMenu);
         EventManager.Instance.Subscribe(Event.OnPause, ActivePause);
-        EventManager.Instance.Subscribe(Event.OnUnpause, (object[] args) => pause.SetActive(false));
+        EventManager.Instance.Subscribe(Event.OnUnpause, DeactivatePause);
         EventManager.Instance.Subscribe(Event.OnEndGameOverTrasition, ActiveGameOver);
         EventManager.Instance.Subscribe(Event.OnEndVictoryTrasition, ActiveVictory);
     }
 
-    private void OnDisable()
+    private void OnDestroy()
     {
-        // Game Manager
+        EventManager.Instance.Unsubscribe(Event.OnSystemsLoaded, Activate);
         EventManager.Instance.Unsubscribe(Event.OnWelcome, ActiveWelcome);
         EventManager.Instance.Unsubscribe(Event.OnMainMenu, ActiveChoices);
-        EventManager.Instance.Unsubscribe(Event.OnGameplay, (object[] args) => mainMenu.SetActive(false));
+        EventManager.Instance.Unsubscribe(Event.OnGameplay, DeactiveMainMenu);
         EventManager.Instance.Unsubscribe(Event.OnPause, ActivePause);
-        EventManager.Instance.Unsubscribe(Event.OnUnpause, (object[] args) => pause.SetActive(false));
+        EventManager.Instance.Unsubscribe(Event.OnUnpause, DeactivatePause);
         EventManager.Instance.Unsubscribe(Event.OnEndGameOverTrasition, ActiveGameOver);
         EventManager.Instance.Unsubscribe(Event.OnEndVictoryTrasition, ActiveVictory);
     }
@@ -50,6 +47,11 @@ public class UIManager : MonoBehaviour
     #endregion
 
     #region Listener
+
+    private void Activate(object[] args)
+    {
+        enabled = true;
+    }
 
     private void ActiveWelcome(object[] args)
     {
@@ -114,11 +116,21 @@ public class UIManager : MonoBehaviour
         pause.SetActive(false);
     }
 
+    private void DeactiveMainMenu(object[] args)
+    {
+        mainMenu.SetActive(false);
+    }
+
+    private void DeactivatePause(object[] args)
+    {
+        pause.SetActive(false);
+    }
+
     public void DeactiveInstructions()
     {
         ActiveChoices(null);
     }
-
+ 
     public void StartGame()
     {
         EventManager.Instance.Publish(Event.OnStartGameClicked);
