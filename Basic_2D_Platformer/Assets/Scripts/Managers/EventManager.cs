@@ -1,94 +1,95 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 
-public class EventManager
+namespace GMDG.Basic2DPlatformer.System
 {
-    private static EventManager _instance;
-    public static EventManager Instance
+    public class EventManager
     {
-        get
+        private static EventManager _instance;
+        public static EventManager Instance
         {
-            if (_instance == null)
+            get
             {
-                _instance = new EventManager();
-            }
-            return _instance;
-        }
-    }
-
-    private Dictionary<Event, Action<object[]>> _listenersDictionary = new Dictionary<Event, Action<object[]>>();
-
-    private EventManager() { }
-
-    public void Subscribe(Event eventName, Action<object[]> listener)
-    {
-        if (!_listenersDictionary.ContainsKey(eventName))
-        {
-            _listenersDictionary[eventName] = listener;
-        }
-        else
-        {
-            _listenersDictionary[eventName] += listener;
-        }
-    }
-
-    public void Unsubscribe(Event eventName, Action<object[]> listener)
-    {
-        if (_listenersDictionary.ContainsKey(eventName))
-        {
-            _listenersDictionary[eventName] -= listener;
-
-            if (_listenersDictionary[eventName] == null)
-            {
-                _listenersDictionary.Remove(eventName);
+                if (_instance == null)
+                {
+                    _instance = new EventManager();
+                }
+                return _instance;
             }
         }
-    }
 
-    public void Publish(Event eventName, params object[] args)
-    {
-        if (_listenersDictionary.ContainsKey(eventName))
+        private Dictionary<Event, Action<object[]>> _listenersDictionary = new Dictionary<Event, Action<object[]>>();
+
+        private EventManager() { }
+
+        public void Subscribe(Event eventName, Action<object[]> listener)
         {
-            _listenersDictionary[eventName]?.Invoke(args);
+            if (!_listenersDictionary.ContainsKey(eventName))
+            {
+                _listenersDictionary[eventName] = listener;
+            }
+            else
+            {
+                _listenersDictionary[eventName] += listener;
+            }
+        }
+
+        public void Unsubscribe(Event eventName, Action<object[]> listener)
+        {
+            if (_listenersDictionary.ContainsKey(eventName))
+            {
+                _listenersDictionary[eventName] -= listener;
+
+                if (_listenersDictionary[eventName] == null)
+                {
+                    _listenersDictionary.Remove(eventName);
+                }
+            }
+        }
+
+        public void Publish(Event eventName, params object[] args)
+        {
+            if (_listenersDictionary.ContainsKey(eventName))
+            {
+                _listenersDictionary[eventName]?.Invoke(args);
+            }
+        }
+
+        public override string ToString()
+        {
+            string text = string.Empty;
+
+            foreach (Event e in _listenersDictionary.Keys)
+            {
+                text += "Event registred: " + e + "\tListeners: " + _listenersDictionary[e]?.GetInvocationList().Length + Environment.NewLine;
+            }
+
+            return text;
         }
     }
 
-    public override string ToString()
+    public enum Event
     {
-        string text = string.Empty;
+        // System
+        OnSystemsLoaded,
 
-        foreach (Event e in _listenersDictionary.Keys)
-        {
-            text += "Event registred: " + e + "\tListeners: " + _listenersDictionary[e]?.GetInvocationList().Length + Environment.NewLine;
-        }
+        // Game Manager
+        OnWelcome,
+        OnMainMenu,
+        OnGameplay,
+        OnPause,
+        OnUnpause,
+        OnGameOver,
+        OnVictory,
 
-        return text;
+        //Camera
+        OnEndGameOverTrasition,
+        OnEndVictoryTrasition,
+
+        //UI
+        OnStartGameClicked,
+        OnBackToMenuClicked,
+        OnButtonClicked,
+        OnButtonOver
     }
-}
-
-public enum Event
-{
-    // System
-    OnSystemsLoaded,
-
-    // Game Manager
-    OnWelcome,
-    OnMainMenu,
-    OnGameplay,
-    OnPause,
-    OnUnpause,
-    OnGameOver,
-    OnVictory,
-
-    //Camera
-    OnEndGameOverTrasition,
-    OnEndVictoryTrasition,
-
-    //UI
-    OnStartGameClicked,
-    OnBackToMenuClicked,
-    OnButtonClicked,
-    OnButtonOver
 }

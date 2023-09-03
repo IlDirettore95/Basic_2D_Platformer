@@ -1,42 +1,43 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class DebugManager : MonoBehaviour
+namespace GMDG.Basic2DPlatformer.System
 {
-    [SerializeField] private GameObject _fpsCounter;
-
-    #region UnityMessages
-    private void Awake()
+    public class DebugManager : MonoBehaviour
     {
-        enabled = false;
-        _fpsCounter.SetActive(false);
+        [SerializeField] private GameObject _fpsCounter;
 
-        EventManager.Instance.Subscribe(Event.OnSystemsLoaded, Activate);
-    }
-
-    private void OnDestroy()
-    {
-        EventManager.Instance.Unsubscribe(Event.OnSystemsLoaded, Activate);
-    }
-
-
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.P))
+        #region UnityMessages
+        private void Awake()
         {
-            _fpsCounter.SetActive(!_fpsCounter.activeSelf);
+            enabled = false;
+            _fpsCounter.SetActive(false);
+
+            EventManager.Instance.Subscribe(Event.OnSystemsLoaded, Activate);
         }
+
+        private void OnDestroy()
+        {
+            EventManager.Instance.Unsubscribe(Event.OnSystemsLoaded, Activate);
+        }
+
+
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.P))
+            {
+                _fpsCounter.SetActive(!_fpsCounter.activeSelf);
+            }
+        }
+
+        #endregion
+
+        #region Listeners
+
+        private void Activate(object[] args)
+        {
+            enabled = true;
+        }
+
+        #endregion
     }
-
-    #endregion
-
-    #region Listeners
-
-    private void Activate(object[] args)
-    {
-        enabled = true;
-    }
-
-    #endregion
 }
