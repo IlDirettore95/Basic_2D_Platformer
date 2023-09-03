@@ -2,19 +2,19 @@
 <Levels>
   <Level ID = "1" >
     <Settings>
-      <GridSize><x>20</x><y>20</y></GridSize>
+      <GridSize><x>50</x><y>50</y></GridSize>
       <CellSize><x>1</x><y>1</y></CellSize>
     </Settings>
     <Tiles>
       <Tile>
         <ID>OCEAN</ID>
         <Prefab>Ocean</Prefab>
-        <Frequency>4</Frequency>
+        <Frequency>5</Frequency>
       </Tile>
       <Tile>
         <ID>SEA</ID>
         <Prefab>Sea</Prefab>
-        <Frequency>4</Frequency>
+        <Frequency>5</Frequency>
       </Tile>
       <Tile>
         <ID>COAST</ID>
