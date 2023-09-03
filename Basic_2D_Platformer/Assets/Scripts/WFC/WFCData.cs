@@ -9,7 +9,7 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
 {
     public class WFCData
     {
-        public Utility2D.Grid2D Grid;
+        public Grid2D Grid;
         public Dictionary<string, Tile> Tiles;
         public int TotalWeight;
 
@@ -26,10 +26,11 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
 
             XmlNodeList levels = xmlDocument.DocumentElement.SelectNodes("/Levels/Level");
 
-            XmlNode level = levels[1];
+            XmlNode level = levels[0];
 
             // Settings
             XmlNode settings = level["Settings"];
+
             // GridSize
             int xGridSize = int.Parse(settings["GridSize"]["x"].InnerText);
             int yGridSize = int.Parse(settings["GridSize"]["y"].InnerText);
