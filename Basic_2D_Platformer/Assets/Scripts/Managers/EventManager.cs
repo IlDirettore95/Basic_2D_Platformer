@@ -82,14 +82,17 @@ namespace GMDG.Basic2DPlatformer.System
         OnGameOver,
         OnVictory,
 
-        //Camera
+        // Camera
         OnEndGameOverTrasition,
         OnEndVictoryTrasition,
 
-        //UI
+        // UI
         OnStartGameClicked,
         OnBackToMenuClicked,
         OnButtonClicked,
-        OnButtonOver
+        OnButtonOver,
+
+        // PCG
+        OnGridUpdated
     }
 }

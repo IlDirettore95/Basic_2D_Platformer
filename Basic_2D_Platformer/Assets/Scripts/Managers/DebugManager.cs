@@ -1,3 +1,4 @@
+using GMDG.NoProduct.Utility;
 using UnityEngine;
 
 namespace GMDG.Basic2DPlatformer.System
@@ -6,18 +7,27 @@ namespace GMDG.Basic2DPlatformer.System
     {
         [SerializeField] private GameObject _fpsCounter;
 
+        // Grid Debug
+        private Utility2D.Grid2D<int> _grid;
+        private GameObject _gridDebugGo;
+
         #region UnityMessages
+
         private void Awake()
         {
             enabled = false;
             _fpsCounter.SetActive(false);
+            _gridDebugGo = new GameObject("Grid Debug");
+            _gridDebugGo.SetActive(false);
 
             EventManager.Instance.Subscribe(Event.OnSystemsLoaded, Activate);
+            EventManager.Instance.Subscribe(Event.OnGridUpdated, UpdateGrid);
         }
 
         private void OnDestroy()
         {
             EventManager.Instance.Unsubscribe(Event.OnSystemsLoaded, Activate);
+            EventManager.Instance.Unsubscribe(Event.OnGridUpdated, UpdateGrid);
         }
 
 
@@ -27,7 +37,19 @@ namespace GMDG.Basic2DPlatformer.System
             {
                 _fpsCounter.SetActive(!_fpsCounter.activeSelf);
             }
+
+            if (Input.GetKeyDown(KeyCode.L))
+            {
+                _gridDebugGo.SetActive(!_gridDebugGo.activeSelf);
+            }
         }
+
+#if UNITY_EDITOR
+        private void OnDrawGizmos()
+        {
+            if (_gridDebugGo.activeSelf) _grid?.Draw();
+        }
+#endif
 
         #endregion
 
@@ -36,6 +58,13 @@ namespace GMDG.Basic2DPlatformer.System
         private void Activate(object[] args)
         {
             enabled = true;
+        }
+
+        private void UpdateGrid(object[] args)
+        {
+            _grid = (Utility2D.Grid2D<int>)args[0];
+
+            _grid?.DrawContent(_gridDebugGo);
         }
 
         #endregion

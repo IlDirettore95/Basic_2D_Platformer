@@ -9,7 +9,7 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
 {
     public class WFCData
     {
-        public Utility2D.Grid2D Grid;
+        public Utility2D.Grid2D<int> Grid;
         public Dictionary<string, Tile> Tiles;
         public int TotalWeight;
 
@@ -40,7 +40,7 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
             float yCellSize = float.Parse(settings["CellSize"]["y"].InnerText);
             Vector2 cellSize = new Vector2(xCellSize, yCellSize);
 
-            Grid = new Grid2D(gridSize, cellSize, Vector2.zero);
+            Grid = new Grid2D<int>(gridSize, cellSize, Vector2.zero);
 
             // Tiles
             XmlNodeList tilesList = level["Tiles"].SelectNodes("Tile");

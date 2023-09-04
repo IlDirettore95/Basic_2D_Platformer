@@ -19,7 +19,7 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
 
         [SerializeField] private TileScriptableObject[] _possibleTiles;
 
-        private Utility2D.Grid2D _grid;
+        private Utility2D.Grid2D<int> _grid;
         private Dictionary<Vector2, List<TileScriptableObject>> _waves;
         private Dictionary<Vector2, TileScriptableObject> _collapsedPositions;
         private List<Utility2D.Direction2D> _directions;
@@ -45,7 +45,7 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
 
             UnityEngine.Random.InitState(Seed <= 0 ? UnityEngine.Random.Range(0, int.MaxValue) : Seed);
 
-            _grid = new Utility2D.Grid2D(GridSize, CellSize, Vector2.zero);
+            _grid = new Utility2D.Grid2D<int>(GridSize, CellSize, Vector2.zero);
             _waves = new Dictionary<Vector2, List<TileScriptableObject>>();
             _collapsedPositions = new Dictionary<Vector2, TileScriptableObject>();
             _directions = new List<Utility2D.Direction2D>()

@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
+using TMPro;
 
 namespace GMDG.NoProduct.Utility
 {
@@ -551,14 +552,14 @@ namespace GMDG.NoProduct.Utility
 
     public class Utility2D
     {
-        public class Grid2D
+        public class Grid2D<T>
         {
             public Vector2[,] CellsPositions { get; }
             public Vector2Int GridSize { get; }
             public Vector2 CellSize { get; }
             public Vector2 GridPosition { get; }
 
-            private Cell2D[,] cells;
+            private Cell2D<T>[,] cells;
 
             public Grid2D(Vector2Int gridSize, Vector2 cellSize, Vector2 gridPosition)
             {
@@ -566,7 +567,7 @@ namespace GMDG.NoProduct.Utility
                 CellSize = cellSize;
                 GridPosition = gridPosition;
 
-                cells = new Cell2D[gridSize.y, gridSize.x];
+                cells = new Cell2D<T>[gridSize.y, gridSize.x];
                 CellsPositions = new Vector2[gridSize.y, gridSize.x];
 
                 float yTranslation = (gridSize.y - 1) * cellSize.y / 2;
@@ -577,7 +578,8 @@ namespace GMDG.NoProduct.Utility
                     for (int j = 0; j < gridSize.x; j++)
                     {
                         Vector2 cellPosition = new Vector2(j * cellSize.x - xTranslation, i * cellSize.y - yTranslation) + gridPosition;
-                        cells[i, j] = new Cell2D(cellSize, cellPosition, new Vector2Int(i, j));
+                        cells[i, j] = new Cell2D<T>(cellSize, cellPosition, new Vector2Int(i, j));
+                        cells[i, j].Content = default(T);
                         CellsPositions[i, j] = cellPosition;
                     }
                 }
@@ -617,38 +619,54 @@ namespace GMDG.NoProduct.Utility
                 }
             }
 
-            private class Cell2D
+            public void DrawContent(GameObject parent)
             {
-                public Vector2 size;
-                public Vector2 positionInWorld;
-                public Vector2 positionInGrid;
+                for (int i = 0; i < parent.transform.childCount; i++)
+                {
+                    GameObject.DestroyImmediate(parent.transform.GetChild(i).gameObject);
+                }
+
+                for (int i = 0; i < GridSize.y; i++)
+                {
+                    for (int j = 0; j < GridSize.x; j++)
+                    {
+                        cells[i, j].DrawContent(parent);
+                    }
+                }
+            }
+
+            private class Cell2D<S>
+            {
+                public Vector2 Size;
+                public Vector2 PositionInWorld;
+                public Vector2 PositionInGrid;
+                public S Content;
 
                 public Cell2D(Vector2 positionInWorld, Vector2Int positionInGrid)
                 {
-                    size = new Vector2(1, 1);
-                    this.positionInWorld = positionInWorld;
-                    this.positionInGrid = positionInGrid;
+                    Size = new Vector2(1, 1);
+                    PositionInWorld = positionInWorld;
+                    PositionInGrid = positionInGrid;
                 }
 
                 public Cell2D(Vector2 size, Vector2 positionInWorld, Vector2Int positionInGrid)
                 {
-                    this.size = size;
-                    this.positionInWorld = positionInWorld;
-                    this.positionInGrid = positionInGrid;
+                    Size = size;
+                    PositionInWorld = positionInWorld;
+                    PositionInGrid = positionInGrid;
                 }
 
                 public void Draw()
                 {
-                    GUIStyle style = new GUIStyle();
-                    style.alignment = TextAnchor.LowerRight;
-                    style.fontSize = 10;
-                    style.normal.textColor = Color.gray;
-                    Handles.Label(positionInWorld, string.Format("{0},{1}", positionInGrid.x, positionInGrid.y), style);
-                    Handles.color = Color.black;
-                    Handles.DrawLine(positionInWorld + new Vector2(-size.x / 2, size.y / 2), positionInWorld + new Vector2(size.x / 2, size.y / 2));
-                    Handles.DrawLine(positionInWorld + new Vector2(size.x / 2, size.y / 2), positionInWorld + new Vector2(size.x / 2, -size.y / 2));
-                    Handles.DrawLine(positionInWorld + new Vector2(size.x / 2, -size.y / 2), positionInWorld + new Vector2(-size.x / 2, -size.y / 2));
-                    Handles.DrawLine(positionInWorld + new Vector2(-size.x / 2, -size.y / 2), positionInWorld + new Vector2(-size.x / 2, size.y / 2));
+                    Debug.DrawLine(PositionInWorld + new Vector2(-Size.x / 2, Size.y / 2), PositionInWorld + new Vector2(Size.x / 2, Size.y / 2), Color.white);
+                    Debug.DrawLine(PositionInWorld + new Vector2(Size.x / 2, Size.y / 2), PositionInWorld + new Vector2(Size.x / 2, -Size.y / 2), Color.white);
+                    Debug.DrawLine(PositionInWorld + new Vector2(Size.x / 2, -Size.y / 2), PositionInWorld + new Vector2(-Size.x / 2, -Size.y / 2), Color.white);
+                    Debug.DrawLine(PositionInWorld + new Vector2(-Size.x / 2, -Size.y / 2), PositionInWorld + new Vector2(-Size.x / 2, Size.y / 2), Color.white);
+                }
+
+                public void DrawContent(GameObject parent)
+                {
+                    TextUtility.CreateWorldText(Content.ToString(), 6, PositionInWorld, Color.white, parent.transform);
                 }
             }
         }
@@ -701,6 +719,27 @@ namespace GMDG.NoProduct.Utility
             { Direction2D.WEST, new Vector2Int(0, -1) }
         };
     }
+
+    #region Text
+
+    public class TextUtility
+    {
+        public static GameObject CreateWorldText(string text, int fontSize, Vector3 position, Color color, Transform parent)
+        {
+            GameObject go = new GameObject("WorldText", typeof(TextMeshPro));
+            go.transform.position = position;
+            go.transform.SetParent(parent);
+            TextMeshPro textComponent = go.GetComponent<TextMeshPro>();
+            textComponent.text = text;
+            textComponent.color = color;
+            textComponent.fontSize = fontSize;
+            textComponent.alignment = TextAlignmentOptions.Center;
+
+            return go;
+        }
+    }
+
+    #endregion
 
     #region SpriteAnimation
 
