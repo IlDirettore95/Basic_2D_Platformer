@@ -1,7 +1,9 @@
+using GMDG.Basic2DPlatformer.PCG;
 using GMDG.NoProduct.Utility;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Xml;
 using UnityEngine;
 using UnityEngine.ProBuilder.MeshOperations;
@@ -11,7 +13,7 @@ namespace GMDG.Basic2DPlatformer.System
     public class LevelManager : MonoBehaviour
     {
         private int _currentLevel;
-        private Utility2D.Grid2D<int> _currentGrid;
+        private LevelGenerator _generator;
 
         // Xml document
         private XmlDocument _xmlDocument;
@@ -21,6 +23,7 @@ namespace GMDG.Basic2DPlatformer.System
         private void Awake()
         {
             _currentLevel = 0;
+            _generator = new LevelGenerator();
 
             // Loading XmlDocument
             _xmlDocument = new XmlDocument();
@@ -56,16 +59,21 @@ namespace GMDG.Basic2DPlatformer.System
         {
             enabled = true;
         }
+
         private void GenerateLevel(object[] args)
         {
-            LoadLevelData();
+            PCGData data = LoadData();
+            if (!ValidateData(data)) return;
+            StartCoroutine(_generator.Generation?.Invoke(this, data));
         }
 
         #endregion
 
 
-        private void LoadLevelData()
+        private PCGData LoadData()
         {
+            PCGData data = new PCGData();
+
             XmlNode level = _xmlLevels[_currentLevel];
 
             // Settings
@@ -74,16 +82,29 @@ namespace GMDG.Basic2DPlatformer.System
             // GridSize
             int xGridSize = int.Parse(settings["GridSize"]["x"].InnerText);
             int yGridSize = int.Parse(settings["GridSize"]["y"].InnerText);
-            Vector2Int gridSize = new Vector2Int(xGridSize, yGridSize);
+            data.GridSize = new Vector2Int(xGridSize, yGridSize);
 
             // CellSize
             float xCellSize = float.Parse(settings["CellSize"]["x"].InnerText);
             float yCellSize = float.Parse(settings["CellSize"]["y"].InnerText);
-            Vector2 cellSize = new Vector2(xCellSize, yCellSize);
+            data.CellSize = new Vector2(xCellSize, yCellSize);
 
-            _currentGrid = new Utility2D.Grid2D<int>(gridSize, cellSize, Vector3.zero);
+            // StartingCell
+            int xStartingCell = int.Parse(settings["StartingCell"]["x"].InnerText);
+            int yStartingCell = int.Parse(settings["StartingCell"]["y"].InnerText);
+            data.StartingCell = new Vector2Int(xStartingCell, yStartingCell);
 
-            EventManager.Instance.Publish(Event.OnGridUpdated, _currentGrid);
+            // EndingCell
+            int xEndingCell = int.Parse(settings["EndingCell"]["x"].InnerText);
+            int yEndingCell = int.Parse(settings["EndingCell"]["y"].InnerText);
+            data.EndingCell = new Vector2Int(xEndingCell, yEndingCell);
+
+            return data;
+        }
+
+        private bool ValidateData(PCGData data)
+        {
+            return true;
         }
     }
 }

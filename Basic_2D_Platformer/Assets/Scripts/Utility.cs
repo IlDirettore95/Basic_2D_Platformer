@@ -608,6 +608,36 @@ namespace GMDG.NoProduct.Utility
                 return new Vector2Int(-1, -1);
             }
 
+            public T GetElement(int i, int j)
+            {
+                if (i < 0 || j < 0 || i > GridSize.y - 1 || j > GridSize.x - 1)
+                {
+                    throw new ArgumentException();
+                }
+
+                return cells[i, j].Content;
+            }
+
+            public void PlaceElement(int i, int j, T content)
+            {
+                if (i < 0 || j < 0 || i > GridSize.y - 1 || j > GridSize.x - 1)
+                {
+                    throw new ArgumentException();
+                }
+
+                cells[i, j].Content = content;
+            }
+
+            public void PlaceElement(Vector2Int indicies, T content)
+            {
+                if (indicies.y < 0 || indicies.x < 0 || indicies.y > GridSize.y - 1 || indicies.x > GridSize.x - 1)
+                {
+                    throw new ArgumentException();
+                }
+
+                cells[indicies.y, indicies.x].Content = content;
+            }
+
             public void Draw()
             {
                 for (int i = 0; i < cells.GetLength(0); i++)
@@ -619,18 +649,18 @@ namespace GMDG.NoProduct.Utility
                 }
             }
 
-            public void DrawContent(GameObject parent)
+            public void DrawContent(GameObject parent, Func<T,Color> colorHeuristic)
             {
                 for (int i = 0; i < parent.transform.childCount; i++)
                 {
-                    GameObject.DestroyImmediate(parent.transform.GetChild(i).gameObject);
+                    GameObject.Destroy(parent.transform.GetChild(i).gameObject);
                 }
 
                 for (int i = 0; i < GridSize.y; i++)
                 {
                     for (int j = 0; j < GridSize.x; j++)
                     {
-                        cells[i, j].DrawContent(parent);
+                        cells[i, j].DrawContent(parent, colorHeuristic);
                     }
                 }
             }
@@ -658,15 +688,16 @@ namespace GMDG.NoProduct.Utility
 
                 public void Draw()
                 {
-                    Debug.DrawLine(PositionInWorld + new Vector2(-Size.x / 2, Size.y / 2), PositionInWorld + new Vector2(Size.x / 2, Size.y / 2), Color.white);
-                    Debug.DrawLine(PositionInWorld + new Vector2(Size.x / 2, Size.y / 2), PositionInWorld + new Vector2(Size.x / 2, -Size.y / 2), Color.white);
-                    Debug.DrawLine(PositionInWorld + new Vector2(Size.x / 2, -Size.y / 2), PositionInWorld + new Vector2(-Size.x / 2, -Size.y / 2), Color.white);
-                    Debug.DrawLine(PositionInWorld + new Vector2(-Size.x / 2, -Size.y / 2), PositionInWorld + new Vector2(-Size.x / 2, Size.y / 2), Color.white);
+                    Debug.DrawLine(PositionInWorld + new Vector2(-Size.x / 2, Size.y / 2), PositionInWorld + new Vector2(Size.x / 2, Size.y / 2), Color.black);
+                    Debug.DrawLine(PositionInWorld + new Vector2(Size.x / 2, Size.y / 2), PositionInWorld + new Vector2(Size.x / 2, -Size.y / 2), Color.black);
+                    Debug.DrawLine(PositionInWorld + new Vector2(Size.x / 2, -Size.y / 2), PositionInWorld + new Vector2(-Size.x / 2, -Size.y / 2), Color.black);
+                    Debug.DrawLine(PositionInWorld + new Vector2(-Size.x / 2, -Size.y / 2), PositionInWorld + new Vector2(-Size.x / 2, Size.y / 2), Color.black);
                 }
 
-                public void DrawContent(GameObject parent)
+                public void DrawContent(GameObject parent, Func<S, Color> colorHeuristic)
                 {
-                    TextUtility.CreateWorldText(Content.ToString(), 6, PositionInWorld, Color.white, parent.transform);
+                    Color color = colorHeuristic.Invoke(Content);
+                    TextUtility.CreateWorldText(Content.ToString(), 6, PositionInWorld, color, parent.transform);
                 }
             }
         }
@@ -794,6 +825,7 @@ namespace GMDG.NoProduct.Utility
             }
         }
     }
+    
     #endregion
 
     #region General

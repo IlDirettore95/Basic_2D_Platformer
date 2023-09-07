@@ -13,4 +13,3 @@ namespace GMDG.Basic2DPlatformer.PlayerMovement
         public float CollisionThreashold;
     }
 }
-

@@ -2,8 +2,22 @@
 <Levels>
   <Level ID = "1" >
     <Settings>
-      <GridSize><x>20</x><y>20</y></GridSize>
-      <CellSize><x>1</x><y>1</y></CellSize>
+      <GridSize>
+        <x>30</x>
+        <y>20</y>
+      </GridSize>
+      <CellSize>
+        <x>1</x>
+        <y>1</y>
+      </CellSize>
+      <StartingCell>
+        <x>0</x>
+        <y>1</y>
+      </StartingCell>
+      <EndingCell>
+        <x>29</x>
+        <y>1</y>
+      </EndingCell>
     </Settings>
     <Tiles>
       <Tile>
