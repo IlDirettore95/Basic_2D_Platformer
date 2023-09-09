@@ -65,7 +65,7 @@ namespace GMDG.Basic2DPlatformer.System
         {
             _grid = (Grid<int>)args[0];
 
-            _grid?.DrawContent(_gridDebugGo, ColorHeuristic);
+            _grid?.DrawContent(_gridDebugGo, 20, ColorHeuristic);
         }
 
         private Color ColorHeuristic(int cellType)

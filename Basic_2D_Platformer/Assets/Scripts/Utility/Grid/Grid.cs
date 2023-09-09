@@ -103,7 +103,7 @@ namespace GMDG.Basic2DPlatformer.Utility
             }
         }
 
-        public void DrawContent(GameObject parent, Func<T, Color> colorHeuristic)
+        public void DrawContent(GameObject parent, int fontSize, Func<T, Color> colorHeuristic)
         {
             for (int i = 0; i < parent.transform.childCount; i++)
             {
@@ -114,7 +114,7 @@ namespace GMDG.Basic2DPlatformer.Utility
             {
                 for (int j = 0; j < GridSize.x; j++)
                 {
-                    cells[i, j].DrawContent(parent, colorHeuristic);
+                    cells[i, j].DrawContent(parent, fontSize, colorHeuristic);
                 }
             }
         }
@@ -148,10 +148,10 @@ namespace GMDG.Basic2DPlatformer.Utility
                 Debug.DrawLine(PositionInWorld + new Vector2(-Size.x / 2, -Size.y / 2), PositionInWorld + new Vector2(-Size.x / 2, Size.y / 2), Color.black);
             }
 
-            public void DrawContent(GameObject parent, Func<S, Color> colorHeuristic)
+            public void DrawContent(GameObject parent, int fontSize, Func<S, Color> colorHeuristic)
             {
                 Color color = colorHeuristic.Invoke(Content);
-                TextUtility.CreateWorldText(Content.ToString(), 6, PositionInWorld, color, parent.transform);
+                TextUtility.CreateWorldText(Content.ToString(), fontSize, PositionInWorld, color, parent.transform);
             }
         }
     }

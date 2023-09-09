@@ -9,13 +9,12 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
 {
     public class WFCData
     {
-        public Utility2D.Grid2D<int> Grid;
-        public Dictionary<string, Tile> Tiles;
-        public int TotalWeight;
+        public Grid2D<int> Grid;
+        public Dictionary<string, WFCTile> Tiles;
 
         public WFCData()
         {
-            Tiles = new Dictionary<string, Tile>();
+            Tiles = new Dictionary<string, WFCTile>();
         }
 
         public void ReadData()
@@ -49,7 +48,7 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
             {
                 CreateTile(xmlTile, ref totalFrequency);
             }
-            foreach (Tile tile in Tiles.Values)
+            foreach (WFCTile tile in Tiles.Values)
             {
                 tile.RelativeFrequency /= totalFrequency;
             }
@@ -73,7 +72,7 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
             string frequency = xmlTile["Frequency"].InnerText;
             string prefab = xmlTile["Prefab"].InnerText;
 
-            Tile tile = new Tile();
+            WFCTile tile = new WFCTile();
             tile.Prefab = (GameObject)Resources.Load(string.Format("Prefabs/{0}", prefab));
             tile.RelativeFrequency = int.Parse(frequency);
             totalFrequency += int.Parse(frequency);
@@ -152,7 +151,7 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
                 {
                     string id = neighbour.InnerText;
                     Tiles[tile].PossibleNeighbours[directions[i]].Add(Tiles[id]);
-                    Tiles[id].PossibleNeighbours[Utility2D.OppositeDirections[directions[i]]].Add(Tiles[tile]);
+                    Tiles[id].PossibleNeighbours[OppositeDirections[directions[i]]].Add(Tiles[tile]);
                 }
             }
         }
@@ -176,7 +175,7 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
                 {
                     text = string.Concat(text, string.Format("\t\tDirection: {0}\n", direction));
                     text = string.Concat(text, "\t\tNeighbours:\n");
-                    foreach (Tile tile in Tiles[id].PossibleNeighbours[direction])
+                    foreach (WFCTile tile in Tiles[id].PossibleNeighbours[direction])
                     {
                         string tileId = Tiles.FirstOrDefault(x => x.Value == tile).Key;
                         text = string.Concat(text, string.Format("\t\t\tID: {0}\n", tileId));
@@ -189,16 +188,17 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
         }
     }
 
-    public class Tile
+    public class WFCTile
     {
+        public string Name;
         public GameObject Prefab;
         public float RelativeFrequency;
-        public Dictionary<Direction2D, HashSet<Tile>> PossibleNeighbours = new Dictionary<Direction2D, HashSet<Tile>>()
+        public Dictionary<Direction2D, HashSet<WFCTile>> PossibleNeighbours = new Dictionary<Direction2D, HashSet<WFCTile>>()
         {
-            { Direction2D.NORTH,  new HashSet<Tile>()},
-            { Direction2D.EAST,  new HashSet<Tile>()},
-            { Direction2D.SOUTH,  new HashSet<Tile>()},
-            { Direction2D.WEST,  new HashSet<Tile>()},
+            { Direction2D.NORTH,  new HashSet<WFCTile>()},
+            { Direction2D.EAST,  new HashSet<WFCTile>()},
+            { Direction2D.SOUTH,  new HashSet<WFCTile>()},
+            { Direction2D.WEST,  new HashSet<WFCTile>()},
         };
     }
 }
