@@ -1,28 +1,26 @@
-using GMDG.NoProduct.Utility;
-using System;
+using GMDG.Basic2DPlatformer.System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using UnityEditor;
 using UnityEngine;
+using Event = GMDG.Basic2DPlatformer.System.Event;
 
 namespace GMDG.Basic2DPlatformer.PCG.WFC
 {
     public class EvenSimplerTiledModel : IWFCModel
     {
         private MonoBehaviour _caller;
-        //private WFCData _data;
         private PCGData _data;
-        //private WFCTile[] _tiles;
-        private Dictionary<Vector2, HashSet<WFCTile>> _uncollapsedPositions;
-        private Dictionary<Vector2, WFCTile> _collapsedPositions;
+        private Dictionary<Vector2, HashSet<int>> _uncollapsedPositions;
+        private Dictionary<Vector2, int> _collapsedPositions;
         private IEnumerator _solverProcedure;
         
         public EvenSimplerTiledModel(MonoBehaviour caller, PCGData data, int iterationsLimit)
         {
             _caller = caller;
             _data = data;
+            _collapsedPositions = new Dictionary<Vector2, int>();
             _solverProcedure = SolverProcedure(iterationsLimit);
         }
 
@@ -37,70 +35,52 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
 
         public IEnumerator SolverProcedure(int iterationsLimit)
         {
+            yield return new WaitForSeconds(2);
             for (int i = 0; i < iterationsLimit || iterationsLimit < 0; i++)
             {
                 bool positionFound = ChooseNextPosition(out Vector2 chosenPosition);
                 if (!positionFound) break;
                 Observe(chosenPosition);
                 Propagate(chosenPosition);
+                EventManager.Instance.Publish(Event.OnGridUpdated, _data.Grid);
                 yield return null;
             }
             if (AreAllPositionsCollapsed())
             {
+#if UNITY_EDITOR
                 Debug.Log("Finished!");
+#endif
             }
             else
             {
+#if UNITY_EDITOR
                 Debug.Log("Failed!");
-            }
-        }
-
-        public void Draw()
-        {
-            _data.Grid.Draw();
-            if (_uncollapsedPositions == null || _uncollapsedPositions.Count == 0) return;
-            foreach (Vector2 position in _uncollapsedPositions.Keys)
-            {
-                string stringList = string.Empty;
-
-                foreach (WFCTile tile in _uncollapsedPositions[position])
-                {
-                    stringList += _data.WFCTiles.FirstOrDefault(x => x == tile).Name;
-                    stringList += ", ";
-                }
-                stringList += string.Format("({0})", Entropy(_uncollapsedPositions[position]));
-                GUIStyle style = new GUIStyle();
-                style.alignment = TextAnchor.UpperLeft;
-                style.normal.textColor = Color.green;
-                style.fontSize = 8;
-                Handles.Label(position, stringList, style);
+#endif
             }
         }
 
         private void Initialize(PCGData data)
         {
-            //_tiles = new WFCTile[data.Tiles.Values.Count];
-            //WFCTile[] dataTiles = data.Tiles.Values.ToArray();
-            //for (int i = 0; i < dataTiles.Length; i++) 
-            //{
-            //    _tiles[i] = dataTiles[i];
-            //}
-
-            _uncollapsedPositions = new Dictionary<Vector2, HashSet<WFCTile>>();
+            _uncollapsedPositions = new Dictionary<Vector2, HashSet<int>>();
             for (int i = 0; i < data.Grid.GridSize.y; i++)
             {
                 for (int j = 0; j < data.Grid.GridSize.x; j++)
                 {
                     Vector2 position = data.Grid.CellsPositions[i, j];
-                    _uncollapsedPositions[position] = new HashSet<WFCTile>();
-                    foreach (WFCTile tile in data.WFCTiles)
+
+                    HashSet<int> superPositions = data.Grid.GetElement(i, j);
+
+                    if (superPositions.Count == 1)
                     {
-                        _uncollapsedPositions[position].Add(tile);
+                        CollapsePosition(position, superPositions.First());
+                        Propagate(position);
+                    }
+                    else
+                    {
+                        _uncollapsedPositions[position] = superPositions;
                     }
                 }
             }
-
-            _collapsedPositions = new Dictionary<Vector2, WFCTile>();
         }
 
         private bool ChooseNextPosition(out Vector2 chosenPosition)
@@ -126,7 +106,7 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
             }
             if (possibleChosenPosition.Count > 0)
             {
-                chosenPosition = possibleChosenPosition[UnityEngine.Random.Range(0, possibleChosenPosition.Count)];
+                chosenPosition = possibleChosenPosition[Random.Range(0, possibleChosenPosition.Count)];
                 return true;
             }
 
@@ -135,20 +115,20 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
 
         private void Observe(Vector2 position)
         {
-            HashSet<WFCTile> superPositions = _uncollapsedPositions[position];
-            WFCTile collapsedWave = null;
+            HashSet<int> superPositions = _uncollapsedPositions[position];
+            int collapsedWave = -1;
 
             float totalRelativeFrequency = 0;
-            foreach (WFCTile superPosition in superPositions)
+            foreach (int superPosition in superPositions)
             {
-                totalRelativeFrequency += superPosition.RelativeFrequency;
+                totalRelativeFrequency += _data.WFCTiles[superPosition].RelativeFrequency;
             }
 
-            float randomChoice = UnityEngine.Random.Range(0, totalRelativeFrequency);
+            float randomChoice = Random.Range(0, totalRelativeFrequency);
 
-            foreach (WFCTile superPosition in superPositions)
+            foreach (int superPosition in superPositions)
             {
-                randomChoice -= superPosition.RelativeFrequency;
+                randomChoice -= _data.WFCTiles[superPosition].RelativeFrequency;
 
                 if (randomChoice > 0) continue;
 
@@ -156,10 +136,7 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
                 break;
             }
 
-            _uncollapsedPositions.Remove(position);
-            _collapsedPositions.Add(position, collapsedWave);
-
-            GameObject.Instantiate(collapsedWave.Prefab, position, Quaternion.identity, _caller.gameObject.transform);
+            CollapsePosition(position, collapsedWave);
         }
 
         private void Propagate(Vector2 chosenPosition)
@@ -170,46 +147,58 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
             while (positionsToPropagate.Count > 0)
             {
                 Vector2 currentPosition = positionsToPropagate.Dequeue();
-                foreach (Utility2D.Direction2D direction in Utility2D.Directions2D)
+                foreach (NoProduct.Utility.Utility2D.Direction2D direction in NoProduct.Utility.Utility2D.Directions2D)
                 {
-                    HashSet<WFCTile> possibleNeighbours = new HashSet<WFCTile>();
+                    HashSet<int> possibleNeighbours = new HashSet<int>();
 
                     if (IsPositionCollapsed(currentPosition))
                     {
-                        possibleNeighbours.UnionWith(_collapsedPositions[currentPosition].PossibleNeighbours[direction]);
+                        WFCTile currentWFCTile = _data.WFCTiles[_collapsedPositions[currentPosition]];
+                        possibleNeighbours.UnionWith(currentWFCTile.PossibleNeighbours[direction]);
                     }
                     else
                     {
-                        foreach (WFCTile superPosition in _uncollapsedPositions[currentPosition])
+                        foreach (int superPosition in _uncollapsedPositions[currentPosition])
                         {
-                            possibleNeighbours.UnionWith(superPosition.PossibleNeighbours[direction]);
+                            WFCTile currentWFCTile = _data.WFCTiles[superPosition];
+                            possibleNeighbours.UnionWith(currentWFCTile.PossibleNeighbours[direction]);
                         }
                     }
 
-                    Vector2Int directionInGrid = Utility2D.GridDirections2D[direction];
+                    Vector2Int directionInGrid = NoProduct.Utility.Utility2D.GridDirections2D[direction];
                     Vector2 positionInDirection = currentPosition + new Vector2Int(directionInGrid.y, directionInGrid.x) * _data.Grid.CellSize;
 
-                    if (!_uncollapsedPositions.TryGetValue(positionInDirection, out HashSet<WFCTile> neighbourSuperPositions)) continue;
+                    if (!_uncollapsedPositions.TryGetValue(positionInDirection, out HashSet<int> neighbourSuperPositions)) continue;
 
                     int numberOfNeighbourSuperPositions = neighbourSuperPositions.Count;
 
                     neighbourSuperPositions.IntersectWith(possibleNeighbours);
 
                     if (neighbourSuperPositions.Count == numberOfNeighbourSuperPositions) continue;
+                    if (neighbourSuperPositions.Count == 1) CollapsePosition(positionInDirection, neighbourSuperPositions.First());
 
                     positionsToPropagate.Enqueue(positionInDirection);
                 }
             }
         }
 
-        private float Entropy(HashSet<WFCTile> superPositions)
+        private void CollapsePosition(Vector2 position, int collapsedWave)
+        {
+            _uncollapsedPositions.Remove(position);
+            _collapsedPositions.Add(position, collapsedWave);
+
+            GameObject.Instantiate(_data.WFCTiles[collapsedWave].Prefab, position, Quaternion.identity, _caller.gameObject.transform);
+        }
+
+        private float Entropy(HashSet<int> superPositions)
         {
             float totalFrequency = 0;
             float totalSum = 0;
-            foreach (WFCTile superPosition in superPositions)
+            foreach (int superPosition in superPositions)
             {
-                totalFrequency += superPosition.RelativeFrequency;
-                totalSum += superPosition.RelativeFrequency * Mathf.Log(superPosition.RelativeFrequency, 2);
+                float relativeFrequency = _data.WFCTiles[superPosition].RelativeFrequency;
+                totalFrequency += relativeFrequency;
+                totalSum += relativeFrequency * Mathf.Log(relativeFrequency, 2);
             }
             return Mathf.Log(totalFrequency, 2) - totalSum / totalFrequency;
         }

@@ -11,15 +11,11 @@ namespace GMDG.Basic2DPlatformer.System
     public class LevelManager : MonoBehaviour
     {
         private int _currentLevel;
-        private LevelGenerator _generator;
 
         #region UnityMessages
         private void Awake()
         {
             _currentLevel = 0;
-            _generator = new LevelGenerator();
-
-
 
             enabled = false;
 
@@ -52,9 +48,11 @@ namespace GMDG.Basic2DPlatformer.System
 
         private void GenerateLevel(object[] args)
         {
+            Delete();
+
             PCGData data = LoadData();
             if (!ValidateData(data)) return;
-            StartCoroutine(_generator.Generation?.Invoke(this, data));
+            StartCoroutine(new LevelGenerator().Generation?.Invoke(this, data));
         }
 
         #endregion
@@ -65,6 +63,19 @@ namespace GMDG.Basic2DPlatformer.System
             GenerateLevel(null);
         }
 #endif
+
+        public void Delete()
+        {
+            for (int i = 0; i < gameObject.transform.childCount;)
+            {
+#if UNITY_EDITOR
+                DestroyImmediate(gameObject.transform.GetChild(i).gameObject);
+#else
+                Destroy(gameObject.transform.GetChild(i).gameObject);
+#endif
+            }
+            StopAllCoroutines();
+        }
 
         private PCGData LoadData()
         {
@@ -92,7 +103,7 @@ namespace GMDG.Basic2DPlatformer.System
             float yCellSize = float.Parse(settings["CellSize"]["y"].InnerText);
             data.CellSize = new Vector2(xCellSize, yCellSize);
 
-            data.Grid = new Grid<int>(data.GridSize, data.CellSize, Vector3.zero);
+            data.Grid = new Grid<HashSet<int>>(data.GridSize, data.CellSize, Vector3.zero);
 
             // StartingCell
             int xStartingCell = int.Parse(settings["StartingCell"]["x"].InnerText);
@@ -135,7 +146,7 @@ namespace GMDG.Basic2DPlatformer.System
 
                 tile.Name = id;
                 tile.RelativeFrequency = frequency;
-                tile.Prefab = (GameObject)Resources.Load(string.Format("Prefabs/{0}", prefab));
+                tile.Prefab = (GameObject)Resources.Load(string.Format("Prefabs/Chunks/{0}", prefab));
             }
 
             // Update Relative Frequency
@@ -144,12 +155,39 @@ namespace GMDG.Basic2DPlatformer.System
                 tile.RelativeFrequency /= totalFrequency;
             }
 
+            // Special Tiles
+            foreach (string name in visitedWFCTiles.Keys)
+            {
+                if (!name.Equals("START")) continue;
+
+                data.WFCTiles.Add(visitedWFCTiles[name]);
+                break;
+            }
+
+            foreach (string name in visitedWFCTiles.Keys)
+            {
+                if (!name.Equals("END")) continue;
+
+                data.WFCTiles.Add(visitedWFCTiles[name]);
+                break;
+            }
+
+            foreach (WFCTile tile in visitedWFCTiles.Values)
+            {
+                if (data.WFCTiles.Contains(tile)) continue;
+                data.WFCTiles.Add(tile);
+            }
+
             // Getting Constraints
             for (int i = 0; i < tilesList.Count; i++)
             {
-                XmlNodeList constraintsList = tilesList[i]["Constraints"].SelectNodes("Constraint");
+                XmlNode constraintsNode = tilesList[i]["Constraints"];
 
-                for (int j = 0; j < constraintsList.Count; j++) 
+                if (constraintsNode == null) continue;
+
+                XmlNodeList constraintsList = constraintsNode.SelectNodes("Constraint");
+
+                for (int j = 0; j < constraintsList.Count; j++)
                 {
                     XmlNode node = constraintsList[j];
 
@@ -166,16 +204,11 @@ namespace GMDG.Basic2DPlatformer.System
                         foreach (XmlNode neighbour in neighbours)
                         {
                             string neighbourId = neighbour.InnerText;
-                            visitedWFCTiles[id].PossibleNeighbours[directions[k]].Add(visitedWFCTiles[neighbourId]);
-                            visitedWFCTiles[neighbourId].PossibleNeighbours[OppositeDirections[directions[k]]].Add(visitedWFCTiles[id]);
+                            visitedWFCTiles[id].PossibleNeighbours[directions[k]].Add(data.WFCTiles.IndexOf(visitedWFCTiles[neighbourId]));
+                            visitedWFCTiles[neighbourId].PossibleNeighbours[OppositeDirections[directions[k]]].Add(data.WFCTiles.IndexOf(visitedWFCTiles[id]));
                         }
                     }
                 }
-            }
-
-            foreach (WFCTile tile in visitedWFCTiles.Values)
-            {
-                data.WFCTiles.Add(tile);
             }
         }
 

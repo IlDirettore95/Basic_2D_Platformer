@@ -150,8 +150,8 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
                 foreach (XmlNode neighbour in neighbours)
                 {
                     string id = neighbour.InnerText;
-                    Tiles[tile].PossibleNeighbours[directions[i]].Add(Tiles[id]);
-                    Tiles[id].PossibleNeighbours[OppositeDirections[directions[i]]].Add(Tiles[tile]);
+                    //Tiles[tile].PossibleNeighbours[directions[i]].Add(Tiles[id]);
+                    //Tiles[id].PossibleNeighbours[OppositeDirections[directions[i]]].Add(Tiles[tile]);
                 }
             }
         }
@@ -175,10 +175,10 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
                 {
                     text = string.Concat(text, string.Format("\t\tDirection: {0}\n", direction));
                     text = string.Concat(text, "\t\tNeighbours:\n");
-                    foreach (WFCTile tile in Tiles[id].PossibleNeighbours[direction])
+                    foreach (int neighbour in Tiles[id].PossibleNeighbours[direction])
                     {
-                        string tileId = Tiles.FirstOrDefault(x => x.Value == tile).Key;
-                        text = string.Concat(text, string.Format("\t\t\tID: {0}\n", tileId));
+                        //string tileId = Tiles.FirstOrDefault(x => x.Value == tile).Key;
+                        //text = string.Concat(text, string.Format("\t\t\tID: {0}\n", tileId));
                     }
                     text = string.Concat(text, "\n");
                 }
@@ -193,12 +193,12 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
         public string Name;
         public GameObject Prefab;
         public float RelativeFrequency;
-        public Dictionary<Direction2D, HashSet<WFCTile>> PossibleNeighbours = new Dictionary<Direction2D, HashSet<WFCTile>>()
+        public Dictionary<Direction2D, HashSet<int>> PossibleNeighbours = new Dictionary<Direction2D, HashSet<int>>()
         {
-            { Direction2D.NORTH,  new HashSet<WFCTile>()},
-            { Direction2D.EAST,  new HashSet<WFCTile>()},
-            { Direction2D.SOUTH,  new HashSet<WFCTile>()},
-            { Direction2D.WEST,  new HashSet<WFCTile>()},
+            { Direction2D.NORTH,  new HashSet<int>()},
+            { Direction2D.EAST,  new HashSet<int>()},
+            { Direction2D.SOUTH,  new HashSet<int>()},
+            { Direction2D.WEST,  new HashSet<int>()},
         };
     }
 }

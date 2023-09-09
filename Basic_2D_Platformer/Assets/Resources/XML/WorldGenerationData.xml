@@ -8,7 +8,7 @@
       </GridSize>
       <CellSize>
         <x>30</x>
-        <y>20</y>
+        <y>15</y>
       </CellSize>
       <StartingCell>
         <x>0</x>
@@ -22,60 +22,50 @@
     <WFC>
       <Tiles>
         <Tile>
-          <ID>OCEAN</ID>
-          <Prefab>Ocean</Prefab>
+          <ID>AIR</ID>
+          <Prefab>Air</Prefab>
           <Frequency>4</Frequency>
           <Constraints>
             <Constraint>
               <Direction>ALL</Direction>
               <Neighbours>
-                <ID>OCEAN</ID>
-                <ID>SEA</ID>
+                <ID>AIR</ID>
               </Neighbours>
             </Constraint>
-          </Constraints>
-        </Tile>
-        <Tile>
-          <ID>SEA</ID>
-          <Prefab>Sea</Prefab>
-          <Frequency>4</Frequency>
-          <Constraints>
             <Constraint>
-              <Direction>ALL</Direction>
+              <Direction>SOUTH</Direction>
               <Neighbours>
-                <ID>OCEAN</ID>
-                <ID>SEA</ID>
-                <ID>COAST</ID>
+                <ID>START</ID>
+                <ID>GORGE</ID>
+                <ID>END</ID>
               </Neighbours>
             </Constraint>
           </Constraints>
         </Tile>
         <Tile>
-          <ID>COAST</ID>
-          <Prefab>Coast</Prefab>
+          <ID>GORGE</ID>
+          <Prefab>Gorge</Prefab>
           <Frequency>3</Frequency>
           <Constraints>
             <Constraint>
-              <Direction>ALL</Direction>
+              <Direction>HORIZONTAL</Direction>
               <Neighbours>
-                <ID>COAST</ID>
-                <ID>LAND</ID>
+                <ID>START</ID>
+                <ID>END</ID>
+                <ID>GORGE</ID>
               </Neighbours>
             </Constraint>
           </Constraints>
         </Tile>
         <Tile>
-          <ID>LAND</ID>
-          <Prefab>Land</Prefab>
-          <Frequency>3</Frequency>
-          <Constraints>
-            <Constraint>
-              <Direction>ALL</Direction>
-              <Neighbours>
-                <ID>LAND</ID>
-              </Neighbours>
-            </Constraint>
-          </Constraints>
+          <ID>START</ID>
+          <Prefab>Start</Prefab>
+          <Frequency>1</Frequency>
+        </Tile>
+        <Tile>
+          <ID>END</ID>
+          <Prefab>End</Prefab>
+          <Frequency>1</Frequency>
         </Tile>
       </Tiles>
     </WFC>

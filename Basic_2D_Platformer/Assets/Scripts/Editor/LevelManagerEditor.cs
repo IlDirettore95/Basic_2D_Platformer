@@ -1,6 +1,3 @@
-using GMDG.Basic2DPlatformer.PCG.WFC;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -13,14 +10,14 @@ namespace GMDG.Basic2DPlatformer.System
         public override void OnInspectorGUI()
         {
             DrawDefaultInspector();
-            LevelManager generator = (LevelManager)target;
+            LevelManager manager = (LevelManager)target;
             if (GUILayout.Button("Generate"))
             {
-                generator.GenerateLevel();
+                manager.GenerateLevel();
             }
             if (GUILayout.Button("Delete"))
             {
-                //generator.Delete();
+                manager.Delete();
             }
         }
     }

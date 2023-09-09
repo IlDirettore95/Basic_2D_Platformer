@@ -72,6 +72,16 @@ namespace GMDG.Basic2DPlatformer.Utility
             return cells[i, j].Content;
         }
 
+        public T GetElement(Vector2Int indicies)
+        {
+            if (indicies.y < 0 || indicies.x < 0 || indicies.y > GridSize.y - 1 || indicies.x > GridSize.x - 1)
+            {
+                throw new ArgumentException();
+            }
+
+            return cells[indicies.y, indicies.x].Content;
+        }
+
         public void PlaceElement(int i, int j, T content)
         {
             if (i < 0 || j < 0 || i > GridSize.y - 1 || j > GridSize.x - 1)
@@ -103,7 +113,7 @@ namespace GMDG.Basic2DPlatformer.Utility
             }
         }
 
-        public void DrawContent(GameObject parent, int fontSize, Func<T, Color> colorHeuristic)
+        public void DrawContent(GameObject parent, int fontSize, Func<T, Color> colorHeuristic, Func<T, string> stringHeuristic)
         {
             for (int i = 0; i < parent.transform.childCount; i++)
             {
@@ -114,7 +124,7 @@ namespace GMDG.Basic2DPlatformer.Utility
             {
                 for (int j = 0; j < GridSize.x; j++)
                 {
-                    cells[i, j].DrawContent(parent, fontSize, colorHeuristic);
+                    cells[i, j].DrawContent(parent, fontSize, colorHeuristic, stringHeuristic);
                 }
             }
         }
@@ -148,10 +158,11 @@ namespace GMDG.Basic2DPlatformer.Utility
                 Debug.DrawLine(PositionInWorld + new Vector2(-Size.x / 2, -Size.y / 2), PositionInWorld + new Vector2(-Size.x / 2, Size.y / 2), Color.black);
             }
 
-            public void DrawContent(GameObject parent, int fontSize, Func<S, Color> colorHeuristic)
+            public void DrawContent(GameObject parent, int fontSize, Func<S, Color> colorHeuristic, Func<S, string> stringHeuristic)
             {
                 Color color = colorHeuristic.Invoke(Content);
-                TextUtility.CreateWorldText(Content.ToString(), fontSize, PositionInWorld, color, parent.transform);
+                string text = stringHeuristic.Invoke(Content);
+                TextUtility.CreateWorldText(text, fontSize, PositionInWorld, color, parent.transform);
             }
         }
     }

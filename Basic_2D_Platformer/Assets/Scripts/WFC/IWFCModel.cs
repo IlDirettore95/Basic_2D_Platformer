@@ -8,6 +8,5 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
     public interface IWFCModel
     {
         public IEnumerator Generate();
-        public void Draw();
     }
 }

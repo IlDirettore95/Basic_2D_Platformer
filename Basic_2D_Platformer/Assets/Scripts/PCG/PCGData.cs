@@ -11,10 +11,13 @@ namespace GMDG.Basic2DPlatformer.PCG
     {
         public Vector2Int GridSize;
         public Vector2 CellSize;
-        public Grid<int> Grid;
         public Vector2Int StartingCell;
         public Vector2Int EndingCell;
+        public Grid<HashSet<int>> Grid;
         public List<WFCTile> WFCTiles = new List<WFCTile>();
+
+        public const int START_CELL = 0;
+        public const int END_CELL = 1;
 
         public override string ToString()
         {
@@ -36,9 +39,9 @@ namespace GMDG.Basic2DPlatformer.PCG
                 {
                     text = string.Concat(text, string.Format("\t\tDirection: {0}\n", direction));
                     text = string.Concat(text, "\t\tNeighbours:\n");
-                    foreach (WFCTile possibleNeighbour in tile.PossibleNeighbours[direction])
+                    foreach (int possibleNeighbour in tile.PossibleNeighbours[direction])
                     {
-                        text = string.Concat(text, string.Format("\t\t\tID: {0}\n", possibleNeighbour.Name));
+                        text = string.Concat(text, string.Format("\t\t\tID: {0}\n", WFCTiles[possibleNeighbour].Name));
                     }
                     text = string.Concat(text, "\n");
                 }

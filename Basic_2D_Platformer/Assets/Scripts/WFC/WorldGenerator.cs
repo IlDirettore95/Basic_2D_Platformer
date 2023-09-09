@@ -21,7 +21,7 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
             UnityEngine.Random.InitState(Seed <= 0 ? UnityEngine.Random.Range(0, int.MaxValue) : Seed);
 
             //_model = new EvenSimplerTiledModel(this, data, IterationsLimit);
-            _model.Generate();
+            //_model.Generate();
         }
 
         public void Delete()
@@ -43,7 +43,7 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
 #if UNITY_EDITOR
         private void OnDrawGizmosSelected()
         {
-            _model?.Draw();
+            //_model?.Draw();
         }
 #endif
 
