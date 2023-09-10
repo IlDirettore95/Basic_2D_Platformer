@@ -12,28 +12,25 @@ namespace GMDG.Basic2DPlatformer.PCG
 {
     public class LevelGenerator
     {
-
-        public Func<MonoBehaviour, PCGData, IEnumerator> Generation;
-
-        private WaitForSeconds _waitForSeconds;
-
+        public Func<MonoBehaviour, PCGData, int, float, bool, IEnumerator> Generation;
 
         public LevelGenerator() 
         {
-            Generation = Generate;
-            _waitForSeconds = new WaitForSeconds(0.25f);          
+            Generation = Generate;       
         }
 
-        private IEnumerator Generate(MonoBehaviour caller, PCGData data)
+        private IEnumerator Generate(MonoBehaviour caller, PCGData data, int iterationLimit, float timeout, bool isSimulated)
         {
             // Place Starting and Ending Cell
-            yield return caller.StartCoroutine(InitializeSuperPositions(data.Grid, data));
+            if (isSimulated) yield return caller.StartCoroutine(InitializeSuperPositions(data.Grid, data, timeout, isSimulated));
+            else InitializeSuperPositions(data.Grid, data, timeout, isSimulated).MoveNext();
 
             // Use WFC for placing chunks
-            yield return caller.StartCoroutine(new EvenSimplerTiledModel(caller, data, -1).Generate());
+            if (isSimulated) yield return caller.StartCoroutine(new EvenSimplerTiledModel(caller, data).Generate(iterationLimit, timeout, isSimulated));
+            else new EvenSimplerTiledModel(caller, data).Generate(iterationLimit, timeout, isSimulated).MoveNext();
         }
 
-        private IEnumerator InitializeSuperPositions(Grid<HashSet<int>> grid, PCGData data)
+        private IEnumerator InitializeSuperPositions(Grid<HashSet<int>> grid, PCGData data, float timeout, bool isSimulated)
         {
             for (int i = 0; i < grid.GridSize.y; i++) 
             { 
@@ -61,13 +58,11 @@ namespace GMDG.Basic2DPlatformer.PCG
                 }
             }
 
-            EventManager.Instance.Publish(Event.OnGridUpdated, grid);
-
-#if UNITY_EDITOR
-            yield return _waitForSeconds;
-#else
-            yield return null;
-#endif
+            if (isSimulated)
+            {
+                EventManager.Instance.Publish(Event.OnGridUpdated, grid);
+                yield return new WaitForSeconds(timeout);
+            }
         }
     }
 }

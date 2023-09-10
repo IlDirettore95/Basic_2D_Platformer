@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using static GMDG.NoProduct.Utility.Utility2D;
 using Event = GMDG.Basic2DPlatformer.System.Event;
 
 namespace GMDG.Basic2DPlatformer.PCG.WFC
@@ -14,36 +15,37 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
         private PCGData _data;
         private Dictionary<Vector2, HashSet<int>> _uncollapsedPositions;
         private Dictionary<Vector2, int> _collapsedPositions;
-        private IEnumerator _solverProcedure;
         
-        public EvenSimplerTiledModel(MonoBehaviour caller, PCGData data, int iterationsLimit)
+        public EvenSimplerTiledModel(MonoBehaviour caller, PCGData data)
         {
             _caller = caller;
             _data = data;
             _collapsedPositions = new Dictionary<Vector2, int>();
-            _solverProcedure = SolverProcedure(iterationsLimit);
         }
 
-        public IEnumerator Generate()
+        public IEnumerator Generate(int iterationsLimit, float timeout, bool isSimulated)
         {
-            // Initialize
-            Initialize(_data);
-
-            //Solver
-            yield return _caller.StartCoroutine(_solverProcedure);
+            if (isSimulated) yield return _caller.StartCoroutine(SolverProcedure(iterationsLimit, timeout, isSimulated));
+            else SolverProcedure(iterationsLimit, timeout, isSimulated).MoveNext();
         }
 
-        public IEnumerator SolverProcedure(int iterationsLimit)
+        public IEnumerator SolverProcedure(int iterationsLimit, float timeout, bool isSimulated)
         {
-            yield return new WaitForSeconds(2);
+            if (isSimulated) yield return _caller.StartCoroutine(Initialize(_data, timeout, isSimulated));
+            else Initialize(_data, timeout, isSimulated).MoveNext();
+
             for (int i = 0; i < iterationsLimit || iterationsLimit < 0; i++)
             {
                 bool positionFound = ChooseNextPosition(out Vector2 chosenPosition);
                 if (!positionFound) break;
                 Observe(chosenPosition);
                 Propagate(chosenPosition);
-                EventManager.Instance.Publish(Event.OnGridUpdated, _data.Grid);
-                yield return null;
+
+                if (isSimulated)
+                {
+                    EventManager.Instance.Publish(Event.OnGridUpdated, _data.Grid);
+                    yield return new WaitForSeconds(timeout);
+                }
             }
             if (AreAllPositionsCollapsed())
             {
@@ -57,9 +59,15 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
                 Debug.Log("Failed!");
 #endif
             }
+
+            if (isSimulated)
+            {
+                EventManager.Instance.Publish(Event.OnGridUpdated, _data.Grid);
+                yield return null;
+            }
         }
 
-        private void Initialize(PCGData data)
+        private IEnumerator Initialize(PCGData data, float timeout, bool isSimulated)
         {
             _uncollapsedPositions = new Dictionary<Vector2, HashSet<int>>();
             for (int i = 0; i < data.Grid.GridSize.y; i++)
@@ -78,6 +86,12 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
                     else
                     {
                         _uncollapsedPositions[position] = superPositions;
+                    }
+
+                    if (isSimulated)
+                    {
+                        EventManager.Instance.Publish(Event.OnGridUpdated, _data.Grid);
+                        yield return new WaitForSeconds(timeout);
                     }
                 }
             }
@@ -175,7 +189,6 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
                     neighbourSuperPositions.IntersectWith(possibleNeighbours);
 
                     if (neighbourSuperPositions.Count == numberOfNeighbourSuperPositions) continue;
-                    if (neighbourSuperPositions.Count == 1) CollapsePosition(positionInDirection, neighbourSuperPositions.First());
 
                     positionsToPropagate.Enqueue(positionInDirection);
                 }
@@ -188,6 +201,8 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
             _collapsedPositions.Add(position, collapsedWave);
 
             GameObject.Instantiate(_data.WFCTiles[collapsedWave].Prefab, position, Quaternion.identity, _caller.gameObject.transform);
+
+            EventManager.Instance.Publish(Event.OnGridUpdated, _data.Grid);
         }
 
         private float Entropy(HashSet<int> superPositions)
@@ -212,5 +227,6 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
         {
             return _collapsedPositions.ContainsKey(position);
         }
+
     }
 }

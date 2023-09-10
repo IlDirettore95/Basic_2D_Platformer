@@ -7,6 +7,6 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
 {
     public interface IWFCModel
     {
-        public IEnumerator Generate();
+        public IEnumerator Generate(int iterationsLimit, float timeout, bool isSimulated);
     }
 }

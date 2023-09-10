@@ -211,6 +211,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6d18e4f10b9f564fbaee30d0f62d318, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  IterationLimit: -1
+  Timeout: 0
+  IsSimulated: 1
 --- !u!114 &1095926700314210696
 MonoBehaviour:
   m_ObjectHideFlags: 0

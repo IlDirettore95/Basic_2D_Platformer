@@ -10,12 +10,20 @@ namespace GMDG.Basic2DPlatformer.System
 {
     public class LevelManager : MonoBehaviour
     {
+        public int IterationLimit;
+        public float Timeout;
+        public bool IsSimulated;
+
         private int _currentLevel;
 
         #region UnityMessages
         private void Awake()
         {
             _currentLevel = 0;
+
+#if !UNITY_EDITOR
+            IsSimulated = false;
+#endif
 
             enabled = false;
 
@@ -37,7 +45,7 @@ namespace GMDG.Basic2DPlatformer.System
             EventManager.Instance.Unsubscribe(Event.OnSystemsLoaded, Activate);
         }
 
-        #endregion
+#endregion
 
         #region Listeners
 
@@ -52,7 +60,8 @@ namespace GMDG.Basic2DPlatformer.System
 
             PCGData data = LoadData();
             if (!ValidateData(data)) return;
-            StartCoroutine(new LevelGenerator().Generation?.Invoke(this, data));
+            if (IsSimulated) StartCoroutine(new LevelGenerator().Generation?.Invoke(this, data, IterationLimit, Timeout, IsSimulated));
+            else new LevelGenerator().Generation?.Invoke(this, data, IterationLimit, Timeout, IsSimulated).MoveNext();
         }
 
         #endregion

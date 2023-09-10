@@ -19,8 +19,7 @@ namespace GMDG.Basic2DPlatformer.System
         {
             enabled = false;
             _fpsCounter.SetActive(false);
-            _gridDebugGo = new GameObject("Grid Debug");
-            _gridDebugGo.transform.SetParent(transform);
+            _gridDebugGo = GameObject.Find("Grid Debug");
             _gridDebugGo.SetActive(false);
 
             EventManager.Instance.Subscribe(Event.OnSystemsLoaded, Activate);
@@ -52,8 +51,7 @@ namespace GMDG.Basic2DPlatformer.System
         {
             if (_gridDebugGo == null)
             {
-                _gridDebugGo = new GameObject("Grid Debug");
-                _gridDebugGo.transform.SetParent(transform);
+                _gridDebugGo = GameObject.Find("Grid Debug");
             }
             if (_gridDebugGo.activeSelf) _grid?.Draw();
         }
