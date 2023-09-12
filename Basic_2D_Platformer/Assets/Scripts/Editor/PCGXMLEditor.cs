@@ -21,20 +21,23 @@ public class PCGXMLEditor : EditorWindow
     private Color _messageColor = new Color(150f / 255f, 50f / 255f, 50f / 255f);
     private Rect _messageRect;
 
+    private Vector2 _currentHierarchyScrollPosition;
+    private Vector2 _currentChildrenScrollPosition;
+
     // Texts
     private string _path = "XML/WorldGenerationData";
     private string _message = string.Empty;
 
     // DataStructure
     private XmlDocument _xmlDocument;
-    private XmlNodeList _levelNodes;
     private List<object> _currentHierarchy;
 
     [MenuItem("Window/PCG/XMLData")]
     private static void Init()
     {
         PCGXMLEditor window = GetWindow<PCGXMLEditor>(true, "XML Data", true);
-        window.minSize = new Vector2(280, 400);
+        window.minSize = new Vector2(800, 400);
+        window.maxSize = new Vector2(800, 400);
     }
 
     private void OnEnable()
@@ -43,6 +46,14 @@ public class PCGXMLEditor : EditorWindow
         InitXml();
         InitDataStructures();
     }
+
+    private void OnGUI()
+    {
+        DrawLayout();
+        DrawContent();
+    }
+
+    #region Init
 
     private void InitTextures()
     {
@@ -61,7 +72,6 @@ public class PCGXMLEditor : EditorWindow
 
     private void InitXml()
     {
-        // Loading XmlDocument
         TextAsset textAsset = Resources.Load<TextAsset>(_path);
 
         if (textAsset == null)
@@ -84,22 +94,20 @@ public class PCGXMLEditor : EditorWindow
         };
     }
 
-    private void OnGUI()
-    {
-        DrawLayout();
-        DrawContent();
-    }
+    #endregion
+
+    #region Graphics
 
     private void DrawLayout()
     {
-        _headerRect.x = 0;
+        _headerRect.x = 20;
         _headerRect.y = 0;
-        _headerRect.width = Screen.width;
-        _headerRect.height = 50;
+        _headerRect.width = Screen.width - 40;
+        _headerRect.height = 70;
         GUI.DrawTexture(_headerRect, _headerTexture);
 
         _bodyRect.x = 20;
-        _bodyRect.y = 50;
+        _bodyRect.y = 70;
         _bodyRect.width = Screen.width - 40;
         _bodyRect.height = Screen.height - 50;
         GUI.DrawTexture(_bodyRect, _bodyTexture);
@@ -128,10 +136,8 @@ public class PCGXMLEditor : EditorWindow
     private void DrawHeader()
     {
         GUILayout.BeginArea(_headerRect);
-
         GUILayout.Label("Current hierarchy:");
-        DrawHierarchy();
-
+        DrawHierarchyScrollBar();
         GUILayout.EndArea();
     }
 
@@ -139,11 +145,16 @@ public class PCGXMLEditor : EditorWindow
     {
         GUILayout.BeginArea(_bodyRect);
         GUILayout.Space(10);
-        GUILayout.Label("Current children:");
+        GUILayout.BeginHorizontal();
         GUILayout.BeginVertical();
-        DrawCurrentChildren();
-        DrawPossibleActions();
+        GUILayout.Label("Current children:");
+        DrawChildrenScrollBar();
         GUILayout.EndVertical();
+        GUILayout.BeginVertical();
+        DrawOtherActions();
+        GUILayout.EndVertical();
+        GUILayout.Space(80);
+        GUILayout.EndHorizontal();
         GUILayout.EndArea();
     }
 
@@ -153,6 +164,21 @@ public class PCGXMLEditor : EditorWindow
         GUILayout.Space(10);
         GUILayout.Label(_message);
         GUILayout.EndArea();
+    }
+
+    private void DrawHierarchyScrollBar()
+    {
+        _currentHierarchyScrollPosition = GUILayout.BeginScrollView(_currentHierarchyScrollPosition, GUILayout.Width(_headerRect.width - 20), GUILayout.Height(_headerRect.height - 30));
+        DrawHierarchy();
+        GUILayout.EndScrollView();
+    }
+
+    private void DrawChildrenScrollBar()
+    {
+        _currentChildrenScrollPosition = GUILayout.BeginScrollView(_currentChildrenScrollPosition, GUILayout.Width(Screen.width - 200), GUILayout.Height(_bodyRect.height - 110));
+        DrawCurrentChildren();
+        DrawPossibleActions();
+        GUILayout.EndScrollView();
     }
     
     private void DrawHierarchy()
@@ -179,17 +205,6 @@ public class PCGXMLEditor : EditorWindow
         GUILayout.EndHorizontal();
     }
 
-    private string TakeString(object element)
-    {
-        string text = string.Empty;
-
-        XmlNode node = element as XmlNode;
-
-        if (node != null) return node.Name;
-
-        return text;
-    }
-
     private void DrawCurrentChildren()
     {
         object lastElement = _currentHierarchy[_currentHierarchy.Count - 1];
@@ -202,23 +217,26 @@ public class PCGXMLEditor : EditorWindow
         {
             string buttonText = TakeString(node);
 
+            GUILayout.BeginHorizontal();
             if (GUILayout.Button(buttonText, GUILayout.ExpandWidth(false)))
             {
                 _currentHierarchy.Add(node);
             }
+
+            if (node.Attributes.Count > 0) 
+            { 
+                foreach (XmlAttribute attribute in node.Attributes)
+                {
+                    GUILayout.Label(attribute.Name, GUILayout.ExpandWidth(false));
+                    attribute.Value = GUILayout.TextField(attribute.Value, GUILayout.Width(60));
+                    GUILayout.Space(15);
+                }
+            }
+
+            GUILayout.EndHorizontal();
         }
     }
-
-    private XmlNodeList TakeChildren(object element)
-    {
-        XmlNode node = element as XmlNode;
-
-        if (node != null) return node.ChildNodes;
-
-        return null;    
-    }
-
-
+    
     private void DrawPossibleActions()
     {
         XmlNode node = _currentHierarchy[_currentHierarchy.Count - 1] as XmlNode;
@@ -230,16 +248,169 @@ public class PCGXMLEditor : EditorWindow
             case "Levels":
                 if (GUILayout.Button("+", GUILayout.ExpandWidth(false)))
                 {
-                    XmlElement newLevel = _xmlDocument.CreateElement("Level");
-                    XmlElement newSetting = _xmlDocument.CreateElement("Settings");
-                    XmlElement newWFC = _xmlDocument.CreateElement("WFC");
-                    newLevel.AppendChild(newSetting);
-                    newLevel.AppendChild(newWFC);
-                    node.AppendChild(newLevel);
-                    _xmlDocument.Save(Application.dataPath + "/Resources/" + _path + ".xml");
+                    node.AppendChild(CreateLevelNode());
+                }
+                break;
+            case "Tiles":
+                if (GUILayout.Button("+", GUILayout.ExpandWidth(false)))
+                {
+                    node.AppendChild(CreateTileNode());
+                }
+                break;
+            case "Constraints":
+                if (GUILayout.Button("+", GUILayout.ExpandWidth(false)))
+                {
+                    node.AppendChild(CreateConstraintNode());
+                }
+                break;
+            case "Neighbours":
+                if (GUILayout.Button("+", GUILayout.ExpandWidth(false)))
+                {
+                    node.AppendChild(CreateNeighbourNode());
                 }
                 break;
         }
     }
 
+    private void DrawOtherActions()
+    {
+        if (GUILayout.Button("Reload XML file", GUILayout.ExpandWidth(false)))
+        {
+            AssetDatabase.Refresh();
+            InitXml();
+            InitDataStructures();
+        }
+
+        if (GUILayout.Button("Save XML file", GUILayout.ExpandWidth(false)))
+        {
+            _xmlDocument.Save(Application.dataPath + "/Resources/" + _path + ".xml");
+        }
+    }
+
+    #endregion
+
+    #region ReadXml
+
+    private string TakeString(object element)
+    {
+        string text = string.Empty;
+
+        XmlNode node = element as XmlNode;
+
+        if (node == null) return text;
+            
+        text += node.Name;
+
+        if (node.Attributes.Count <= 0) return text;
+
+        text += " " + node.Attributes[0].Value;
+
+        return text;
+    }
+
+    private XmlNodeList TakeChildren(object element)
+    {
+        XmlNode node = element as XmlNode;
+
+        if (node != null) return node.ChildNodes;
+
+        return null;    
+    }
+
+    #endregion
+
+    #region WriteXml
+
+    private XmlElement CreateLevelNode()
+    {
+        XmlElement level = _xmlDocument.CreateElement("Level");
+
+        XmlAttribute id = _xmlDocument.CreateAttribute("ID");
+
+        level.Attributes.Append(id);
+        level.AppendChild(CreateSettingsNode());
+        level.AppendChild(CreateWFCNode());
+
+        return level;
+    }
+
+    private XmlElement CreateTileNode()
+    {
+        XmlElement tile = _xmlDocument.CreateElement("Tile");
+
+        XmlAttribute id = _xmlDocument.CreateAttribute("ID");
+        XmlAttribute prefab = _xmlDocument.CreateAttribute("Prefab");
+        XmlAttribute frequency = _xmlDocument.CreateAttribute("Frequency");
+
+        tile.Attributes.Append(id);
+        tile.Attributes.Append(prefab);
+        tile.Attributes.Append(frequency);
+
+        XmlElement constraints = _xmlDocument.CreateElement("Constraints");
+        tile.AppendChild(constraints);
+
+        return tile;
+    }
+
+    private XmlElement CreateConstraintNode()
+    {
+        XmlElement constraint = _xmlDocument.CreateElement("Constraint");
+
+        XmlAttribute direction = _xmlDocument.CreateAttribute("Direction");
+        XmlElement neighbours = _xmlDocument.CreateElement("Neighbours");
+
+        constraint.Attributes.Append(direction);
+        constraint.AppendChild(neighbours);
+
+        return constraint;
+    }
+
+    private XmlElement CreateNeighbourNode()
+    {
+        XmlElement neighbour = _xmlDocument.CreateElement("Neighbour");
+
+        XmlAttribute id = _xmlDocument.CreateAttribute("ID");
+        neighbour.Attributes.Append(id);
+
+        return neighbour;
+    }
+
+    private XmlNode CreateSettingsNode()
+    {
+        XmlElement setting = _xmlDocument.CreateElement("Settings");
+
+        setting.AppendChild(CreateVector2Element("GridSize"));
+        setting.AppendChild(CreateVector2Element("CellSize"));
+        setting.AppendChild(CreateVector2Element("StartingCell"));
+        setting.AppendChild(CreateVector2Element("EndingCell"));
+
+        return setting;
+    }
+
+    private XmlNode CreateWFCNode()
+    {
+        XmlElement wfc = _xmlDocument.CreateElement("WFC");
+
+        wfc.AppendChild(_xmlDocument.CreateElement("Tiles"));
+
+        return wfc;
+    }
+
+    private XmlElement CreateVector2Element(string name)
+    {
+        XmlElement vector2 = _xmlDocument.CreateElement(name);
+
+        XmlAttribute x = _xmlDocument.CreateAttribute("x");
+        XmlAttribute y = _xmlDocument.CreateAttribute("y");
+
+        x.Value = "0";
+        y.Value = "0";
+
+        vector2.Attributes.Append(x);
+        vector2.Attributes.Append(y);
+
+        return vector2;
+    }
+
+    #endregion
 }
