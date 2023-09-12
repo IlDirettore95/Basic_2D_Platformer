@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Levels>
-  <Level ID = "1" >
+  <Level ID="1">
     <Settings>
       <GridSize>
         <x>5</x>
@@ -69,5 +69,10 @@
         </Tile>
       </Tiles>
     </WFC>
+  </Level>
+  <Level>Yeah!</Level>
+  <Level>
+    <Settings />
+    <WFC />
   </Level>
 </Levels>

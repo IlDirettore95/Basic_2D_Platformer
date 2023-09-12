@@ -1,4 +1,5 @@
 using System.Xml;
+using System;
 using UnityEditor;
 using UnityEngine;
 using System.Collections.Generic;
@@ -27,8 +28,7 @@ public class PCGXMLEditor : EditorWindow
     // DataStructure
     private XmlDocument _xmlDocument;
     private XmlNodeList _levelNodes;
-
-    private List<object> _currentHierarchy = new List<object>();
+    private List<object> _currentHierarchy;
 
     [MenuItem("Window/PCG/XMLData")]
     private static void Init()
@@ -41,10 +41,7 @@ public class PCGXMLEditor : EditorWindow
     {
         InitTextures();
         InitXml();
-
-        _currentHierarchy.Add("Hello");
-        _currentHierarchy.Add("World");
-        _currentHierarchy.Add("!");
+        InitDataStructures();
     }
 
     private void InitTextures()
@@ -77,8 +74,14 @@ public class PCGXMLEditor : EditorWindow
         _xmlDocument.LoadXml(textAsset.text);
 
         _message = string.Format("File {0} loaded!", _path);
+    }
 
-        XmlNodeList xmlLevels = _xmlDocument.DocumentElement.SelectNodes("/Levels/Level");
+    private void InitDataStructures()
+    {
+        _currentHierarchy = new List<object>
+        {
+            _xmlDocument.SelectNodes("//Levels")[0]
+        };
     }
 
     private void OnGUI()
@@ -95,9 +98,9 @@ public class PCGXMLEditor : EditorWindow
         _headerRect.height = 50;
         GUI.DrawTexture(_headerRect, _headerTexture);
 
-        _bodyRect.x = 0;
+        _bodyRect.x = 20;
         _bodyRect.y = 50;
-        _bodyRect.width = Screen.width;
+        _bodyRect.width = Screen.width - 40;
         _bodyRect.height = Screen.height - 50;
         GUI.DrawTexture(_bodyRect, _bodyTexture);
 
@@ -126,22 +129,44 @@ public class PCGXMLEditor : EditorWindow
     {
         GUILayout.BeginArea(_headerRect);
 
-        GUILayout.Label("Current Hierarchy: ");
+        GUILayout.Label("Current hierarchy:");
         DrawHierarchy();
 
         GUILayout.EndArea();
     }
 
+    private void DrawBody()
+    {
+        GUILayout.BeginArea(_bodyRect);
+        GUILayout.Space(10);
+        GUILayout.Label("Current children:");
+        GUILayout.BeginVertical();
+        DrawCurrentChildren();
+        DrawPossibleActions();
+        GUILayout.EndVertical();
+        GUILayout.EndArea();
+    }
+
+    private void DrawMessage()
+    {
+        GUILayout.BeginArea(_messageRect);
+        GUILayout.Space(10);
+        GUILayout.Label(_message);
+        GUILayout.EndArea();
+    }
+    
     private void DrawHierarchy()
     {
         GUILayout.BeginHorizontal();
+
         for (int i = 0; i < _currentHierarchy.Count; i++) 
         { 
             object element = _currentHierarchy[i];
+            string buttonText = TakeString(element);
 
-            if (GUILayout.Button("Element", GUILayout.ExpandWidth(false)))
+            if (GUILayout.Button(buttonText, GUILayout.ExpandWidth(false)))
             {
-                for (int j = i + 1; j <  _currentHierarchy.Count; j++)
+                for (int j = i + 1; j <  _currentHierarchy.Count;)
                 {
                     _currentHierarchy.RemoveAt(j);
                 }
@@ -154,19 +179,67 @@ public class PCGXMLEditor : EditorWindow
         GUILayout.EndHorizontal();
     }
 
-    private void DrawBody()
+    private string TakeString(object element)
     {
-        GUILayout.BeginArea(_bodyRect);
-        GUILayout.Space(10);
-        GUILayout.Label("Body");
+        string text = string.Empty;
 
-        GUILayout.EndArea();
+        XmlNode node = element as XmlNode;
+
+        if (node != null) return node.Name;
+
+        return text;
     }
-    private void DrawMessage()
+
+    private void DrawCurrentChildren()
     {
-        GUILayout.BeginArea(_messageRect);
-        GUILayout.Space(10);
-        GUILayout.Label(_message);
-        GUILayout.EndArea();
+        object lastElement = _currentHierarchy[_currentHierarchy.Count - 1];
+
+        XmlNodeList currentNodeList = TakeChildren(lastElement);
+
+        if (currentNodeList == null) return;
+
+        foreach (XmlNode node in currentNodeList) 
+        {
+            string buttonText = TakeString(node);
+
+            if (GUILayout.Button(buttonText, GUILayout.ExpandWidth(false)))
+            {
+                _currentHierarchy.Add(node);
+            }
+        }
     }
+
+    private XmlNodeList TakeChildren(object element)
+    {
+        XmlNode node = element as XmlNode;
+
+        if (node != null) return node.ChildNodes;
+
+        return null;    
+    }
+
+
+    private void DrawPossibleActions()
+    {
+        XmlNode node = _currentHierarchy[_currentHierarchy.Count - 1] as XmlNode;
+
+        if (node == null) return;
+
+        switch (node.Name)
+        {
+            case "Levels":
+                if (GUILayout.Button("+", GUILayout.ExpandWidth(false)))
+                {
+                    XmlElement newLevel = _xmlDocument.CreateElement("Level");
+                    XmlElement newSetting = _xmlDocument.CreateElement("Settings");
+                    XmlElement newWFC = _xmlDocument.CreateElement("WFC");
+                    newLevel.AppendChild(newSetting);
+                    newLevel.AppendChild(newWFC);
+                    node.AppendChild(newLevel);
+                    _xmlDocument.Save(Application.dataPath + "/Resources/" + _path + ".xml");
+                }
+                break;
+        }
+    }
+
 }
