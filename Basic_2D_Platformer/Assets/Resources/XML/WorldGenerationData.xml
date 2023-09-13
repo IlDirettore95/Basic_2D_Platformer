@@ -1,2 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<Levels></Levels>
+<Levels>
+  <Level ID="1">
+    <Settings>
+      <GridSize x="0" y="0" />
+      <CellSize x="0" y="0" />
+      <StartingCell x="0" y="0" />
+      <EndingCell x="0" y="0" />
+    </Settings>
+    <WFC>
+      <Tiles>
+        <Tile ID="OCEAN" Frequency="">
+          <Prefab Path="Assets/Resources/Prefabs/Coast.prefab" />
+          <Constraints />
+        </Tile>
+      </Tiles>
+    </WFC>
+  </Level>
+</Levels>

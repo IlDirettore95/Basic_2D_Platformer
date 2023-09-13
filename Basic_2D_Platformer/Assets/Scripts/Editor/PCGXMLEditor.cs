@@ -3,6 +3,9 @@ using System;
 using UnityEditor;
 using UnityEngine;
 using System.Collections.Generic;
+using GluonGui.WorkspaceWindow.Views.WorkspaceExplorer.Explorer;
+using System.Linq;
+using Unity.VisualScripting;
 
 public class PCGXMLEditor : EditorWindow
 {
@@ -31,6 +34,10 @@ public class PCGXMLEditor : EditorWindow
     // DataStructure
     private XmlDocument _xmlDocument;
     private List<object> _currentHierarchy;
+    private XmlNode _currentLevel;
+    private XmlNode _currentTile;
+    private Dictionary<XmlNode, List<XmlNode>> _tilesPerLevel;
+    private Dictionary<XmlNode, Dictionary<XmlNode, int>> _popupIndexesPerNeighbour;
 
     [MenuItem("Window/PCG/XMLData")]
     private static void Init()
@@ -88,10 +95,51 @@ public class PCGXMLEditor : EditorWindow
 
     private void InitDataStructures()
     {
+        // Current Hierarchy
         _currentHierarchy = new List<object>
         {
-            _xmlDocument.SelectNodes("//Levels")[0]
+            _xmlDocument.SelectNodes("/Levels")[0]
         };
+
+        // CurrentTilesPerLevel
+        _tilesPerLevel = new Dictionary<XmlNode, List<XmlNode>>();
+        
+        foreach (XmlNode level in _xmlDocument.SelectNodes("/Levels/Level"))
+        {
+            _tilesPerLevel[level] = new List<XmlNode>();
+            XmlNodeList tilesList = level["WFC"]["Tiles"].SelectNodes("Tile");
+            
+            foreach (XmlNode tile in tilesList) 
+            {
+                _tilesPerLevel[level].Add(tile);
+            }
+        }
+
+        // PopupIndexesPerNeighbour
+        _popupIndexesPerNeighbour = new Dictionary<XmlNode, Dictionary<XmlNode, int>>();
+
+        foreach (XmlNode level in _xmlDocument.SelectNodes("/Levels/Level"))
+        {
+            _popupIndexesPerNeighbour[level] = new Dictionary<XmlNode, int>();
+            XmlNodeList tilesList = level["WFC"]["Tiles"].SelectNodes("Tile");
+
+            foreach (XmlNode tile in tilesList)
+            {
+                XmlNode constraintsNode = tile["Constraints"];
+                XmlNodeList constraintsList = constraintsNode.SelectNodes("Constraint");
+
+                foreach (XmlNode contraint in constraintsList)
+                {
+                    XmlNodeList neighbours = contraint["Neighbours"].ChildNodes;
+
+                    foreach (XmlNode neighbour in neighbours)
+                    {
+                        string neighbourId = neighbour.Attributes["ID"].Value;
+                        _popupIndexesPerNeighbour[level][neighbour] = _tilesPerLevel[level].IndexOf(_tilesPerLevel[level].First(n => n.Attributes["ID"].Value.Equals(neighbourId)));
+                    }
+                }
+            }
+        }
     }
 
     #endregion
@@ -188,6 +236,7 @@ public class PCGXMLEditor : EditorWindow
         for (int i = 0; i < _currentHierarchy.Count; i++) 
         { 
             object element = _currentHierarchy[i];
+            UpdateData(element);
             string buttonText = TakeString(element);
 
             if (GUILayout.Button(buttonText, GUILayout.ExpandWidth(false)))
@@ -227,6 +276,33 @@ public class PCGXMLEditor : EditorWindow
             { 
                 foreach (XmlAttribute attribute in node.Attributes)
                 {
+                    if (node.Name.Equals("Neighbour") && attribute.Name.Equals("ID"))
+                    {
+                        int oldIndex = _popupIndexesPerNeighbour[_currentLevel][node];
+                        int newIndex = EditorGUILayout.Popup(oldIndex, GetTilesIDs(_tilesPerLevel[_currentLevel]), GUILayout.ExpandWidth(false));
+                        _popupIndexesPerNeighbour[_currentLevel][node] = newIndex;
+
+                        if (newIndex < 0) continue;
+
+                        node.Attributes["ID"].Value = _tilesPerLevel[_currentLevel][newIndex].Attributes["ID"].Value;
+                        continue;
+                    }
+
+                    if (attribute.Name.Equals("Path"))
+                    {
+                        string title = attribute.Value == "" ? "DragAndDrop" : attribute.Value;
+                        object[] objects = DropZone(title, title.Length * 8, 20);
+
+                        if (objects == null) continue;
+
+                        foreach (object obj in objects) 
+                        {
+                            if (obj is GameObject) attribute.Value = AssetDatabase.GetAssetPath((GameObject)obj);
+                        }
+
+                        continue;
+                    }
+
                     GUILayout.Label(attribute.Name, GUILayout.ExpandWidth(false));
                     attribute.Value = GUILayout.TextField(attribute.Value, GUILayout.Width(60));
                     GUILayout.Space(15);
@@ -287,9 +363,53 @@ public class PCGXMLEditor : EditorWindow
         }
     }
 
+    public object[] DropZone(string title, int w, int h)
+    {
+        Rect lastRect = GUILayoutUtility.GetLastRect();
+        Rect dropArea = new Rect(lastRect.x + lastRect.width + 20, lastRect.y, w, h);
+
+        GUI.Box(dropArea, title);
+        GUILayout.Label("", GUILayout.Width(dropArea.width + 20), GUILayout.Height(dropArea.height));
+
+        EventType eventType = Event.current.type;
+        bool isAccepted = false;
+
+        if (eventType == EventType.DragUpdated || eventType == EventType.DragPerform)
+        {
+            if (dropArea.Contains(Event.current.mousePosition))
+            {
+                DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
+            }
+            if (eventType == EventType.DragPerform && dropArea.Contains(Event.current.mousePosition))
+            {
+                DragAndDrop.AcceptDrag();
+                isAccepted = true;
+            }
+            Event.current.Use();
+        }
+        return isAccepted ? DragAndDrop.objectReferences : null;
+    }
+
     #endregion
 
     #region ReadXml
+
+    private void UpdateData(object element)
+    {
+        XmlNode node = element as XmlNode;
+
+        if (node == null) return;
+
+        switch (node.Name)
+        {
+            case "Level":
+                _currentLevel = node;
+                break;
+            case "Tile":
+                _currentTile = node;
+                break;
+        }
+    }
 
     private string TakeString(object element)
     {
@@ -302,10 +422,23 @@ public class PCGXMLEditor : EditorWindow
         text += node.Name;
 
         if (node.Attributes.Count <= 0) return text;
+        if (node.Attributes["Path"] != null) return text;
 
         text += " " + node.Attributes[0].Value;
 
         return text;
+    }
+
+    private string[] GetTilesIDs(List<XmlNode> list)
+    {
+        string[] ids = new string[list.Count];
+
+        for (int i = 0; i < list.Count; i++)
+        {
+            ids[i] = list[i].Attributes["ID"].Value;
+        }
+
+        return ids;
     }
 
     private XmlNodeList TakeChildren(object element)
@@ -339,15 +472,21 @@ public class PCGXMLEditor : EditorWindow
         XmlElement tile = _xmlDocument.CreateElement("Tile");
 
         XmlAttribute id = _xmlDocument.CreateAttribute("ID");
-        XmlAttribute prefab = _xmlDocument.CreateAttribute("Prefab");
         XmlAttribute frequency = _xmlDocument.CreateAttribute("Frequency");
 
         tile.Attributes.Append(id);
-        tile.Attributes.Append(prefab);
         tile.Attributes.Append(frequency);
 
+        XmlElement prefab = _xmlDocument.CreateElement("Prefab");
         XmlElement constraints = _xmlDocument.CreateElement("Constraints");
+
+        XmlAttribute path = _xmlDocument.CreateAttribute("Path");
+        prefab.Attributes.Append(path);
+
+        tile.AppendChild(prefab);
         tile.AppendChild(constraints);
+
+        _tilesPerLevel[_currentLevel].Add(tile);
 
         return tile;
     }
@@ -371,6 +510,8 @@ public class PCGXMLEditor : EditorWindow
 
         XmlAttribute id = _xmlDocument.CreateAttribute("ID");
         neighbour.Attributes.Append(id);
+
+        _popupIndexesPerNeighbour[_currentLevel][neighbour] = -1;
 
         return neighbour;
     }
