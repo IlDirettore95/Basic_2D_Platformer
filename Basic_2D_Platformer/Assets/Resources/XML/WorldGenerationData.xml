@@ -2,18 +2,13 @@
 <Levels>
   <Level ID="1">
     <Settings>
-      <GridSize x="0" y="0" />
+      <GridSize x="5" y="5" />
       <CellSize x="0" y="0" />
-      <StartingCell x="0" y="0" />
+      <StartingCell x="1" y="0" />
       <EndingCell x="0" y="0" />
     </Settings>
     <WFC>
-      <Tiles>
-        <Tile ID="OCEAN" Frequency="">
-          <Prefab Path="Assets/Resources/Prefabs/Coast.prefab" />
-          <Constraints />
-        </Tile>
-      </Tiles>
+      <Tiles />
     </WFC>
   </Level>
 </Levels>

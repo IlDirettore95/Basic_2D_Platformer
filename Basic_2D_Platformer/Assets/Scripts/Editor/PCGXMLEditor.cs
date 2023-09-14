@@ -6,6 +6,10 @@ using System.Collections.Generic;
 using GluonGui.WorkspaceWindow.Views.WorkspaceExplorer.Explorer;
 using System.Linq;
 using Unity.VisualScripting;
+using System.Xml.Serialization;
+using static UnityEngine.RuleTile.TilingRuleOutput;
+using UnityEngine.UIElements;
+using GMDG.Basic2DPlatformer.Utility;
 
 public class PCGXMLEditor : EditorWindow
 {
@@ -38,6 +42,8 @@ public class PCGXMLEditor : EditorWindow
     private XmlNode _currentTile;
     private Dictionary<XmlNode, List<XmlNode>> _tilesPerLevel;
     private Dictionary<XmlNode, Dictionary<XmlNode, int>> _popupIndexesPerNeighbour;
+    private Dictionary<XmlNode, Dictionary<XmlNode, int>> _popupIndexesPerConstraint;
+    private string[] _possibleDirection = { "ALL", "NORTH", "EAST", "SOUTH", "WEST", "HORIZONTAL", "VERTICAL", "N_NORTH", "N_EAST", "N_SOUTH", "N_WEST"};
 
     [MenuItem("Window/PCG/XMLData")]
     private static void Init()
@@ -128,14 +134,40 @@ public class PCGXMLEditor : EditorWindow
                 XmlNode constraintsNode = tile["Constraints"];
                 XmlNodeList constraintsList = constraintsNode.SelectNodes("Constraint");
 
-                foreach (XmlNode contraint in constraintsList)
+                foreach (XmlNode constraint in constraintsList)
                 {
-                    XmlNodeList neighbours = contraint["Neighbours"].ChildNodes;
+                    XmlNodeList neighbours = constraint["Neighbours"].ChildNodes;
 
                     foreach (XmlNode neighbour in neighbours)
                     {
                         string neighbourId = neighbour.Attributes["ID"].Value;
                         _popupIndexesPerNeighbour[level][neighbour] = _tilesPerLevel[level].IndexOf(_tilesPerLevel[level].First(n => n.Attributes["ID"].Value.Equals(neighbourId)));
+                    }
+                }
+            }
+        }
+
+        // PopupIndexesPerConstraint
+        _popupIndexesPerConstraint = new Dictionary<XmlNode, Dictionary<XmlNode, int>>();
+
+        foreach (XmlNode level in _xmlDocument.SelectNodes("/Levels/Level"))
+        {
+            _popupIndexesPerConstraint[level] = new Dictionary<XmlNode, int>();
+            XmlNodeList tilesList = level["WFC"]["Tiles"].SelectNodes("Tile");
+
+            foreach (XmlNode tile in tilesList)
+            {
+                XmlNode constraintsNode = tile["Constraints"];
+                XmlNodeList constraintsList = constraintsNode.SelectNodes("Constraint");
+
+                foreach (XmlNode constraint in constraintsList)
+                {
+                    string direction = constraint.Attributes["Direction"].Value;
+                    for (int i = 0; i < _possibleDirection.Length; i++)
+                    {
+                        if (_possibleDirection[i].Equals(direction)) continue;
+                        _popupIndexesPerConstraint[level][constraint] = i;
+                        break;
                     }
                 }
             }
@@ -288,6 +320,18 @@ public class PCGXMLEditor : EditorWindow
                         continue;
                     }
 
+                    if (attribute.Name.Equals("Direction"))
+                    {
+                        int oldIndex = _popupIndexesPerConstraint[_currentLevel][node];
+                        int newIndex = EditorGUILayout.Popup(oldIndex, _possibleDirection, GUILayout.ExpandWidth(false));
+                        _popupIndexesPerConstraint[_currentLevel][node] = newIndex;
+
+                        if (newIndex < 0) continue;
+
+                        node.Attributes["Direction"].Value = _possibleDirection[newIndex];
+                        continue;
+                    }
+
                     if (attribute.Name.Equals("Path"))
                     {
                         string title = attribute.Value == "" ? "DragAndDrop" : attribute.Value;
@@ -357,9 +401,15 @@ public class PCGXMLEditor : EditorWindow
             InitDataStructures();
         }
 
+        if (GUILayout.Button("Validate XML file", GUILayout.ExpandWidth(false)))
+        {
+            ValidateXmlDocument();
+        }
+
         if (GUILayout.Button("Save XML file", GUILayout.ExpandWidth(false)))
         {
             _xmlDocument.Save(Application.dataPath + "/Resources/" + _path + ".xml");
+            _message = string.Format("File {0} saved!", _path);
         }
     }
 
@@ -423,6 +473,10 @@ public class PCGXMLEditor : EditorWindow
 
         if (node.Attributes.Count <= 0) return text;
         if (node.Attributes["Path"] != null) return text;
+        if (node.Name.Equals("GridSize")) return text;
+        if (node.Name.Equals("CellSize")) return text;
+        if (node.Name.Equals("StartingCell")) return text;
+        if (node.Name.Equals("EndingCell")) return text;
 
         text += " " + node.Attributes[0].Value;
 
@@ -464,6 +518,10 @@ public class PCGXMLEditor : EditorWindow
         level.AppendChild(CreateSettingsNode());
         level.AppendChild(CreateWFCNode());
 
+        _tilesPerLevel[level] = new List<XmlNode>();
+        _popupIndexesPerNeighbour[level] = new Dictionary<XmlNode, int>();
+        _popupIndexesPerConstraint[level] = new Dictionary<XmlNode, int>();
+
         return level;
     }
 
@@ -500,6 +558,8 @@ public class PCGXMLEditor : EditorWindow
 
         constraint.Attributes.Append(direction);
         constraint.AppendChild(neighbours);
+
+        _popupIndexesPerConstraint[_currentLevel][constraint] = -1;
 
         return constraint;
     }
@@ -551,6 +611,161 @@ public class PCGXMLEditor : EditorWindow
         vector2.Attributes.Append(y);
 
         return vector2;
+    }
+
+    #endregion
+
+    #region ValidateXml
+
+    private void ValidateXmlDocument()
+    {
+        bool errorsFound = false;
+        foreach (XmlNode level in _xmlDocument.SelectNodes("/Levels/Level"))
+        {
+            if (!ValidateLevel(level))
+            {
+                errorsFound = true;
+                break;
+            }
+
+            XmlNode settings = level["Settings"];
+
+            if (!ValidateSettings(settings))
+            {
+                errorsFound = true;
+                break;
+            }
+
+            foreach (XmlNode tile in level["WFC"].SelectNodes("/Tiles/Tile"))
+            {
+                if (!ValidateTile(tile))
+                {
+                    errorsFound = true;
+                    break;
+                }
+            }
+
+            if (errorsFound)
+            {
+                break;
+            }
+        }
+
+        if (!errorsFound) 
+        {
+            _message = "Validation successful";
+        }
+    }
+
+    private bool ValidateLevel(XmlNode level) 
+    {
+        if (level.Attributes["ID"].Value.Equals(string.Empty))
+        {
+            _message = "All Levels must have a string ID";
+            return false;
+        }
+
+        return true;
+    }
+
+    private bool ValidateSettings(XmlNode settings)
+    {
+        // GridSize
+        if (!int.TryParse(settings["GridSize"].Attributes["x"].InnerText, out int xGridSize))
+        {
+            _message = "GridSize X must be an integer";
+            return false;
+        }
+        if (!int.TryParse(settings["GridSize"].Attributes["y"].InnerText, out int yGridSize))
+        {
+            _message = "GridSize Y must be an integer";
+            return false;
+        }
+
+        // CellSize
+        if (!float.TryParse(settings["CellSize"].Attributes["x"].InnerText, out float xCellSize))
+        {
+            _message = "CellSize X must be a float";
+            return false;
+        }
+        if (!float.TryParse(settings["CellSize"].Attributes["y"].InnerText, out float yCellSize))
+        {
+            _message = "CellSize Y must be a float";
+            return false;
+        }
+
+
+        // StartingCell
+        if (!int.TryParse(settings["StartingCell"].Attributes["x"].InnerText, out int xStartingCell))
+        {
+            _message = "StartingCell X must be an integer";
+            return false;
+        }
+        if (!int.TryParse(settings["StartingCell"].Attributes["y"].InnerText, out int yStartingCell))
+        {
+            _message = "StartingCell Y must be an integer";
+            return false;
+        }
+
+        // EndingCell
+        if (!int.TryParse(settings["EndingCell"].Attributes["x"].InnerText, out int xEndingCell))
+        {
+            _message = "EndingCell X must be an integer";
+            return false;
+        }
+        if (!int.TryParse(settings["EndingCell"].Attributes["y"].InnerText, out int yEndingCell))
+        {
+            _message = "EndingCell Y must be an integer";
+            return false;
+        }
+
+        bool gridSizeOk = xGridSize > 0 && yGridSize > 0;
+        bool startingCellOk = xStartingCell >= 0 && xStartingCell < xGridSize && yStartingCell >= 0 && yStartingCell < yGridSize;
+        bool endingCellOk = xEndingCell >= 0 && xEndingCell < xGridSize && yEndingCell >= 0 && yEndingCell < yGridSize;
+        bool startingEndingCellOk = xStartingCell != xEndingCell || yStartingCell != yEndingCell;
+
+        if (!gridSizeOk)
+        {
+            _message = "GridSize must be above 0!";
+            return false;
+        }
+
+        if (!startingCellOk) 
+        {
+            _message = "Starting cell must be in GridSize";
+            return false;
+        }
+
+        if (!endingCellOk)
+        {
+            _message = "Ending cell must be in GridSize";
+            return false;
+        }
+
+        if (!startingEndingCellOk)
+        {
+            _message = "Starting and ending cell cannot be on the same";
+            return false;
+        }
+
+        return true;
+    }
+
+    private bool ValidateTile(XmlNode tile)
+    {
+        if (!int.TryParse(tile.Attributes["Frequency"].Value, out int frequency))
+        {
+            _message = "frequency must be an integer";
+            return false;
+        }
+
+        if (frequency <= 0)
+        {
+            _message = "frequency must be above 0";
+            return false;
+        }
+
+        return true;
     }
 
     #endregion

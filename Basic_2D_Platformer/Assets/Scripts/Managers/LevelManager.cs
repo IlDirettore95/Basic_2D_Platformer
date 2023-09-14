@@ -286,20 +286,5 @@ namespace GMDG.Basic2DPlatformer.System
         {
             return true;
         }
-
-        public enum DirectionXmlLabel
-        {
-            NORTH,
-            EAST, 
-            SOUTH, 
-            WEST,
-            ALL,
-            VERTICAL,
-            HORIZONTAL,
-            N_NORTH,
-            N_EAST,
-            N_SOUTH,
-            N_WEST
-        }
     }
 }
