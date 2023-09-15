@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: afa96912234010047863bbe0b9f2602f, type: 3}
   m_Name: MovementData
   m_EditorClassIdentifier: 
-  WalkingSpeed: 8
+  WalkingSpeed: 10
   Gravity: 10
-  JumpForce: 10
+  JumpForce: 9.5
   CollisionThreashold: 0.01

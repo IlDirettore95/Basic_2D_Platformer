@@ -69,6 +69,7 @@ namespace GMDG.Basic2DPlatformer.PlayerMovement
             for (int i = 0; i < hits.Length; i++)
             {
                 if (hits[i].collider == _collider) continue;
+                if (hits[i].collider.isTrigger) continue;
                 Debug.DrawLine(transform.position, hits[i].point, Color.blue);
                 DistanceFromGround = hits[i].distance;
                 if (_kinematicStatus.Velocity.y > 0) return false;
@@ -89,6 +90,7 @@ namespace GMDG.Basic2DPlatformer.PlayerMovement
             for (int i = 0; i < hits.Length; i++)
             {
                 if (hits[i].collider == _collider) continue;
+                if (hits[i].collider.isTrigger) continue;
                 Debug.DrawLine(transform.position, hits[i].point, Color.red);
                 DistanceFromCollision = hits[i].distance;
                 if (_kinematicStatus.Velocity.y < 0 && !IsGrounded && hits[i].distance <= _data.CollisionThreashold)

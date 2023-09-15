@@ -138,7 +138,7 @@ namespace GMDG.Basic2DPlatformer.PlayerMovement
 
             public void Tick() 
             {
-                _movement._velocity.y -= _movement._velocity.y > 0 ? _movement._data.Gravity * Time.deltaTime : _movement._data.Gravity * 2 * Time.deltaTime;
+                _movement._velocity.y -= _movement._velocity.y > 0 ? _movement._data.Gravity * Time.deltaTime : _movement._data.Gravity * 3 * Time.deltaTime;
                 _movement._velocity.x = _movement._sensors.HorizontalInput * _movement._data.WalkingSpeed;
             }
         }

@@ -258,7 +258,7 @@ public class PCGXMLEditor : EditorWindow
     {
         _currentChildrenScrollPosition = GUILayout.BeginScrollView(_currentChildrenScrollPosition, GUILayout.Width(Screen.width - 200), GUILayout.Height(_bodyRect.height - 110));
         DrawCurrentChildren();
-        DrawPossibleActions();
+        DrawAdding();
         GUILayout.EndScrollView();
     }
     
@@ -359,13 +359,14 @@ public class PCGXMLEditor : EditorWindow
                     attribute.Value = GUILayout.TextField(attribute.Value, GUILayout.Width(60));
                     GUILayout.Space(15);
                 }
+                DrawDeleting(node);
             }
 
             GUILayout.EndHorizontal();
         }
     }
     
-    private void DrawPossibleActions()
+    private void DrawAdding()
     {
         XmlNode node = _currentHierarchy[_currentHierarchy.Count - 1] as XmlNode;
 
@@ -395,6 +396,41 @@ public class PCGXMLEditor : EditorWindow
                 if (GUILayout.Button("+", GUILayout.ExpandWidth(false)))
                 {
                     node.AppendChild(CreateNeighbourNode());
+                }
+                break;
+        }
+    }
+
+    private void DrawDeleting(XmlNode node)
+    {
+        XmlNode parent = _currentHierarchy[_currentHierarchy.Count - 1] as XmlNode;
+
+        if (parent == null) return;
+
+        switch (parent.Name)
+        {
+            case "Levels":
+                if (GUILayout.Button("-", GUILayout.ExpandWidth(false)))
+                {
+                    parent.RemoveChild(node);
+                }
+                break;
+            case "Tiles":
+                if (GUILayout.Button("-", GUILayout.ExpandWidth(false)))
+                {
+                    parent.RemoveChild(node);
+                }
+                break;
+            case "Constraints":
+                if (GUILayout.Button("-", GUILayout.ExpandWidth(false)))
+                {
+                    parent.RemoveChild(node);
+                }
+                break;
+            case "Neighbours":
+                if (GUILayout.Button("-", GUILayout.ExpandWidth(false)))
+                {
+                    parent.RemoveChild(node);
                 }
                 break;
         }

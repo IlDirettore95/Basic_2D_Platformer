@@ -19,14 +19,15 @@
             </Constraint>
             <Constraint Direction="SOUTH">
               <Neighbours>
-                <Neighbour ID="GORGE" />
                 <Neighbour ID="START" />
                 <Neighbour ID="END" />
+                <Neighbour ID="GORGE" />
+                <Neighbour ID="TERRAIN" />
               </Neighbours>
             </Constraint>
           </Constraints>
         </Tile>
-        <Tile ID="GORGE" Frequency="3">
+        <Tile ID="GORGE" Frequency="2">
           <Prefab Path="Prefabs/Chunks/Gorge" />
           <Constraints>
             <Constraint Direction="HORIZONTAL">
@@ -34,6 +35,7 @@
                 <Neighbour ID="START" />
                 <Neighbour ID="END" />
                 <Neighbour ID="GORGE" />
+                <Neighbour ID="TERRAIN" />
               </Neighbours>
             </Constraint>
           </Constraints>
@@ -45,6 +47,19 @@
         <Tile ID="END" Frequency="1">
           <Prefab Path="Prefabs/Chunks/End" />
           <Constraints />
+        </Tile>
+        <Tile ID="TERRAIN" Frequency="3">
+          <Prefab Path="Prefabs/Chunks/Terrain" />
+          <Constraints>
+            <Constraint Direction="HORIZONTAL">
+              <Neighbours>
+                <Neighbour ID="GORGE" />
+                <Neighbour ID="TERRAIN" />
+                <Neighbour ID="START" />
+                <Neighbour ID="END" />
+              </Neighbours>
+            </Constraint>
+          </Constraints>
         </Tile>
       </Tiles>
     </WFC>

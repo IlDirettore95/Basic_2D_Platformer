@@ -87,7 +87,6 @@ namespace GMDG.Basic2DPlatformer.PCG
 
                 tile.Name = id;
                 tile.RelativeFrequency = frequency;
-                Debug.Log("Loading " + prefabPath);
                 tile.Prefab = (GameObject)Resources.Load(string.Format("{0}", prefabPath));
             }
 
