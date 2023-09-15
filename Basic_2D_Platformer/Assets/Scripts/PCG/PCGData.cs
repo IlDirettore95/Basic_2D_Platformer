@@ -26,6 +26,8 @@ namespace GMDG.Basic2DPlatformer.PCG
             text = string.Concat(text, "Settings\n");
             text = string.Concat(text, string.Format("\tGridSize: {0}\n", GridSize));
             text = string.Concat(text, string.Format("\tCellSize: {0}\n", CellSize));
+            text = string.Concat(text, string.Format("\tStartingCell: {0}\n", StartingCell));
+            text = string.Concat(text, string.Format("\tEndingCell: {0}\n", EndingCell));
             text = string.Concat(text, "Tiles\n");
 
             for (int i = 0; i < WFCTiles.Count; i++)

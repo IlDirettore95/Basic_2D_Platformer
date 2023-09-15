@@ -10,6 +10,7 @@ using System.Xml.Serialization;
 using static UnityEngine.RuleTile.TilingRuleOutput;
 using UnityEngine.UIElements;
 using GMDG.Basic2DPlatformer.Utility;
+using System.IO;
 
 public class PCGXMLEditor : EditorWindow
 {
@@ -341,7 +342,14 @@ public class PCGXMLEditor : EditorWindow
 
                         foreach (object obj in objects) 
                         {
-                            if (obj is GameObject) attribute.Value = AssetDatabase.GetAssetPath((GameObject)obj);
+                            if (obj is GameObject)
+                            {
+                                string path = AssetDatabase.GetAssetPath((GameObject)obj);
+                                path = path.Substring(path.IndexOf("/") + 1);
+                                path = path.Substring(path.IndexOf("/") + 1);
+                                path = path.Substring(0, path.LastIndexOf("."));
+                                attribute.Value = path;
+                            }
                         }
 
                         continue;
@@ -410,6 +418,7 @@ public class PCGXMLEditor : EditorWindow
         {
             _xmlDocument.Save(Application.dataPath + "/Resources/" + _path + ".xml");
             _message = string.Format("File {0} saved!", _path);
+            AssetDatabase.Refresh();
         }
     }
 
@@ -720,6 +729,7 @@ public class PCGXMLEditor : EditorWindow
         }
 
         bool gridSizeOk = xGridSize > 0 && yGridSize > 0;
+        bool cellSizeOk = xCellSize > 0 && yCellSize > 0;
         bool startingCellOk = xStartingCell >= 0 && xStartingCell < xGridSize && yStartingCell >= 0 && yStartingCell < yGridSize;
         bool endingCellOk = xEndingCell >= 0 && xEndingCell < xGridSize && yEndingCell >= 0 && yEndingCell < yGridSize;
         bool startingEndingCellOk = xStartingCell != xEndingCell || yStartingCell != yEndingCell;
@@ -727,6 +737,12 @@ public class PCGXMLEditor : EditorWindow
         if (!gridSizeOk)
         {
             _message = "GridSize must be above 0!";
+            return false;
+        }
+
+        if (!cellSizeOk)
+        {
+            _message = "CellSize must be above 0!";
             return false;
         }
 

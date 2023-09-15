@@ -75,7 +75,7 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
                 for (int j = 0; j < data.Grid.GridSize.x; j++)
                 {
                     Vector2 position = data.Grid.CellsPositions[i, j];
-
+                    Debug.Log(position);
                     HashSet<int> superPositions = data.Grid.GetElement(i, j);
 
                     if (superPositions.Count == 1)

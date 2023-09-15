@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using System.Linq;
 
 namespace GMDG.NoProduct.Utility
 {
@@ -851,6 +852,21 @@ namespace GMDG.NoProduct.Utility
             }
 
             behaviour.enabled = true;
+        }
+    }
+
+    public class DataStructureUtility
+    {
+        public static string DebugDicitonary<T, S>(Dictionary<T, S> dictionary)
+        {
+            string text = string.Empty;
+
+            foreach (T key in dictionary.Keys) 
+            {
+                text += key + ": ( " + dictionary[key] + " )" + Environment.NewLine;
+            }
+
+            return text;
         }
     }
 

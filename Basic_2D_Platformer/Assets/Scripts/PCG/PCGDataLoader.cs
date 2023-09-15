@@ -1,5 +1,6 @@
 using GMDG.Basic2DPlatformer.PCG;
 using GMDG.Basic2DPlatformer.Utility;
+using GMDG.NoProduct.Utility;
 using System.Collections;
 using System.Collections.Generic;
 using System.Xml;
@@ -27,25 +28,25 @@ namespace GMDG.Basic2DPlatformer.PCG
             XmlNode settings = level["Settings"];
 
             // GridSize
-            int xGridSize = int.Parse(settings["GridSize"]["x"].InnerText);
-            int yGridSize = int.Parse(settings["GridSize"]["y"].InnerText);
+            int xGridSize = int.Parse(settings["GridSize"].Attributes["x"].Value);
+            int yGridSize = int.Parse(settings["GridSize"].Attributes["y"].Value);
             data.GridSize = new Vector2Int(xGridSize, yGridSize);
 
             // CellSize
-            float xCellSize = float.Parse(settings["CellSize"]["x"].InnerText);
-            float yCellSize = float.Parse(settings["CellSize"]["y"].InnerText);
+            float xCellSize = float.Parse(settings["CellSize"].Attributes["x"].Value);
+            float yCellSize = float.Parse(settings["CellSize"].Attributes["y"].Value);
             data.CellSize = new Vector2(xCellSize, yCellSize);
 
             data.Grid = new Grid<HashSet<int>>(data.GridSize, data.CellSize, Vector3.zero);
 
             // StartingCell
-            int xStartingCell = int.Parse(settings["StartingCell"]["x"].InnerText);
-            int yStartingCell = int.Parse(settings["StartingCell"]["y"].InnerText);
+            int xStartingCell = int.Parse(settings["StartingCell"].Attributes["x"].Value);
+            int yStartingCell = int.Parse(settings["StartingCell"].Attributes["y"].Value);
             data.StartingCell = new Vector2Int(xStartingCell, yStartingCell);
 
             // EndingCell
-            int xEndingCell = int.Parse(settings["EndingCell"]["x"].InnerText);
-            int yEndingCell = int.Parse(settings["EndingCell"]["y"].InnerText);
+            int xEndingCell = int.Parse(settings["EndingCell"].Attributes["x"].Value);
+            int yEndingCell = int.Parse(settings["EndingCell"].Attributes["y"].Value);
             data.EndingCell = new Vector2Int(xEndingCell, yEndingCell);
 
             // Tiles
@@ -77,16 +78,17 @@ namespace GMDG.Basic2DPlatformer.PCG
 
                 WFCTile tile = new WFCTile();
 
-                string id = node["ID"].InnerText;
-                int frequency = int.Parse(node["Frequency"].InnerText);
-                string prefab = node["Prefab"].InnerText;
+                string id = node.Attributes["ID"].Value;
+                int frequency = int.Parse(node.Attributes["Frequency"].Value);
+                string prefabPath = node["Prefab"].Attributes["Path"].Value;
 
                 visitedWFCTiles[id] = tile;
                 totalFrequency += frequency;
 
                 tile.Name = id;
                 tile.RelativeFrequency = frequency;
-                tile.Prefab = (GameObject)Resources.Load(string.Format("Prefabs/Chunks/{0}", prefab));
+                Debug.Log("Loading " + prefabPath);
+                tile.Prefab = (GameObject)Resources.Load(string.Format("{0}", prefabPath));
             }
 
             // Update Relative Frequency
@@ -131,9 +133,9 @@ namespace GMDG.Basic2DPlatformer.PCG
                 {
                     XmlNode node = constraintsList[j];
 
-                    string id = tilesList[i]["ID"].InnerText;
+                    string id = tilesList[i].Attributes["ID"].Value;
                     XmlNodeList neighbours = node["Neighbours"].ChildNodes;
-                    string direction = node["Direction"].InnerText;
+                    string direction = node.Attributes["Direction"].Value;
 
                     List<Direction2D> directions = new List<Direction2D>();
 
@@ -143,7 +145,7 @@ namespace GMDG.Basic2DPlatformer.PCG
                     {
                         foreach (XmlNode neighbour in neighbours)
                         {
-                            string neighbourId = neighbour.InnerText;
+                            string neighbourId = neighbour.Attributes["ID"].Value;
                             visitedWFCTiles[id].PossibleNeighbours[directions[k]].Add(data.WFCTiles.IndexOf(visitedWFCTiles[neighbourId]));
                             visitedWFCTiles[neighbourId].PossibleNeighbours[OppositeDirections[directions[k]]].Add(data.WFCTiles.IndexOf(visitedWFCTiles[id]));
                         }

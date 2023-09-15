@@ -15,4 +15,25 @@ public class WFCTile
         { Direction2D.SOUTH,  new HashSet<int>()},
         { Direction2D.WEST,  new HashSet<int>()},
     };
+
+    public override string ToString()
+    {
+        string text = string.Empty;
+
+        text = string.Concat(text, string.Format("\tName: {0}\n", Name));
+        text = string.Concat(text, string.Format("\tRelative Frequency: {0}\n", RelativeFrequency));
+        text = string.Concat(text, "\tConstraints\n");
+        foreach (Direction2D direction in PossibleNeighbours.Keys)
+        {
+            text = string.Concat(text, string.Format("\t\tDirection: {0}\n", direction));
+            text = string.Concat(text, "\t\tNeighbours:\n");
+            foreach (int possibleNeighbour in PossibleNeighbours[direction])
+            {
+                text = string.Concat(text, string.Format("\t\t\tID: {0}\n", possibleNeighbour));
+            }
+            text = string.Concat(text, "\n");
+        }
+
+        return text;
+    }
 }
