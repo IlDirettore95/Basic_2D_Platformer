@@ -13,7 +13,7 @@ namespace GMDG.Basic2DPlatformer.System
             LevelManager manager = (LevelManager)target;
             if (GUILayout.Button("Generate"))
             {
-                manager.GenerateLevel();
+                manager.LoadFirstLevel();
             }
             if (GUILayout.Button("Delete"))
             {

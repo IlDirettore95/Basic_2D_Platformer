@@ -10,7 +10,7 @@
     <WFC>
       <Tiles>
         <Tile ID="AIR" Frequency="4">
-          <Prefab Path="Prefabs/Chunks/Air" />
+          <Prefab Path="Prefabs/Chunks/Level 1/Air" />
           <Constraints>
             <Constraint Direction="ALL">
               <Neighbours>
@@ -27,8 +27,8 @@
             </Constraint>
           </Constraints>
         </Tile>
-        <Tile ID="GORGE" Frequency="2">
-          <Prefab Path="Prefabs/Chunks/Gorge" />
+        <Tile ID="GORGE" Frequency="3">
+          <Prefab Path="Prefabs/Chunks/Level 1/Gorge" />
           <Constraints>
             <Constraint Direction="HORIZONTAL">
               <Neighbours>
@@ -41,15 +41,16 @@
           </Constraints>
         </Tile>
         <Tile ID="START" Frequency="1">
-          <Prefab Path="Prefabs/Chunks/Start" />
-          <Constraints />
+          <Prefab Path="Prefabs/Chunks/Level 1/Start" />
+          <Constraints>
+          </Constraints>
         </Tile>
         <Tile ID="END" Frequency="1">
-          <Prefab Path="Prefabs/Chunks/End" />
+          <Prefab Path="Prefabs/Chunks/Level 1/End" />
           <Constraints />
         </Tile>
-        <Tile ID="TERRAIN" Frequency="3">
-          <Prefab Path="Prefabs/Chunks/Terrain" />
+        <Tile ID="TERRAIN" Frequency="4">
+          <Prefab Path="Prefabs/Chunks/Level 1/Terrain" />
           <Constraints>
             <Constraint Direction="HORIZONTAL">
               <Neighbours>

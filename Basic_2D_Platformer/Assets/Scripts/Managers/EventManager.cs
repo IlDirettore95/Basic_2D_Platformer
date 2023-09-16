@@ -97,7 +97,6 @@ namespace GMDG.Basic2DPlatformer.System
         OnLevelGenerated,
 
         // Gameplay
-        OnPlayerSpawn,
         OnLevelCompleted
     }
 }

@@ -11,6 +11,17 @@ namespace GMDG.Basic2DPlatformer.PCG
 {
     public class PCGDataLoader
     {
+        public int GetNumberOfLevels()
+        {
+            // Loading XmlDocument
+            XmlDocument xmlDocument = new XmlDocument();
+            TextAsset textAsset = Resources.Load<TextAsset>("XML/WorldGenerationData");
+            xmlDocument.LoadXml(textAsset.text);
+            XmlNodeList xmlLevels = xmlDocument.DocumentElement.SelectNodes("/Levels/Level");
+
+            return xmlLevels.Count;
+        }
+
         public PCGData LoadData(int currentLevel)
         {
             PCGData data = new PCGData();
@@ -51,9 +62,10 @@ namespace GMDG.Basic2DPlatformer.PCG
 
             // Tiles
             ExtractWFCTiles(data, level);
-
+#if UNITY_EDITOR
             Debug.Log(data);
-            
+#endif
+
             if (!ValidateData(data))
             {
 #if UNITY_EDITOR

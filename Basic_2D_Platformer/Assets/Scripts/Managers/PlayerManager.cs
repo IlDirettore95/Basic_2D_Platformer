@@ -1,14 +1,18 @@
+using GMDG.Basic2DPlatformer.PlayerMovement;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace GMDG.Basic2DPlatformer.System
 {
     public class PlayerManager : MonoBehaviour
     {
-        private GameObject player;
-        private Transform playerTransform;
+        private GameObject _player;
+        private Transform _playerTransform;
+        private Movement _playerMovement;
+        private SpriteRenderer _playerRenderer;
 
         #region UnityMessages
 
@@ -20,26 +24,37 @@ namespace GMDG.Basic2DPlatformer.System
 
         private void OnEnable()
         {
-            // System
+            // Gameplay
             EventManager.Instance.Subscribe(Event.OnLevelGenerated, SpawnPlayer);
+            EventManager.Instance.Subscribe(Event.OnEndVictoryTrasition, DespawnPlayer);
         }
 
         private void Start()
         {
-            player = GameObject.FindGameObjectWithTag("Player");
+            _player = GameObject.FindGameObjectWithTag("Player");
 
-            if (player == null)
+            if (_player == null)
             {
                 Debug.LogError("PlayerManager not correctly initialized");
             }
 
-            playerTransform = player.transform;
+            _playerTransform = _player.transform;
+            _playerMovement = _player.GetComponent<Movement>();
+            _playerRenderer = _player.GetComponent<SpriteRenderer>();
+
+            DespawnPlayer(null);
         }
 
         private void OnDisable()
         {
-            // System
+            // Gameplay
             EventManager.Instance.Unsubscribe(Event.OnLevelGenerated, SpawnPlayer);
+            EventManager.Instance.Unsubscribe(Event.OnEndVictoryTrasition, DespawnPlayer);
+        }
+
+        private void OnDestroy()
+        {
+            EventManager.Instance.Unsubscribe(Event.OnSystemsLoaded, Activate);
         }
 
         #endregion
@@ -53,17 +68,17 @@ namespace GMDG.Basic2DPlatformer.System
 
         private void SpawnPlayer(object[] args)
         {
-            Vector2 position = (Vector3)args[0];
+            Vector2 position = GameObject.FindGameObjectWithTag("Spawn").transform.position;
 
-            player.SetActive(true);
-            playerTransform.position = position;
-
-            EventManager.Instance.Publish(Event.OnPlayerSpawn);
+            _playerTransform.position = position;
+            _playerMovement.enabled = true;
+            _playerRenderer.enabled = true;
         }
 
-        private void RoomChanged(object[] args)
+        private void DespawnPlayer(object[] args)
         {
-            playerTransform.position = (Vector2)playerTransform.position + ((Vector2)(Vector2Int)args[0]) * 2.5f;
+            _playerMovement.enabled = false;
+            _playerRenderer.enabled = false;
         }
 
         #endregion

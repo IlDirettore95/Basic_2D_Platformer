@@ -166,7 +166,7 @@ public class PCGXMLEditor : EditorWindow
                     string direction = constraint.Attributes["Direction"].Value;
                     for (int i = 0; i < _possibleDirection.Length; i++)
                     {
-                        if (_possibleDirection[i].Equals(direction)) continue;
+                        if (!_possibleDirection[i].Equals(direction)) continue;
                         _popupIndexesPerConstraint[level][constraint] = i;
                         break;
                     }

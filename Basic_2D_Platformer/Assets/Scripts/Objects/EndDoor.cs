@@ -1,14 +1,17 @@
-using System.Collections;
-using System.Collections.Generic;
+using GMDG.Basic2DPlatformer.System;
 using UnityEngine;
+using Event = GMDG.Basic2DPlatformer.System.Event;
 
-public class EndDoor : MonoBehaviour
+namespace GMDG.Basic2DPlatformer.Objects
 {
-    private void OnTriggerEnter2D(Collider2D collision)
+    public class EndDoor : MonoBehaviour
     {
-        if (collision.gameObject.tag.Equals("Player"))
+        private void OnTriggerEnter2D(Collider2D collision)
         {
-            Debug.Log("Vittoria!");
+            if (collision.gameObject.tag.Equals("Player"))
+            {
+                EventManager.Instance.Publish(Event.OnLevelCompleted);
+            }
         }
     }
 }

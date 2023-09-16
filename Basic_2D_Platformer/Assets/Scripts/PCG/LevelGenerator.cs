@@ -28,6 +28,8 @@ namespace GMDG.Basic2DPlatformer.PCG
             // Use WFC for placing chunks
             if (isSimulated) yield return caller.StartCoroutine(new EvenSimplerTiledModel(caller, data).Generate(iterationLimit, timeout, isSimulated));
             else new EvenSimplerTiledModel(caller, data).Generate(iterationLimit, timeout, isSimulated).MoveNext();
+
+            EventManager.Instance.Publish(Event.OnLevelGenerated);
         }
 
         private IEnumerator InitializeSuperPositions(Grid<HashSet<int>> grid, PCGData data, float timeout, bool isSimulated)

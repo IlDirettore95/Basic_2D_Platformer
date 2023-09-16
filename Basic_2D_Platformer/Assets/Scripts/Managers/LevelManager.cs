@@ -14,12 +14,15 @@ namespace GMDG.Basic2DPlatformer.System
         public float Timeout;
         public bool IsSimulated;
 
+        private PCGDataLoader _dataLoader = new PCGDataLoader();
         private int _currentLevel;
+        private int _numberOfLevels;
 
         #region UnityMessages
         private void Awake()
         {
             _currentLevel = 0;
+            _numberOfLevels = _dataLoader.GetNumberOfLevels();
 
 #if !UNITY_EDITOR
             IsSimulated = false;
@@ -32,12 +35,14 @@ namespace GMDG.Basic2DPlatformer.System
 
         private void OnEnable()
         {
-            EventManager.Instance.Subscribe(Event.OnGameplay, GenerateLevel);
+            EventManager.Instance.Subscribe(Event.OnGameplay, LoadFirstLevel);
+            EventManager.Instance.Subscribe(Event.OnLevelCompleted, LoadNextLevel);
         }
 
         private void OnDisable()
         {
-            EventManager.Instance.Unsubscribe(Event.OnGameplay, GenerateLevel);
+            EventManager.Instance.Unsubscribe(Event.OnGameplay, LoadFirstLevel);
+            EventManager.Instance.Unsubscribe(Event.OnLevelCompleted, LoadNextLevel);
         }
 
         private void OnDestroy()
@@ -54,35 +59,61 @@ namespace GMDG.Basic2DPlatformer.System
             enabled = true;
         }
 
-        private void GenerateLevel(object[] args)
+        private void LoadFirstLevel(object[] args)
         {
-            Delete();
+            _currentLevel = 0;
 
-            PCGData data = new PCGDataLoader().LoadData(_currentLevel);
-            if (IsSimulated) StartCoroutine(new LevelGenerator().Generation?.Invoke(this, data, IterationLimit, Timeout, IsSimulated));
-            else new LevelGenerator().Generation?.Invoke(this, data, IterationLimit, Timeout, IsSimulated).MoveNext();
+            GenerateLevel();
+        }
+
+        private void LoadNextLevel(object[] args)
+        {
+            _currentLevel += 1;
+            if (_currentLevel < _numberOfLevels) LoadFirstLevel(null);
+            else
+            {
+                Delete();
+                EventManager.Instance.Publish(Event.OnEndVictoryTrasition);
+            }
         }
 
         #endregion
 
 #if UNITY_EDITOR
-        public void GenerateLevel()
+        public void LoadFirstLevel()
         {
-            GenerateLevel(null);
+            LoadFirstLevel(null);
         }
 #endif
 
         public void Delete()
         {
-            for (int i = 0; i < gameObject.transform.childCount;)
+            for (int i = 0; i < gameObject.transform.childCount; i++)
             {
 #if UNITY_EDITOR
-                DestroyImmediate(gameObject.transform.GetChild(i).gameObject);
+                if (Application.isPlaying)
+                {
+                    Destroy(gameObject.transform.GetChild(i).gameObject);
+                }
+                else
+                {
+                    DestroyImmediate(gameObject.transform.GetChild(i).gameObject);
+                    i--;
+                }
 #else
                 Destroy(gameObject.transform.GetChild(i).gameObject);
 #endif
             }
             StopAllCoroutines();
+        }
+
+        private void GenerateLevel()
+        {
+            Delete();
+
+            PCGData data = _dataLoader.LoadData(_currentLevel);
+            if (IsSimulated) StartCoroutine(new LevelGenerator().Generation?.Invoke(this, data, IterationLimit, Timeout, IsSimulated));
+            else new LevelGenerator().Generation?.Invoke(this, data, IterationLimit, Timeout, IsSimulated).MoveNext();
         }
     }
 }
