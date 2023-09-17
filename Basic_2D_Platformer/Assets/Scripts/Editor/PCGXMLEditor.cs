@@ -6,11 +6,6 @@ using System.Collections.Generic;
 using GluonGui.WorkspaceWindow.Views.WorkspaceExplorer.Explorer;
 using System.Linq;
 using Unity.VisualScripting;
-using System.Xml.Serialization;
-using static UnityEngine.RuleTile.TilingRuleOutput;
-using UnityEngine.UIElements;
-using GMDG.Basic2DPlatformer.Utility;
-using System.IO;
 
 public class PCGXMLEditor : EditorWindow
 {
@@ -31,6 +26,9 @@ public class PCGXMLEditor : EditorWindow
 
     private Vector2 _currentHierarchyScrollPosition;
     private Vector2 _currentChildrenScrollPosition;
+
+    private const int BUTTON_SIMPLE_WIDTH = 100;
+    private const int BUTTON_ACTIONS_WIDTH = 140;
 
     // Texts
     private string _path = "XML/WorldGenerationData";
@@ -228,7 +226,6 @@ public class PCGXMLEditor : EditorWindow
         GUILayout.Space(10);
         GUILayout.BeginHorizontal();
         GUILayout.BeginVertical();
-        GUILayout.Label("Current children:");
         DrawChildrenScrollBar();
         GUILayout.EndVertical();
         GUILayout.BeginVertical();
@@ -270,9 +267,9 @@ public class PCGXMLEditor : EditorWindow
         { 
             object element = _currentHierarchy[i];
             UpdateData(element);
-            string buttonText = TakeString(element);
+            string buttonText = TakeCurrentHierarchyString(element);
 
-            if (GUILayout.Button(buttonText, GUILayout.ExpandWidth(false)))
+            if (GUILayout.Button(buttonText, GUILayout.Width(BUTTON_SIMPLE_WIDTH), GUILayout.ExpandWidth(false)))
             {
                 for (int j = i + 1; j <  _currentHierarchy.Count;)
                 {
@@ -291,24 +288,40 @@ public class PCGXMLEditor : EditorWindow
     {
         object lastElement = _currentHierarchy[_currentHierarchy.Count - 1];
 
-        XmlNodeList currentNodeList = TakeChildren(lastElement);
+        List<XmlNode> currentNodeList = TakeChildren(lastElement);
 
         if (currentNodeList == null) return;
 
         foreach (XmlNode node in currentNodeList) 
         {
-            string buttonText = TakeString(node);
+            string buttonText = TakeCurrentChildString(node);
 
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button(buttonText, GUILayout.ExpandWidth(false)))
+            if (node.Attributes["List"] != null)
+            {
+                GUILayout.Label("-" + buttonText + "-", GUILayout.ExpandWidth(false));
+            }
+            else if (node.Attributes["Element"] != null)
+            {
+                GUILayout.Label(buttonText, GUILayout.Width(BUTTON_SIMPLE_WIDTH), GUILayout.ExpandWidth(false));
+            }
+            else if (GUILayout.Button(buttonText, GUILayout.Width(BUTTON_SIMPLE_WIDTH), GUILayout.ExpandWidth(false)))
             {
                 _currentHierarchy.Add(node);
             }
 
             if (node.Attributes.Count > 0) 
-            { 
+            {
                 foreach (XmlAttribute attribute in node.Attributes)
                 {
+                    if (attribute.Name.Equals("List"))
+                    {
+                        continue;
+                    }
+                    if (attribute.Name.Equals("Element"))
+                    {
+                        continue;
+                    }
                     if (node.Name.Equals("Neighbour") && attribute.Name.Equals("ID"))
                     {
                         int oldIndex = _popupIndexesPerNeighbour[_currentLevel][node];
@@ -340,7 +353,7 @@ public class PCGXMLEditor : EditorWindow
 
                         if (objects == null) continue;
 
-                        foreach (object obj in objects) 
+                        foreach (object obj in objects)
                         {
                             if (obj is GameObject)
                             {
@@ -372,32 +385,40 @@ public class PCGXMLEditor : EditorWindow
 
         if (node == null) return;
 
-        switch (node.Name)
+        if (node.Name.Equals("Levels"))
         {
-            case "Levels":
-                if (GUILayout.Button("+", GUILayout.ExpandWidth(false)))
+            if (GUILayout.Button("+", GUILayout.ExpandWidth(false)))
+            {
+                node.AppendChild(CreateLevelNode());
+            }
+        }
+        else
+        {
+            foreach(XmlNode childNode in node.ChildNodes)
+            {
+                if (childNode.Attributes["List"] == null) continue;
+                switch (childNode.Name)
                 {
-                    node.AppendChild(CreateLevelNode());
+                    case "Tiles":
+                        if (GUILayout.Button("+", GUILayout.ExpandWidth(false)))
+                        {
+                            node.AppendChild(CreateTileNode());
+                        }
+                        break;
+                    case "Constraints":
+                        if (GUILayout.Button("+", GUILayout.ExpandWidth(false)))
+                        {
+                            node.AppendChild(CreateConstraintNode());
+                        }
+                        break;
+                    case "Neighbours":
+                        if (GUILayout.Button("+", GUILayout.ExpandWidth(false)))
+                        {
+                            node.AppendChild(CreateNeighbourNode());
+                        }
+                        break;
                 }
-                break;
-            case "Tiles":
-                if (GUILayout.Button("+", GUILayout.ExpandWidth(false)))
-                {
-                    node.AppendChild(CreateTileNode());
-                }
-                break;
-            case "Constraints":
-                if (GUILayout.Button("+", GUILayout.ExpandWidth(false)))
-                {
-                    node.AppendChild(CreateConstraintNode());
-                }
-                break;
-            case "Neighbours":
-                if (GUILayout.Button("+", GUILayout.ExpandWidth(false)))
-                {
-                    node.AppendChild(CreateNeighbourNode());
-                }
-                break;
+            }
         }
     }
 
@@ -438,23 +459,21 @@ public class PCGXMLEditor : EditorWindow
 
     private void DrawOtherActions()
     {
-        if (GUILayout.Button("Reload XML file", GUILayout.ExpandWidth(false)))
+        if (GUILayout.Button("Reload XML file", GUILayout.Width(BUTTON_ACTIONS_WIDTH), GUILayout.ExpandWidth(false)))
         {
             AssetDatabase.Refresh();
             InitXml();
             InitDataStructures();
         }
 
-        if (GUILayout.Button("Validate XML file", GUILayout.ExpandWidth(false)))
+        if (GUILayout.Button("Save XML file", GUILayout.Width(BUTTON_ACTIONS_WIDTH), GUILayout.ExpandWidth(false)))
         {
-            ValidateXmlDocument();
-        }
-
-        if (GUILayout.Button("Save XML file", GUILayout.ExpandWidth(false)))
-        {
-            _xmlDocument.Save(Application.dataPath + "/Resources/" + _path + ".xml");
-            _message = string.Format("File {0} saved!", _path);
-            AssetDatabase.Refresh();
+            if (ValidateXmlDocument())
+            {
+                _xmlDocument.Save(Application.dataPath + "/Resources/" + _path + ".xml");
+                _message = string.Format("File {0} saved!", _path);
+                AssetDatabase.Refresh();
+            }
         }
     }
 
@@ -506,7 +525,7 @@ public class PCGXMLEditor : EditorWindow
         }
     }
 
-    private string TakeString(object element)
+    private string TakeCurrentChildString(object element)
     {
         string text = string.Empty;
 
@@ -514,6 +533,27 @@ public class PCGXMLEditor : EditorWindow
 
         if (node == null) return text;
             
+        text += node.Name;
+
+        if (node.Attributes.Count <= 0) return text;
+        if (node.Attributes["ID"] != null) return node.Attributes["ID"].Value.Equals("") ? "-" : node.Attributes["ID"].Value;
+        if (node.Attributes["Path"] != null) return text;
+        if (node.Name.Equals("GridSize")) return text;
+        if (node.Name.Equals("CellSize")) return text;
+        if (node.Name.Equals("StartingCell")) return text;
+        if (node.Name.Equals("EndingCell")) return text;
+
+        return text;
+    }
+
+    private string TakeCurrentHierarchyString(object element)
+    {
+        string text = string.Empty;
+
+        XmlNode node = element as XmlNode;
+
+        if (node == null) return text;
+
         text += node.Name;
 
         if (node.Attributes.Count <= 0) return text;
@@ -540,13 +580,21 @@ public class PCGXMLEditor : EditorWindow
         return ids;
     }
 
-    private XmlNodeList TakeChildren(object element)
+    private List<XmlNode> TakeChildren(object element)
     {
         XmlNode node = element as XmlNode;
 
-        if (node != null) return node.ChildNodes;
+        if (node == null) return null;
 
-        return null;    
+        List<XmlNode> children = new List<XmlNode>();
+
+        foreach (XmlNode childNode in node.ChildNodes) 
+        {
+            children.Add(childNode);
+            if (childNode.Attributes["List"] != null) children.AddRange(childNode.ChildNodes);
+        }
+
+        return children;
     }
 
     #endregion
@@ -583,8 +631,14 @@ public class PCGXMLEditor : EditorWindow
         XmlElement prefab = _xmlDocument.CreateElement("Prefab");
         XmlElement constraints = _xmlDocument.CreateElement("Constraints");
 
+        XmlAttribute list = _xmlDocument.CreateAttribute("List");
+        constraints.Attributes.Append(list);
+
+        XmlAttribute element = _xmlDocument.CreateAttribute("Element");
         XmlAttribute path = _xmlDocument.CreateAttribute("Path");
+        prefab.Attributes.Append(element);
         prefab.Attributes.Append(path);
+
 
         tile.AppendChild(prefab);
         tile.AppendChild(constraints);
@@ -601,6 +655,9 @@ public class PCGXMLEditor : EditorWindow
         XmlAttribute direction = _xmlDocument.CreateAttribute("Direction");
         XmlElement neighbours = _xmlDocument.CreateElement("Neighbours");
 
+        XmlAttribute list = _xmlDocument.CreateAttribute("List");
+        neighbours.Attributes.Append(list);
+
         constraint.Attributes.Append(direction);
         constraint.AppendChild(neighbours);
 
@@ -613,7 +670,9 @@ public class PCGXMLEditor : EditorWindow
     {
         XmlElement neighbour = _xmlDocument.CreateElement("Neighbour");
 
+        XmlAttribute element = _xmlDocument.CreateAttribute("Element");
         XmlAttribute id = _xmlDocument.CreateAttribute("ID");
+        neighbour.Attributes.Append(element);
         neighbour.Attributes.Append(id);
 
         _popupIndexesPerNeighbour[_currentLevel][neighbour] = -1;
@@ -623,21 +682,29 @@ public class PCGXMLEditor : EditorWindow
 
     private XmlNode CreateSettingsNode()
     {
-        XmlElement setting = _xmlDocument.CreateElement("Settings");
+        XmlElement settings = _xmlDocument.CreateElement("Settings");
 
-        setting.AppendChild(CreateVector2Element("GridSize"));
-        setting.AppendChild(CreateVector2Element("CellSize"));
-        setting.AppendChild(CreateVector2Element("StartingCell"));
-        setting.AppendChild(CreateVector2Element("EndingCell"));
+        XmlAttribute list = _xmlDocument.CreateAttribute("List");
+        settings.Attributes.Append(list);
 
-        return setting;
+        settings.AppendChild(CreateVector2Element("GridSize"));
+        settings.AppendChild(CreateVector2Element("CellSize"));
+        settings.AppendChild(CreateVector2Element("StartingCell"));
+        settings.AppendChild(CreateVector2Element("EndingCell"));
+
+        return settings;
     }
 
     private XmlNode CreateWFCNode()
     {
         XmlElement wfc = _xmlDocument.CreateElement("WFC");
 
-        wfc.AppendChild(_xmlDocument.CreateElement("Tiles"));
+        XmlElement tiles = _xmlDocument.CreateElement("Tiles");
+
+        XmlAttribute list = _xmlDocument.CreateAttribute("List");
+        tiles.Attributes.Append(list);
+
+        wfc.AppendChild(tiles);
 
         return wfc;
     }
@@ -646,12 +713,14 @@ public class PCGXMLEditor : EditorWindow
     {
         XmlElement vector2 = _xmlDocument.CreateElement(name);
 
+        XmlAttribute element = _xmlDocument.CreateAttribute("Element");
         XmlAttribute x = _xmlDocument.CreateAttribute("x");
         XmlAttribute y = _xmlDocument.CreateAttribute("y");
 
         x.Value = "0";
         y.Value = "0";
 
+        vector2.Attributes.Append(element);
         vector2.Attributes.Append(x);
         vector2.Attributes.Append(y);
 
@@ -662,7 +731,7 @@ public class PCGXMLEditor : EditorWindow
 
     #region ValidateXml
 
-    private void ValidateXmlDocument()
+    private bool ValidateXmlDocument()
     {
         bool errorsFound = false;
         foreach (XmlNode level in _xmlDocument.SelectNodes("/Levels/Level"))
@@ -696,10 +765,9 @@ public class PCGXMLEditor : EditorWindow
             }
         }
 
-        if (!errorsFound) 
-        {
-            _message = "Validation successful";
-        }
+        if (errorsFound) _message += " (Validation Unsuccessful)";
+
+        return !errorsFound;
     }
 
     private bool ValidateLevel(XmlNode level) 
