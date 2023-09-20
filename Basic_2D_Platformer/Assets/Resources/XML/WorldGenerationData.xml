@@ -1,22 +1,40 @@
-﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<Levels>
-  <Level ID="1">
-    <Settings List="">
-      <GridSize Element="" x="0" y="0" />
-      <CellSize Element="" x="0" y="0" />
-      <StartingCell Element="" x="0" y="0" />
-      <EndingCell Element="" x="0" y="0" />
-    </Settings>
-    <WFC>
-      <Tiles List="" />
-      <Tile ID="OCEAN" Frequency="">
-        <Prefab Element="" Path="" />
-        <Constraints List="" />
-        <Constraint Direction="ALL">
-          <Neighbours List="" />
-          <Neighbour Element="" ID="OCEAN" />
-        </Constraint>
-      </Tile>
-    </WFC>
-  </Level>
-</Levels>
+<Root>
+  <Levels List="">
+    <Level ID="FOREST">
+      <Settings List="">
+        <GridSize Element="" x="0" y="0" />
+        <CellSize Element="" x="0" y="0" />
+        <StartingCell Element="" x="0" y="0" />
+        <EndingCell Element="" x="0" y="0" />
+      </Settings>
+      <WFC>
+        <Tiles List="">
+          <Tile ID="START" Frequency="">
+            <Prefab Element="" Path="" />
+            <Constraints List="">
+              <Constraint Type="ALL">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="END" />
+                  <Neighbour Element="" ID="START" />
+                  <Neighbour Element="" ID="TERRAIN" />
+                </Neighbours>
+              </Constraint>
+            </Constraints>
+          </Tile>
+          <Tile ID="END" Frequency="">
+            <Prefab Element="" Path="" />
+            <Constraints List="" />
+          </Tile>
+          <Tile ID="GORGE" Frequency="">
+            <Prefab Element="" Path="" />
+            <Constraints List="" />
+          </Tile>
+          <Tile ID="TERRAIN" Frequency="">
+            <Prefab Element="" Path="" />
+            <Constraints List="" />
+          </Tile>
+        </Tiles>
+      </WFC>
+    </Level>
+  </Levels>
+</Root>

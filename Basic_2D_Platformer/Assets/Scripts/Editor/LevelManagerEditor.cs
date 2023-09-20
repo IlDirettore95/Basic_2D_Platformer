@@ -5,7 +5,7 @@ using UnityEngine;
 namespace GMDG.Basic2DPlatformer.System
 {
     [CustomEditor(typeof(LevelManager))]
-    public class LevelManagerEditor : Editor
+    public class LevelManagerEditor : UnityEditor.Editor
     {
         public override void OnInspectorGUI()
         {

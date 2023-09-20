@@ -1,13 +1,12 @@
 using System.Xml;
-using System;
 using UnityEditor;
 using UnityEngine;
 using System.Collections.Generic;
-using GluonGui.WorkspaceWindow.Views.WorkspaceExplorer.Explorer;
 using System.Linq;
 using Unity.VisualScripting;
+using static GMDG.NoProduct.Utility.Utility2D;
 
-public class PCGXMLEditor : EditorWindow
+public class PCGXMLEditorOld : EditorWindow
 {
     // Graphics
     private const int PADDING = 8;
@@ -29,6 +28,7 @@ public class PCGXMLEditor : EditorWindow
 
     private const int BUTTON_SIMPLE_WIDTH = 100;
     private const int BUTTON_ACTIONS_WIDTH = 140;
+    private const int BUTTON_HIERARCHY_WIDTH = 150;
 
     // Texts
     private string _path = "XML/WorldGenerationData";
@@ -42,12 +42,12 @@ public class PCGXMLEditor : EditorWindow
     private Dictionary<XmlNode, List<XmlNode>> _tilesPerLevel;
     private Dictionary<XmlNode, Dictionary<XmlNode, int>> _popupIndexesPerNeighbour;
     private Dictionary<XmlNode, Dictionary<XmlNode, int>> _popupIndexesPerConstraint;
-    private string[] _possibleDirection = { "ALL", "NORTH", "EAST", "SOUTH", "WEST", "HORIZONTAL", "VERTICAL", "N_NORTH", "N_EAST", "N_SOUTH", "N_WEST"};
+    private string[] _possibleConstraints = { "ALL", "NORTH", "EAST", "SOUTH", "WEST", "HORIZONTAL", "VERTICAL", "N_NORTH", "N_EAST", "N_SOUTH", "N_WEST"};
 
-    [MenuItem("Window/PCG/XMLData")]
+    //[MenuItem("Window/PCG/XMLData")]
     private static void Init()
     {
-        PCGXMLEditor window = GetWindow<PCGXMLEditor>(true, "XML Data", true);
+        PCGXMLEditorOld window = GetWindow<PCGXMLEditorOld>(true, "XML Data", true);
         window.minSize = new Vector2(800, 400);
         window.maxSize = new Vector2(800, 400);
     }
@@ -161,10 +161,11 @@ public class PCGXMLEditor : EditorWindow
 
                 foreach (XmlNode constraint in constraintsList)
                 {
-                    string direction = constraint.Attributes["Direction"].Value;
-                    for (int i = 0; i < _possibleDirection.Length; i++)
+                    string direction = constraint.Attributes["Type"].Value;
+
+                    for (int i = 0; i < _possibleConstraints.Length; i++)
                     {
-                        if (!_possibleDirection[i].Equals(direction)) continue;
+                        if (!_possibleConstraints[i].Equals(direction)) continue;
                         _popupIndexesPerConstraint[level][constraint] = i;
                         break;
                     }
@@ -269,7 +270,7 @@ public class PCGXMLEditor : EditorWindow
             UpdateData(element);
             string buttonText = TakeCurrentHierarchyString(element);
 
-            if (GUILayout.Button(buttonText, GUILayout.Width(BUTTON_SIMPLE_WIDTH), GUILayout.ExpandWidth(false)))
+            if (GUILayout.Button(buttonText, GUILayout.Width(BUTTON_HIERARCHY_WIDTH), GUILayout.ExpandWidth(false)))
             {
                 for (int j = i + 1; j <  _currentHierarchy.Count;)
                 {
@@ -294,91 +295,108 @@ public class PCGXMLEditor : EditorWindow
 
         foreach (XmlNode node in currentNodeList) 
         {
-            string buttonText = TakeCurrentChildString(node);
 
             GUILayout.BeginHorizontal();
-            if (node.Attributes["List"] != null)
-            {
-                GUILayout.Label("-" + buttonText + "-", GUILayout.ExpandWidth(false));
-            }
-            else if (node.Attributes["Element"] != null)
-            {
-                GUILayout.Label(buttonText, GUILayout.Width(BUTTON_SIMPLE_WIDTH), GUILayout.ExpandWidth(false));
-            }
-            else if (GUILayout.Button(buttonText, GUILayout.Width(BUTTON_SIMPLE_WIDTH), GUILayout.ExpandWidth(false)))
-            {
-                _currentHierarchy.Add(node);
-            }
+
+            DrawChildName(node);
 
             if (node.Attributes.Count > 0) 
             {
-                foreach (XmlAttribute attribute in node.Attributes)
-                {
-                    if (attribute.Name.Equals("List"))
-                    {
-                        continue;
-                    }
-                    if (attribute.Name.Equals("Element"))
-                    {
-                        continue;
-                    }
-                    if (node.Name.Equals("Neighbour") && attribute.Name.Equals("ID"))
-                    {
-                        int oldIndex = _popupIndexesPerNeighbour[_currentLevel][node];
-                        int newIndex = EditorGUILayout.Popup(oldIndex, GetTilesIDs(_tilesPerLevel[_currentLevel]), GUILayout.ExpandWidth(false));
-                        _popupIndexesPerNeighbour[_currentLevel][node] = newIndex;
-
-                        if (newIndex < 0) continue;
-
-                        node.Attributes["ID"].Value = _tilesPerLevel[_currentLevel][newIndex].Attributes["ID"].Value;
-                        continue;
-                    }
-
-                    if (attribute.Name.Equals("Direction"))
-                    {
-                        int oldIndex = _popupIndexesPerConstraint[_currentLevel][node];
-                        int newIndex = EditorGUILayout.Popup(oldIndex, _possibleDirection, GUILayout.ExpandWidth(false));
-                        _popupIndexesPerConstraint[_currentLevel][node] = newIndex;
-
-                        if (newIndex < 0) continue;
-
-                        node.Attributes["Direction"].Value = _possibleDirection[newIndex];
-                        continue;
-                    }
-
-                    if (attribute.Name.Equals("Path"))
-                    {
-                        string title = attribute.Value == "" ? "DragAndDrop" : attribute.Value;
-                        object[] objects = DropZone(title, title.Length * 8, 20);
-
-                        if (objects == null) continue;
-
-                        foreach (object obj in objects)
-                        {
-                            if (obj is GameObject)
-                            {
-                                string path = AssetDatabase.GetAssetPath((GameObject)obj);
-                                path = path.Substring(path.IndexOf("/") + 1);
-                                path = path.Substring(path.IndexOf("/") + 1);
-                                path = path.Substring(0, path.LastIndexOf("."));
-                                attribute.Value = path;
-                            }
-                        }
-
-                        continue;
-                    }
-
-                    GUILayout.Label(attribute.Name, GUILayout.ExpandWidth(false));
-                    attribute.Value = GUILayout.TextField(attribute.Value, GUILayout.Width(60));
-                    GUILayout.Space(15);
-                }
+                DrawChildAttributes(node);
                 DrawDeleting(node);
             }
 
             GUILayout.EndHorizontal();
         }
     }
+
+    private void DrawChildName(XmlNode node)
+    {
+        string buttonText = TakeCurrentChildString(node);
+        if (node.Attributes["List"] != null)
+        {
+            GUILayout.Label("-" + buttonText + "-", GUILayout.ExpandWidth(false));
+        }
+        else if (node.Attributes["Element"] != null)
+        {
+            GUILayout.Label(buttonText, GUILayout.Width(BUTTON_SIMPLE_WIDTH), GUILayout.ExpandWidth(false));
+        }
+        else if (GUILayout.Button(buttonText, GUILayout.Width(BUTTON_SIMPLE_WIDTH), GUILayout.ExpandWidth(false)))
+        {
+            _currentHierarchy.Add(node);
+        }
+    }
     
+
+    private void DrawChildAttributes(XmlNode node)
+    {
+        foreach (XmlAttribute attribute in node.Attributes)
+        {
+            if (attribute.Name.Equals("List"))
+            {
+                continue;
+            }
+            if (attribute.Name.Equals("Element"))
+            {
+                continue;
+            }
+            if (node.Name.Equals("Neighbour") && attribute.Name.Equals("ID"))
+            {
+                int oldIndex = _popupIndexesPerNeighbour[_currentLevel][node];
+                int newIndex = EditorGUILayout.Popup(oldIndex, GetTilesIDs(_tilesPerLevel[_currentLevel]), GUILayout.ExpandWidth(false));
+                _popupIndexesPerNeighbour[_currentLevel][node] = newIndex;
+
+                if (newIndex < 0) continue;
+
+                node.Attributes["ID"].Value = _tilesPerLevel[_currentLevel][newIndex].Attributes["ID"].Value;
+
+                if (newIndex != oldIndex) UpdateMutualTilesConstraint(oldIndex, newIndex, node);
+
+                continue;
+            }
+
+            if (attribute.Name.Equals("Type"))
+            {
+                int oldIndex = _popupIndexesPerConstraint[_currentLevel][node];
+                int newIndex = EditorGUILayout.Popup(oldIndex, _possibleConstraints, GUILayout.ExpandWidth(false));
+                _popupIndexesPerConstraint[_currentLevel][node] = newIndex;
+
+                if (newIndex < 0) continue;
+
+                if (newIndex != oldIndex) UpdateMutualTilesConstraint(oldIndex, newIndex, node);
+
+                node.Attributes["Type"].Value = _possibleConstraints[newIndex];
+                continue;
+            }
+
+            if (attribute.Name.Equals("Path"))
+            {
+                string title = attribute.Value == "" ? "DragAndDrop" : attribute.Value;
+                object[] objects = DropZone(title, title.Length * 8, 22);
+
+                if (objects == null) continue;
+
+                foreach (object obj in objects)
+                {
+                    if (obj is GameObject)
+                    {
+                        string path = AssetDatabase.GetAssetPath((GameObject)obj);
+                        path = path.Substring(path.IndexOf("/") + 1);
+                        path = path.Substring(path.IndexOf("/") + 1);
+                        path = path.Substring(0, path.LastIndexOf("."));
+                        attribute.Value = path;
+                    }
+                }
+
+                continue;
+            }
+
+            GUILayout.Label(attribute.Name, GUILayout.ExpandWidth(false));
+            attribute.Value = GUILayout.TextField(attribute.Value, GUILayout.Width(60));
+            GUILayout.Space(15);
+        }
+    }
+
     private void DrawAdding()
     {
         XmlNode node = _currentHierarchy[_currentHierarchy.Count - 1] as XmlNode;
@@ -402,19 +420,19 @@ public class PCGXMLEditor : EditorWindow
                     case "Tiles":
                         if (GUILayout.Button("+", GUILayout.ExpandWidth(false)))
                         {
-                            node.AppendChild(CreateTileNode());
+                            childNode.AppendChild(CreateTileNode());
                         }
                         break;
                     case "Constraints":
                         if (GUILayout.Button("+", GUILayout.ExpandWidth(false)))
                         {
-                            node.AppendChild(CreateConstraintNode());
+                            childNode.AppendChild(CreateConstraintNode());
                         }
                         break;
                     case "Neighbours":
                         if (GUILayout.Button("+", GUILayout.ExpandWidth(false)))
                         {
-                            node.AppendChild(CreateNeighbourNode());
+                            childNode.AppendChild(CreateNeighbourNode());
                         }
                         break;
                 }
@@ -424,34 +442,30 @@ public class PCGXMLEditor : EditorWindow
 
     private void DrawDeleting(XmlNode node)
     {
-        XmlNode parent = _currentHierarchy[_currentHierarchy.Count - 1] as XmlNode;
-
-        if (parent == null) return;
-
-        switch (parent.Name)
+        switch (node.Name)
         {
-            case "Levels":
+            case "Level":
                 if (GUILayout.Button("-", GUILayout.ExpandWidth(false)))
                 {
-                    parent.RemoveChild(node);
+                    node.ParentNode.RemoveChild(node);
                 }
                 break;
-            case "Tiles":
+            case "Tile":
                 if (GUILayout.Button("-", GUILayout.ExpandWidth(false)))
                 {
-                    parent.RemoveChild(node);
+                    node.ParentNode.RemoveChild(node);
                 }
                 break;
-            case "Constraints":
+            case "Constraint":
                 if (GUILayout.Button("-", GUILayout.ExpandWidth(false)))
                 {
-                    parent.RemoveChild(node);
+                    node.ParentNode.RemoveChild(node);
                 }
                 break;
-            case "Neighbours":
+            case "Neighbour":
                 if (GUILayout.Button("-", GUILayout.ExpandWidth(false)))
                 {
-                    parent.RemoveChild(node);
+                    node.ParentNode.RemoveChild(node);
                 }
                 break;
         }
@@ -459,14 +473,26 @@ public class PCGXMLEditor : EditorWindow
 
     private void DrawOtherActions()
     {
-        if (GUILayout.Button("Reload XML file", GUILayout.Width(BUTTON_ACTIONS_WIDTH), GUILayout.ExpandWidth(false)))
+        if (GUILayout.Button("Reload", GUILayout.Width(BUTTON_ACTIONS_WIDTH), GUILayout.ExpandWidth(false)))
         {
             AssetDatabase.Refresh();
             InitXml();
             InitDataStructures();
         }
 
-        if (GUILayout.Button("Save XML file", GUILayout.Width(BUTTON_ACTIONS_WIDTH), GUILayout.ExpandWidth(false)))
+        if (GUILayout.Button("Validate", GUILayout.Width(BUTTON_ACTIONS_WIDTH), GUILayout.ExpandWidth(false)))
+        {
+            ValidateXmlDocument();
+        }
+
+        if (GUILayout.Button("Save", GUILayout.Width(BUTTON_ACTIONS_WIDTH), GUILayout.ExpandWidth(false)))
+        {
+            _xmlDocument.Save(Application.dataPath + "/Resources/" + _path + ".xml");
+            _message = string.Format("File {0} saved!", _path);
+            AssetDatabase.Refresh();
+        }
+
+        if (GUILayout.Button("Validate and save", GUILayout.Width(BUTTON_ACTIONS_WIDTH), GUILayout.ExpandWidth(false)))
         {
             if (ValidateXmlDocument())
             {
@@ -572,7 +598,7 @@ public class PCGXMLEditor : EditorWindow
     {
         string[] ids = new string[list.Count];
 
-        for (int i = 0; i < list.Count; i++)
+        for (int i = 0; i < ids.Length; i++)
         {
             ids[i] = list[i].Attributes["ID"].Value;
         }
@@ -652,7 +678,7 @@ public class PCGXMLEditor : EditorWindow
     {
         XmlElement constraint = _xmlDocument.CreateElement("Constraint");
 
-        XmlAttribute direction = _xmlDocument.CreateAttribute("Direction");
+        XmlAttribute direction = _xmlDocument.CreateAttribute("Type");
         XmlElement neighbours = _xmlDocument.CreateElement("Neighbours");
 
         XmlAttribute list = _xmlDocument.CreateAttribute("List");
@@ -727,6 +753,47 @@ public class PCGXMLEditor : EditorWindow
         return vector2;
     }
 
+    private void UpdateMutualTilesConstraint(int oldIndex, int newIndex, XmlNode node)
+    {
+        if (node.Name.Equals("Constraint"))
+        {
+            string oldConstraintType = oldIndex == -1 ? "" : _possibleConstraints[oldIndex];
+            string newConstraintType = _possibleConstraints[newIndex];
+        }
+        else if (node.Name.Equals("Neighbour"))
+        {
+            XmlNode oldTile = oldIndex == -1 ? null : _tilesPerLevel[_currentLevel][oldIndex];
+            XmlNode newTile = _tilesPerLevel[_currentLevel][newIndex];
+
+            string constraintType = node.ParentNode.ParentNode.Attributes["Type"].Value;
+            string oppositeConstraintType = TakeOppositeConstraintType(constraintType);
+
+            // Adding New
+            XmlNode newNeighbour = CreateNeighbourNode();
+            newNeighbour.Attributes["ID"].Value = _currentTile.Attributes["ID"].Value;
+
+            XmlNode constraint = null;
+            XmlNodeList constraints = newTile["Constraints"].SelectNodes("Constraint");
+            foreach (XmlNode c in constraints)
+            {
+                if (!c.Attributes["Type"].Value.Equals(oppositeConstraintType)) continue;
+                constraint = c;
+                break;
+            }
+            if (constraint == null) constraint = CreateConstraintNode();
+
+            constraint.Attributes["Type"].Value = oppositeConstraintType;
+            constraint["Neighbours"].AppendChild(newNeighbour);
+            newTile["Constraints"].AppendChild(constraint);
+
+            _popupIndexesPerNeighbour[_currentLevel][newNeighbour] = _tilesPerLevel[_currentLevel].IndexOf(_currentTile);
+            _popupIndexesPerConstraint[_currentLevel][constraint] = GetConstraintTypeIndex(oppositeConstraintType);
+
+            // Deleting Old
+            if (oldTile == null) return;
+        }
+    }
+
     #endregion
 
     #region ValidateXml
@@ -734,7 +801,7 @@ public class PCGXMLEditor : EditorWindow
     private bool ValidateXmlDocument()
     {
         bool errorsFound = false;
-        foreach (XmlNode level in _xmlDocument.SelectNodes("/Levels/Level"))
+        foreach (XmlNode level in _xmlDocument["Levels"].SelectNodes("Level"))
         {
             if (!ValidateLevel(level))
             {
@@ -750,7 +817,7 @@ public class PCGXMLEditor : EditorWindow
                 break;
             }
 
-            foreach (XmlNode tile in level["WFC"].SelectNodes("/Tiles/Tile"))
+            foreach (XmlNode tile in level["WFC"]["Tiles"].SelectNodes("Tile"))
             {
                 if (!ValidateTile(tile))
                 {
@@ -884,8 +951,82 @@ public class PCGXMLEditor : EditorWindow
             _message = "frequency must be above 0";
             return false;
         }
+        Debug.Log(tile["Prefab"].Attributes["Path"].Value);
+        if (tile["Prefab"].Attributes["Path"].Value.Equals(string.Empty))
+        {
+            _message = "prefab asset is missing";
+            return false;
+        }
 
         return true;
+    }
+
+    #endregion
+
+    #region Utilis
+
+    private string TakeOppositeConstraintType(string contraintType)
+    {
+        string oppositeConstraintType = string.Empty;
+
+        if (contraintType.Equals("ALL"))
+        {
+            oppositeConstraintType = "ALL";
+        }
+        else if (contraintType.Equals("NORTH"))
+        {
+            oppositeConstraintType = "SOUTH";
+        }
+        else if (contraintType.Equals("SOUTH"))
+        {
+            oppositeConstraintType = "NORTH";
+        }
+        else if (contraintType.Equals("EAST"))
+        {
+            oppositeConstraintType = "WEST";
+        }
+        else if (contraintType.Equals("WEST"))
+        {
+            oppositeConstraintType = "EAST";
+        }
+        else if (contraintType.Equals("VERTICAL"))
+        {
+            oppositeConstraintType = "VERTICAL";
+        }
+        else if (contraintType.Equals("HORIZONTAL"))
+        {
+            oppositeConstraintType = "HORIZONTAL";
+        }
+        else if (contraintType.Equals("N_NORTH"))
+        {
+            oppositeConstraintType = "N_SOUTH";
+        }
+        else if (contraintType.Equals("N_SOUTH"))
+        {
+            oppositeConstraintType = "N_NORTH";
+        }
+        else if (contraintType.Equals("N_EAST"))
+        {
+            oppositeConstraintType = "N_WEST";
+        }
+        else if (contraintType.Equals("N_WEST"))
+        {
+            oppositeConstraintType = "N_EAST";
+        }
+
+        return oppositeConstraintType;
+    }
+
+    private int GetConstraintTypeIndex(string contraintType)
+    {
+        int index = -1;
+
+        for (int i = 0; i < _possibleConstraints.Length; i++)
+        {
+            if (_possibleConstraints[i].Equals(contraintType)) return i;
+        }
+
+        return index;
     }
 
     #endregion

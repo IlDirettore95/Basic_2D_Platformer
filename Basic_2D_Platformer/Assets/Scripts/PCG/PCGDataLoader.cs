@@ -31,7 +31,7 @@ namespace GMDG.Basic2DPlatformer.PCG
             XmlDocument xmlDocument = new XmlDocument();
             TextAsset textAsset = Resources.Load<TextAsset>("XML/WorldGenerationData");
             xmlDocument.LoadXml(textAsset.text);
-            XmlNodeList xmlLevels = xmlDocument.DocumentElement.SelectNodes("/Levels/Level");
+            XmlNodeList xmlLevels = xmlDocument.SelectNodes("/Levels/Level");
 
             XmlNode level = xmlLevels[currentLevel];
 
@@ -148,9 +148,7 @@ namespace GMDG.Basic2DPlatformer.PCG
                     XmlNodeList neighbours = node["Neighbours"].ChildNodes;
                     string direction = node.Attributes["Direction"].Value;
 
-                    List<Direction2D> directions = new List<Direction2D>();
-
-                    AddPossibleDirection(direction, directions);
+                    List<Direction2D> directions = AddPossibleDirection(direction);
 
                     for (int k = 0; k < directions.Count; k++)
                     {
@@ -158,15 +156,17 @@ namespace GMDG.Basic2DPlatformer.PCG
                         {
                             string neighbourId = neighbour.Attributes["ID"].Value;
                             visitedWFCTiles[id].PossibleNeighbours[directions[k]].Add(data.WFCTiles.IndexOf(visitedWFCTiles[neighbourId]));
-                            visitedWFCTiles[neighbourId].PossibleNeighbours[OppositeDirections[directions[k]]].Add(data.WFCTiles.IndexOf(visitedWFCTiles[id]));
+                            //visitedWFCTiles[neighbourId].PossibleNeighbours[OppositeDirections[directions[k]]].Add(data.WFCTiles.IndexOf(visitedWFCTiles[id]));
                         }
                     }
                 }
             }
         }
 
-        private void AddPossibleDirection(string direction, List<Direction2D> directions)
+        private List<Direction2D> AddPossibleDirection(string direction)
         {
+            List<Direction2D> directions = new List<Direction2D>();
+            
             if (direction.Equals("ALL"))
             {
                 directions.Add(Direction2D.NORTH);
@@ -224,6 +224,8 @@ namespace GMDG.Basic2DPlatformer.PCG
                 directions.Add(Direction2D.SOUTH);
                 directions.Add(Direction2D.EAST);
             }
+
+            return directions;
         }
 
         private bool ValidateData(PCGData data)
