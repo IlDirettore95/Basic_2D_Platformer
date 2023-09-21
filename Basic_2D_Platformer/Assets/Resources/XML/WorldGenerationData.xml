@@ -14,8 +14,7 @@
             <Constraints List="">
               <Constraint Type="ALL">
                 <Neighbours List="">
-                  <Neighbour Element="" ID="END" />
-                  <Neighbour Element="" ID="START" />
+                  <Neighbour Element="" ID="GORGE" />
                   <Neighbour Element="" ID="TERRAIN" />
                 </Neighbours>
               </Constraint>
@@ -27,11 +26,23 @@
           </Tile>
           <Tile ID="GORGE" Frequency="">
             <Prefab Element="" Path="" />
-            <Constraints List="" />
+            <Constraints List="">
+              <Constraint Type="ALL">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="START" />
+                </Neighbours>
+              </Constraint>
+            </Constraints>
           </Tile>
           <Tile ID="TERRAIN" Frequency="">
             <Prefab Element="" Path="" />
-            <Constraints List="" />
+            <Constraints List="">
+              <Constraint Type="ALL">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="START" />
+                </Neighbours>
+              </Constraint>
+            </Constraints>
           </Tile>
         </Tiles>
       </WFC>

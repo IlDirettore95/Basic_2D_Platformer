@@ -1,13 +1,14 @@
-using log4net.Core;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Xml;
+using Unity.Collections.LowLevel.Unsafe;
 using UnityEditor;
 using UnityEditor.Rendering.LookDev;
 using UnityEngine;
-
+using static UnityEngine.RuleTile.TilingRuleOutput;
 
 namespace GMDG.Basic2DPlatformer.Tools.XML
 {
@@ -27,9 +28,9 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
         private List<XmlNode> _hierarchy; 
         private Dictionary<XmlNode, List<XmlNode>> _tilesPerLevel;
         private Dictionary<XmlNode, string[]> _neighbourChoicesPerLevel;
-        private Dictionary<XmlNode, Dictionary<XmlNode, int>> _indexesNeighbourPerLevel;
+        private Dictionary<XmlNode, Dictionary<XmlNode, Dictionary<XmlNode, Dictionary<XmlNode, int>>>> _indexesPerNeighbour;
         private string[] _possibleConstraintTypes = { "ALL", "NORTH", "EAST", "SOUTH", "WEST", "HORIZONTAL", "VERTICAL", "N_NORTH", "N_EAST", "N_SOUTH", "N_WEST" };
-        private Dictionary<XmlNode, Dictionary<XmlNode, int>> _indexesConstraintPerLevel;
+        private Dictionary<XmlNode, Dictionary<XmlNode, Dictionary<XmlNode, int>>> _indexesPerConstraint;
 
         #region Init
 
@@ -94,21 +95,23 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
                 }
             }
 
-            _indexesNeighbourPerLevel = new Dictionary<XmlNode, Dictionary<XmlNode, int>>();
+            _indexesPerNeighbour = new Dictionary<XmlNode, Dictionary<XmlNode, Dictionary<XmlNode, Dictionary<XmlNode, int>>>>();
             foreach (XmlNode level in Utils.GetLevelNodes(_xmlDocument))
             {
-                _indexesNeighbourPerLevel[level] = new Dictionary<XmlNode, int>();
+                _indexesPerNeighbour[level] = new Dictionary<XmlNode, Dictionary<XmlNode, Dictionary<XmlNode, int>>>();
                 foreach (XmlNode tile in Utils.GetTileNodes(level))
                 {
+                    _indexesPerNeighbour[level][tile] = new Dictionary<XmlNode, Dictionary<XmlNode, int>>();
                     foreach (XmlNode constraint in Utils.GetConstraintNodes(tile))
                     {
+                        _indexesPerNeighbour[level][tile][constraint] = new Dictionary<XmlNode, int>();
                         foreach (XmlNode neighbour in Utils.GetNeighbourNodes(constraint))
                         {
                             string neighbourID = Utils.GetNodeAttributeValue(neighbour, "ID"); 
                             for (int i = 0; i < _tilesPerLevel[level].Count; i++)
                             {
                                 if (!Utils.IsNodeAttributeEqual(_tilesPerLevel[level][i], "ID", neighbourID)) continue;
-                                _indexesNeighbourPerLevel[level][neighbour] = i;
+                                _indexesPerNeighbour[level][tile][constraint][neighbour] = i;
                                 break;
                             }
                         }
@@ -116,19 +119,20 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
                 }
             }
 
-            _indexesConstraintPerLevel = new Dictionary<XmlNode, Dictionary<XmlNode, int>>();
+            _indexesPerConstraint = new Dictionary<XmlNode, Dictionary<XmlNode, Dictionary<XmlNode, int>>>();
             foreach (XmlNode level in Utils.GetLevelNodes(_xmlDocument))
             {
-                _indexesConstraintPerLevel[level] = new Dictionary<XmlNode, int>();
+                _indexesPerConstraint[level] = new Dictionary<XmlNode, Dictionary<XmlNode, int>>();
                 foreach (XmlNode tile in Utils.GetTileNodes(level))
                 {
+                    _indexesPerConstraint[level][tile] = new Dictionary<XmlNode, int>();
                     foreach (XmlNode constraint in Utils.GetConstraintNodes(tile))
                     {
                         string constraintType = Utils.GetNodeAttributeValue(constraint, "Type");
                         for (int i = 0; i < _possibleConstraintTypes.Length; i++)
                         {
                             if (!Utils.IsNodeAttributeEqual(constraint, "Type", constraintType)) continue;
-                            _indexesConstraintPerLevel[level][constraint] = i;
+                            _indexesPerConstraint[level][tile][constraint] = i;
                             break;
                         }
                     }
@@ -163,6 +167,21 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
 
         #region CurrentChildren
 
+        public XmlNode GetCurrentLevel()
+        {
+            return _currentLevel;
+        }
+
+        public XmlNode GetCurrentTile()
+        {
+            return _currentTile;
+        }
+
+        public XmlNode GetCurrentConstraint()
+        {
+            return _currentConstraint;
+        }
+
         public XmlNode GetCurrentNode()
         {
             return _currentNode;
@@ -182,28 +201,12 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
 
         public string[] GetNeighbourChoices()
         {
-            for (int i = 0; i < _tilesPerLevel[_currentLevel].Count; i++)
-            {
-                _neighbourChoicesPerLevel[_currentLevel][i] = Utils.GetNodeAttributeValue(_tilesPerLevel[_currentLevel][i], "ID");
-            }
             return _neighbourChoicesPerLevel[_currentLevel];
         }
 
         public int GetNeighbourIndex(XmlNode neighbour)
         {
-           return _indexesNeighbourPerLevel[_currentLevel][neighbour];
-        }
-
-        public void SetNeighbourIndex(XmlNode neighbour, int newIndex)
-        {
-            _indexesNeighbourPerLevel[_currentLevel][neighbour] = newIndex;
-        }
-
-        public void SetNeighbourValue(XmlNode neighbour, int index)
-        {
-            string newValue = Utils.GetNodeAttributeValue(_tilesPerLevel[_currentLevel][index], "ID");
-            _neighbourChoicesPerLevel[_currentLevel][index] = newValue;
-            Utils.SetNodeAttributeValue(neighbour, "ID", newValue);
+           return _indexesPerNeighbour[_currentLevel][_currentTile][_currentConstraint][neighbour];
         }
 
         public string[] GetConstraintChoices()
@@ -213,20 +216,8 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
 
         public int GetConstraintIndex(XmlNode constraint)
         {
-            return _indexesConstraintPerLevel[_currentLevel][constraint];
+            return _indexesPerConstraint[_currentLevel][_currentTile][constraint];
         }
-
-        public void SetConstraintIndex(XmlNode constraint, int newIndex)
-        {
-            _indexesConstraintPerLevel[_currentLevel][constraint] = newIndex;
-        }
-
-        public void SetConstraintValue(XmlNode constraint, int index)
-        {
-            string type = _possibleConstraintTypes[index];
-            Utils.SetNodeAttributeValue(constraint, "Type", type);
-        }
-
 
         #endregion
 
@@ -265,83 +256,122 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
 
         #region WriteXML
 
-        public void CreateNode(XmlNode node)
+        public XmlNode CreateNode(XmlNode parent, XmlNode currentLevel, XmlNode currentTile, XmlNode currentConstraint)
         {
-            if (Utils.IsNodeNameEqual(node, "Levels"))
-            {
-                XmlNode level = node.AppendChild(Utils.CreateLevelElement(_xmlDocument));
-
-                // Update DataStructures
-                _tilesPerLevel[level] = new List<XmlNode>();
-
-                _neighbourChoicesPerLevel[level] = new string[0];
-
-                _indexesNeighbourPerLevel[level] = new Dictionary<XmlNode, int>();
-
-                _indexesConstraintPerLevel[level] = new Dictionary<XmlNode, int>();
-            }
-            else if (Utils.IsNodeNameEqual(node, "Tiles"))
-            {
-                XmlNode tile = node.AppendChild(Utils.CreateTileElement(_xmlDocument));
-
-                // Update DataStructures
-                _tilesPerLevel[_currentLevel].Add(tile);
-
-                string[] newChoices = new string[_tilesPerLevel[_currentLevel].Count];
-                for (int i = 0; i < newChoices.Length - 1; i++)
-                {
-                    newChoices[i] = _neighbourChoicesPerLevel[_currentLevel][i];
-                    _neighbourChoicesPerLevel[_currentLevel][i] = Utils.GetNodeAttributeValue(_tilesPerLevel[_currentLevel][i], "ID");
-                }
-                newChoices[newChoices.Length - 1] = Utils.GetNodeAttributeValue(tile, "ID");
-                _neighbourChoicesPerLevel[_currentLevel] = newChoices;
-            }
-            else if (Utils.IsNodeNameEqual(node, "Constraints"))
-            {
-                XmlNode constraint = node.AppendChild(Utils.CreateConstraintElement(_xmlDocument));
-
-                // Update DataStructures
-                _indexesConstraintPerLevel[_currentLevel][constraint] = -1;
-            }
-            else if (Utils.IsNodeNameEqual(node, "Neighbours"))
-            {
-                XmlNode neighbour = node.AppendChild(Utils.CreateNeighbourElement(_xmlDocument));
-
-                // Update DataStructures
-                _indexesNeighbourPerLevel[_currentLevel][neighbour] = -1;
-            }
-        }
-
-        public void DeleteNode(XmlNode parent, XmlNode child)
-        {
-            parent.RemoveChild(child);
-
             if (Utils.IsNodeNameEqual(parent, "Levels"))
             {
-                // Update DataStructures
-                _tilesPerLevel.Remove(child);
-                _neighbourChoicesPerLevel.Remove(child);
-                _indexesNeighbourPerLevel.Remove(child);
+                return CreateLevel(parent);
             }
             else if (Utils.IsNodeNameEqual(parent, "Tiles"))
             {
-                // Update DataStructures
-                UpdateDataStructureAfterTileRemoved(child);
+                return CreateTile(parent, currentLevel);
             }
             else if (Utils.IsNodeNameEqual(parent, "Constraints"))
             {
-                // Update DataStructures
-                _indexesConstraintPerLevel[_currentLevel].Remove(child);
+                return CreateConstraint(parent, currentLevel, currentTile);
             }
             else if (Utils.IsNodeNameEqual(parent, "Neighbours"))
             {
-                // Update DataStructures
-                _indexesNeighbourPerLevel[_currentLevel].Remove(child);
+                return CreateNeighbour(parent, currentLevel, currentTile, currentConstraint);
             }
+
+            return null;
         }
 
-        private void UpdateDataStructureAfterTileRemoved(XmlNode tile)
+        private XmlNode CreateLevel(XmlNode parent)
         {
+            XmlNode level = parent.AppendChild(Utils.CreateLevelElement(_xmlDocument));
+
+            _tilesPerLevel[level] = new List<XmlNode>();
+            _neighbourChoicesPerLevel[level] = new string[0];
+            _indexesPerNeighbour[level] = new Dictionary<XmlNode, Dictionary<XmlNode, Dictionary<XmlNode, int>>>();
+            _indexesPerConstraint[level] = new Dictionary<XmlNode, Dictionary<XmlNode, int>>();
+
+            return level;
+        }
+
+        private XmlNode CreateTile(XmlNode parent, XmlNode currentLevel)
+        {
+            XmlNode tile = parent.AppendChild(Utils.CreateTileElement(_xmlDocument));
+
+            _tilesPerLevel[currentLevel].Add(tile);
+
+            _neighbourChoicesPerLevel[currentLevel] = AddNewChoice(tile, _neighbourChoicesPerLevel[currentLevel]);
+            _indexesPerNeighbour[currentLevel][tile] = new Dictionary<XmlNode, Dictionary<XmlNode, int>>();
+            _indexesPerConstraint[currentLevel][tile] = new Dictionary<XmlNode, int>();
+
+            return tile;
+        }
+
+        private string[] AddNewChoice(XmlNode tile, string[] oldChoices)
+        {
+            string[] newChoices = new string[oldChoices.Length + 1];
+
+            for (int i = 0; i < newChoices.Length - 1; i++)
+            {
+                newChoices[i] = oldChoices[i];
+            }
+            newChoices[newChoices.Length - 1] = Utils.GetNodeAttributeValue(tile, "ID");
+
+            return newChoices;
+        }
+
+        private XmlNode CreateConstraint(XmlNode parent, XmlNode currentLevel, XmlNode currentTile)
+        {
+            XmlNode constraint = parent.AppendChild(Utils.CreateConstraintElement(_xmlDocument));
+
+            // Update DataStructures
+            _indexesPerNeighbour[currentLevel][currentTile][constraint] = new Dictionary<XmlNode, int>();
+            _indexesPerConstraint[currentLevel][currentTile][constraint] = -1;
+
+            return constraint;
+        }
+
+        private XmlNode CreateNeighbour(XmlNode parent, XmlNode currentLevel, XmlNode currentTile, XmlNode currentConstraint)
+        {
+            XmlNode neighbour = parent.AppendChild(Utils.CreateNeighbourElement(_xmlDocument));
+
+            _indexesPerNeighbour[currentLevel][currentTile][currentConstraint][neighbour] = -1;
+
+            return neighbour;
+        }
+
+        public void DeleteNode(XmlNode parent, XmlNode child, XmlNode currentLevel, XmlNode currentTile, XmlNode currentConstraint)
+        {
+            if (Utils.IsNodeNameEqual(parent, "Levels"))
+            {
+                DeleteLevel(child);
+            }
+            else if (Utils.IsNodeNameEqual(parent, "Tiles"))
+            {
+                DeleteTile(child, currentLevel);
+            }
+            else if (Utils.IsNodeNameEqual(parent, "Constraints"))
+            {
+                DeleteConstraint(child, currentLevel, currentTile);
+            }
+            else if (Utils.IsNodeNameEqual(parent, "Neighbours"))
+            {
+                DeleteNeighbour(child, currentLevel, currentTile, currentConstraint);
+            }
+
+            parent.RemoveChild(child);
+        }
+
+        private void DeleteLevel(XmlNode level)
+        {
+            _tilesPerLevel.Remove(level);
+            _neighbourChoicesPerLevel.Remove(level);
+            _indexesPerNeighbour.Remove(level);
+        }
+
+        private void DeleteTile(XmlNode tile, XmlNode currentLevel)
+        {
+            foreach (XmlNode constraint in Utils.GetConstraintNodes(tile))
+            {
+                DeleteNode(constraint.ParentNode, constraint, currentLevel, tile, constraint);
+            }
+
             int indexTileToRemove = _tilesPerLevel[_currentLevel].IndexOf(tile);
             _tilesPerLevel[_currentLevel].Remove(tile);
 
@@ -352,35 +382,186 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
             }
             _neighbourChoicesPerLevel[_currentLevel] = newChoices;
 
-            List<XmlNode> neighboursToRemove = new List<XmlNode>();
-            foreach (XmlNode neighbour in new List<XmlNode>(_indexesNeighbourPerLevel[_currentLevel].Keys))
+            List<XmlNode> tiles = new List<XmlNode>();
+            List<XmlNode> constraints = new List<XmlNode>();
+            List<XmlNode> neighbours = new List<XmlNode>();
+
+            foreach (XmlNode t in _indexesPerNeighbour[currentLevel].Keys)
             {
-                if (_indexesNeighbourPerLevel[_currentLevel][neighbour] > indexTileToRemove)
+                foreach (XmlNode c in _indexesPerNeighbour[currentLevel][t].Keys)
                 {
-                    _indexesNeighbourPerLevel[_currentLevel][neighbour]--;
-                }
-                else if (Utils.IsNodeAttributeEqual(neighbour, "ID", Utils.GetNodeAttributeValue(tile, "ID")))
-                {
-                    neighboursToRemove.Add(neighbour);
+                    foreach (XmlNode n in _indexesPerNeighbour[currentLevel][t][c].Keys)
+                    {
+                        tiles.Add(t);
+                        constraints.Add(c);
+                        neighbours.Add(n);
+                    }
                 }
             }
-            for (int i = 0; i < neighboursToRemove.Count; i++)
+
+            for (int i = 0; i < neighbours.Count; i++)
             {
-                XmlNode constraint = neighboursToRemove[i].ParentNode;
-                constraint.RemoveChild(neighboursToRemove[i]);
-                if (constraint.ChildNodes.Count == 0)
-                {
-                    constraint.ParentNode.ParentNode.RemoveChild(constraint.ParentNode);
-                }
-                _indexesNeighbourPerLevel[_currentLevel].Remove(neighboursToRemove[i]);
+                if (_indexesPerNeighbour[currentLevel][tiles[i]][constraints[i]][neighbours[i]] <= indexTileToRemove) continue;
+                _indexesPerNeighbour[currentLevel][tiles[i]][constraints[i]][neighbours[i]]--;
             }
+
+            _indexesPerNeighbour[currentLevel].Remove(tile);
+            _indexesPerConstraint[currentLevel].Remove(tile);
+        }
+
+        private void DeleteConstraint(XmlNode constraint, XmlNode currentLevel, XmlNode currentTile)
+        {
+            foreach (XmlNode neighbour in Utils.GetNeighbourNodes(constraint))
+            {
+                DeleteNode(neighbour.ParentNode, neighbour, currentLevel, currentTile, constraint);
+            }
+
+            _indexesPerNeighbour[currentLevel][currentTile].Remove(constraint);
+            _indexesPerConstraint[currentLevel][currentTile].Remove(constraint);
+        }
+
+        private void DeleteNeighbour(XmlNode neighbour, XmlNode currentLevel, XmlNode currentTile, XmlNode currentConstraint)
+        {
+            _indexesPerNeighbour[currentLevel][currentTile][currentConstraint].Remove(neighbour);
+
+            XmlNode correspondingTile = Utils.GetCorrespondingTile(_tilesPerLevel[currentLevel], neighbour);
+            string currentTileID = Utils.GetNodeAttributeValue(currentTile, "ID");
+            string correspondingTileID = Utils.GetNodeAttributeValue(correspondingTile, "ID");
+            string constraintType = Utils.GetNodeAttributeValue(Utils.GetConstraintNodeFromNeighbour(neighbour), "Type");
+            string oppositeConstraintType = Utils.GetOppositeConstraintType(constraintType);
+
+            if (correspondingTileID.Equals(currentTileID)) return;
+            if (!Utils.HasNodeListAttributeEqual(Utils.GetConstraintNodes(correspondingTile), "Type", oppositeConstraintType, out XmlNode oldConstraint))
+            {
+                return;
+            }
+            XmlNodeList neighbours = Utils.GetNeighbourNodes(oldConstraint);
+            if (!Utils.HasNodeListAttributeEqual(neighbours, "ID", currentTileID, out XmlNode oldNeighbour))
+            {
+                return;
+            }
+
+            oldNeighbour.ParentNode.RemoveChild(oldNeighbour);
+            _indexesPerNeighbour[currentLevel][correspondingTile][oldConstraint].Remove(oldNeighbour);
+        }
+
+        public void EditLevel(XmlNode level)
+        {
+            return;
+        }
+
+        public void EditTile(XmlNode tile)
+        {
+            int index = _tilesPerLevel[_currentLevel].IndexOf(tile);
+            _neighbourChoicesPerLevel[_currentLevel][index] = Utils.GetNodeAttributeValue(_tilesPerLevel[_currentLevel][index], "ID");
+            return;
+        }
+
+        public void EditConstraint(XmlNode currentConstraint, int newIndex, int oldIndex)
+        {
+            _indexesPerConstraint[_currentLevel][_currentTile][currentConstraint] = newIndex;
+
+            string newType = _possibleConstraintTypes[newIndex];
+            string oldType = oldIndex == -1 ? null : _possibleConstraintTypes[oldIndex];
+            string oppositeNewType = Utils.GetOppositeConstraintType(newType);
+            string oppositeOldType = oldType == null ? null : Utils.GetOppositeConstraintType(oldType);
+            int oppositeNewIndex = _possibleConstraintTypes.ToList().IndexOf(oppositeNewType);
+            string currentTileID = Utils.GetNodeAttributeValue(_currentTile, "ID");
+
+            Utils.SetNodeAttributeValue(currentConstraint, "Type", newType);
+
+            foreach (XmlNode neighbour in Utils.GetNeighbourNodes(currentConstraint))
+            {
+                XmlNode tile = Utils.GetCorrespondingTile(_tilesPerLevel[_currentLevel], neighbour);
+
+                // Adding new
+                XmlNodeList constraints = Utils.GetConstraintNodes(tile);
+                if (!Utils.HasNodeListAttributeEqual(constraints, "Type", oppositeNewType, out XmlNode newConstraint))
+                {
+                    newConstraint = CreateConstraint(Utils.GetConstraintsNodeList(tile), _currentLevel, tile);
+                    Utils.SetNodeAttributeValue(newConstraint, "Type", oppositeNewType);
+                    _indexesPerConstraint[_currentLevel][tile][newConstraint] = oppositeNewIndex;
+                }
+                XmlNodeList neighbours = Utils.GetNeighbourNodes(newConstraint);
+                if (!Utils.HasNodeListAttributeEqual(neighbours, "ID", currentTileID, out XmlNode newNeighbour))
+                {
+                    newNeighbour = CreateNeighbour(Utils.GetNeighboursNodeList(newConstraint), _currentLevel, tile, newConstraint);
+                    Utils.SetNodeAttributeValue(newNeighbour, "ID", currentTileID);
+                    _indexesPerNeighbour[_currentLevel][tile][newConstraint][newNeighbour] = _tilesPerLevel[_currentLevel].IndexOf(_currentTile);
+                }
+
+                if (oldType == null) continue;
+
+                //Deleting old
+                if (!Utils.HasNodeListAttributeEqual(constraints, "Type", oppositeOldType, out XmlNode oldConstraint))
+                {
+                    continue;
+                }
+
+                neighbours = Utils.GetNeighbourNodes(oldConstraint);
+                if (!Utils.HasNodeListAttributeEqual(neighbours, "ID", currentTileID, out XmlNode oldNeighbour))
+                {
+                    continue;
+                }
+                oldNeighbour.ParentNode.RemoveChild(oldNeighbour);
+                _indexesPerNeighbour[_currentLevel][tile][oldConstraint].Remove(oldNeighbour);
+            }
+        }
+
+        public void EditNeighbour(XmlNode neighbour, int newIndex, int oldIndex)
+        {
+            _indexesPerNeighbour[_currentLevel][_currentTile][_currentConstraint][neighbour] = newIndex;
+
+            string newValue = Utils.GetNodeAttributeValue(_tilesPerLevel[_currentLevel][newIndex], "ID");
+            string oldValue = oldIndex == -1 ? null : Utils.GetNodeAttributeValue(_tilesPerLevel[_currentLevel][oldIndex], "ID");
+            string currentTileID = Utils.GetNodeAttributeValue(_currentTile, "ID");
+            XmlNode newTile = _tilesPerLevel[_currentLevel][newIndex];
+            string constraintType = Utils.GetNodeAttributeValue(Utils.GetConstraintNodeFromNeighbour(neighbour), "Type");
+            string oppositeConstraintType = Utils.GetOppositeConstraintType(constraintType);
+            int oppositeNewIndex = _possibleConstraintTypes.ToList().IndexOf(oppositeConstraintType);
+            int currentTileIndex = _tilesPerLevel[_currentLevel].IndexOf(_currentTile);
+
+            Utils.SetNodeAttributeValue(neighbour, "ID", newValue);
+
+            // AddingNew
+            if (!Utils.HasNodeListAttributeEqual(Utils.GetConstraintNodes(newTile), "Type", oppositeConstraintType, out XmlNode newConstraint))
+            {
+                newConstraint = CreateConstraint(Utils.GetConstraintsNodeList(newTile), _currentLevel, newTile);
+                Utils.SetNodeAttributeValue(newConstraint, "Type", oppositeConstraintType);
+                _indexesPerConstraint[_currentLevel][newTile][newConstraint] = oppositeNewIndex;
+            }
+
+            XmlNodeList neighbours = Utils.GetNeighbourNodes(newConstraint);
+            if (!Utils.HasNodeListAttributeEqual(neighbours, "ID", currentTileID, out XmlNode newNeighbour))
+            {
+                newNeighbour = CreateNeighbour(Utils.GetNeighboursNodeList(newConstraint), _currentLevel, newTile, newConstraint);
+                Utils.SetNodeAttributeValue(newNeighbour, "ID", currentTileID);
+                _indexesPerNeighbour[_currentLevel][newTile][newConstraint][newNeighbour] = currentTileIndex;
+            }
+
+            if (oldValue == null) return;
+
+            // DeletingOld
+            XmlNode oldTile = _tilesPerLevel[_currentLevel][oldIndex];
+
+            if (!Utils.HasNodeListAttributeEqual(Utils.GetConstraintNodes(oldTile), "Type", oppositeConstraintType, out XmlNode oldConstraint))
+            {
+                return;
+            }
+            neighbours = Utils.GetNeighbourNodes(oldConstraint);
+            if (!Utils.HasNodeListAttributeEqual(neighbours, "ID", oldValue, out XmlNode oldNeighbour))
+            {
+                return;
+            }
+            oldNeighbour.ParentNode.RemoveChild(oldNeighbour);
+            _indexesPerNeighbour[_currentLevel][oldTile][oldConstraint].Remove(oldNeighbour);
         }
 
         #endregion
 
         #region Debug
 
-        public string Debug()
+        public string PrintDebug()
         {
             string text = string.Empty;
 
@@ -461,14 +642,21 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
             string text = string.Empty;
 
             text = string.Concat(text, "IndexesNeighbourPerLevel\n");
-            foreach (XmlNode level in _indexesNeighbourPerLevel.Keys)
+            foreach (XmlNode level in _indexesPerNeighbour.Keys)
             {
                 text = string.Concat(text, string.Format("\tLevel: {0}\n", Utils.GetHierarchyButtonText(level)));
-                foreach (XmlNode neighbour in _indexesNeighbourPerLevel[level].Keys)
+                foreach (XmlNode tile in _indexesPerNeighbour[level].Keys)
                 {
-                    int index = _indexesNeighbourPerLevel[level][neighbour];
-                    XmlNode tile = index == -1 ? null : _tilesPerLevel[level][index];
-                    text = string.Concat(text, string.Format("\t\tNeighbour: {0} ({1})\n", index, index == -1 ? null : Utils.GetHierarchyButtonText(tile)));
+                    text = string.Concat(text, string.Format("\t\tTile: {0}\n", Utils.GetHierarchyButtonText(tile)));
+                    foreach (XmlNode constraint in _indexesPerNeighbour[level][tile].Keys)
+                    {
+                        text = string.Concat(text, string.Format("\t\t\tConstraint: {0}\n", Utils.GetNodeAttributeValue(constraint, "Type")));
+                        foreach (XmlNode neighbour in _indexesPerNeighbour[level][tile][constraint].Keys)
+                        {
+                            int index = _indexesPerNeighbour[level][tile][constraint][neighbour];
+                            text = string.Concat(text, string.Format("\t\t\t\tNeighbour: {0} ({1})\n", index, index == -1 ? null : Utils.GetHierarchyButtonText(_tilesPerLevel[level][index])));
+                        }
+                    }
                 }
             }
 
@@ -480,14 +668,18 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
             string text = string.Empty;
 
             text = string.Concat(text, "IndexesConstraintPerLevel\n");
-            foreach (XmlNode level in _indexesConstraintPerLevel.Keys)
+            foreach (XmlNode level in _indexesPerConstraint.Keys)
             {
                 text = string.Concat(text, string.Format("\tLevel: {0}\n", Utils.GetHierarchyButtonText(level)));
-                foreach (XmlNode constraint in _indexesConstraintPerLevel[level].Keys)
+                foreach (XmlNode tile in _indexesPerConstraint[level].Keys)
                 {
-                    int index = _indexesConstraintPerLevel[level][constraint];
-                    string type = index == -1 ? null : _possibleConstraintTypes[index];
-                    text = string.Concat(text, string.Format("\t\tConstraint: {0} ({1})\n", index, index == -1 ? null : type));
+                    text = string.Concat(text, string.Format("\t\tTile: {0}\n", Utils.GetHierarchyButtonText(tile)));
+                    foreach (XmlNode constraint in _indexesPerConstraint[level][tile].Keys)
+                    {
+                        int index = _indexesPerConstraint[level][tile][constraint];
+                        string type = index == -1 ? null : _possibleConstraintTypes[index];
+                        text = string.Concat(text, string.Format("\t\t\tConstraint: {0} ({1})\n", index, index == -1 ? null : type));
+                    }
                 }
             }
 

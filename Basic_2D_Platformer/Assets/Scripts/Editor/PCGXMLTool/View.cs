@@ -173,7 +173,7 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
                 XmlNode child = childrenList[i];
                 DrawChildName(child);
                 DrawChildAttributes(child);
-                DrawChildDeleting(child);
+                DrawDeleting(child);
 
                 GUILayout.EndHorizontal();
 
@@ -223,59 +223,45 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
                     continue;
                 }
 
+                if (Utils.IsNodeNameEqual(child, "Level") && Utils.IsAttributeNameEqual(attribute, "ID"))
+                {
+                    GUILayout.Space(20);
+                    GUILayout.Label(attribute.Name, GUILayout.ExpandWidth(false));
+                    attribute.Value = GUILayout.TextField(attribute.Value, GUILayout.Width(TEXTFIELDS_ATTRIBUTE_WIDTH));
+                    _model.EditLevel(child);
+                    continue;
+                }
+
+                if (Utils.IsNodeNameEqual(child, "Tile") && Utils.IsAttributeNameEqual(attribute, "ID"))
+                {
+                    GUILayout.Space(20);
+                    GUILayout.Label(attribute.Name, GUILayout.ExpandWidth(false));
+                    attribute.Value = GUILayout.TextField(attribute.Value, GUILayout.Width(TEXTFIELDS_ATTRIBUTE_WIDTH));
+                    _model.EditTile(child);
+                    continue;
+                }
+
                 if (Utils.IsNodeNameEqual(child, "Constraint") && Utils.IsAttributeNameEqual(attribute, "Type"))
                 {
+                    GUILayout.Space(20);
                     string[] choices = _model.GetConstraintChoices();
                     int oldIndex = _model.GetConstraintIndex(child);
                     int newIndex = EditorGUILayout.Popup(oldIndex, choices, GUILayout.ExpandWidth(false));
-                    _model.SetConstraintIndex(child, newIndex);
-
-                    if (newIndex < 0) continue;
-
-                    _model.SetConstraintValue(child, newIndex);
+                    if (newIndex == oldIndex) continue;
+                    _model.EditConstraint(child, newIndex, oldIndex);
                     continue;
                 }
 
                 if (Utils.IsNodeNameEqual(child, "Neighbour") && Utils.IsAttributeNameEqual(attribute, "ID"))
                 {
+                    GUILayout.Space(20);
                     string[] choices = _model.GetNeighbourChoices();
                     int oldIndex = _model.GetNeighbourIndex(child);
                     int newIndex = EditorGUILayout.Popup(oldIndex, choices, GUILayout.ExpandWidth(false));
-                    _model.SetNeighbourIndex(child, newIndex);
-
-                    if (newIndex < 0) continue;
-
-                    _model.SetNeighbourValue(child, newIndex);
+                    if (newIndex == oldIndex) continue;
+                    _model.EditNeighbour(child, newIndex, oldIndex);
                     continue;
                 }
-                //if (child.Name.Equals("Neighbour") && attribute.Name.Equals("ID"))
-                //{
-                //    int oldIndex = _popupIndexesPerNeighbour[_currentLevel][child];
-                //   int newIndex = EditorGUILayout.Popup(oldIndex, GetTilesIDs(_tilesPerLevel[_currentLevel]), GUILayout.ExpandWidth(false));
-                //    _popupIndexesPerNeighbour[_currentLevel][child] = newIndex;
-
-                //    if (newIndex < 0) continue;
-
-                //    child.Attributes["ID"].Value = _tilesPerLevel[_currentLevel][newIndex].Attributes["ID"].Value;
-
-                //    if (newIndex != oldIndex) UpdateMutualTilesConstraint(oldIndex, newIndex, child);
-
-                //    continue;
-                //}
-
-                //if (attribute.Name.Equals("Type"))
-                //{
-                //    int oldIndex = _popupIndexesPerConstraint[_currentLevel][child];
-                //    int newIndex = EditorGUILayout.Popup(oldIndex, _possibleConstraints, GUILayout.ExpandWidth(false));
-                //    _popupIndexesPerConstraint[_currentLevel][child] = newIndex;
-
-                //    if (newIndex < 0) continue;
-
-                //    if (newIndex != oldIndex) UpdateMutualTilesConstraint(oldIndex, newIndex, child);
-
-                //    child.Attributes["Type"].Value = _possibleConstraints[newIndex];
-                //    continue;
-                //}
 
                 GUILayout.Space(20);
                 GUILayout.Label(attribute.Name, GUILayout.ExpandWidth(false));
@@ -310,13 +296,13 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
             return isAccepted ? DragAndDrop.objectReferences[0] : null;
         }
 
-        private void DrawChildDeleting(XmlNode child)
+        private void DrawDeleting(XmlNode child)
         {
             if (!Utils.HasNodeAttribute(child.ParentNode, "List")) return;
 
             if (GUILayout.Button("-", GUILayout.ExpandWidth(false)))
             {
-                _model.DeleteNode(child.ParentNode, child);
+                _model.DeleteNode(child.ParentNode, child, _model.GetCurrentLevel(), _model.GetCurrentTile(), _model.GetCurrentConstraint());
             }
         }
 
@@ -324,10 +310,10 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
         {
             foreach (XmlNode childNode in currentNode.ChildNodes)
             {
-                if (!Utils.HasNodeAttribute(childNode, "List")) continue;
+                if (!Utils.HasNodeAttribute(childNode, "List") || Utils.IsNodeNameEqual(childNode,"Settings")) continue;
                 if (GUILayout.Button("+", GUILayout.ExpandWidth(false)))
                 {
-                    _model.CreateNode(childNode);
+                    _model.CreateNode(childNode, _model.GetCurrentLevel(), _model.GetCurrentTile(), _model.GetCurrentConstraint());
                 }
             }
         }
@@ -365,7 +351,7 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
 
             if (GUILayout.Button("Debug", GUILayout.Width(BUTTON_FILE_ACTIONS_WIDTH)))
             {
-                Debug.Log(_model.Debug());
+                Debug.Log(_model.PrintDebug());
             }
 
             GUILayout.EndVertical();

@@ -35,6 +35,70 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
             return constraint["Neighbours"].SelectNodes("Neighbour");
         }
     
+        public static XmlNode GetLevelsNodeList(XmlDocument document)
+        {
+            return document["Root"]["Levels"];
+        }
+
+        public static XmlNode GetTilesNodeList(XmlNode level)
+        {
+            return level["WFC"]["Tiles"];
+        }
+
+        public static XmlNode GetConstraintsNodeList(XmlNode tile)
+        {
+            return tile["Constraints"];
+        }
+
+        public static XmlNode GetNeighboursNodeList(XmlNode constraint)
+        {
+            return constraint["Neighbours"];
+        }
+
+        public static XmlNode GetLevelNodeFromTile(XmlNode tile)
+        {
+            return tile.ParentNode.ParentNode.ParentNode;
+        }
+
+        public static XmlNode GetTileNodeFromConstraint(XmlNode constraint)
+        {
+            return constraint.ParentNode.ParentNode;
+        }
+
+        public static XmlNode GetConstraintNodeFromNeighbour(XmlNode neighbour)
+        {
+            return neighbour.ParentNode.ParentNode;
+        }
+
+        public static XmlNode GetCorrespondingTile(List<XmlNode> tiles, XmlNode neighbour)
+        {
+            for (int i = 0; i < tiles.Count; i++)
+            {
+                XmlNode tile = tiles[i];
+                if (!IsNodeAttributeEqual(tiles[i], "ID", GetNodeAttributeValue(neighbour, "ID"))) continue;
+                return tiles[i];
+            }
+
+            return null;
+        }
+
+        public static List<XmlNode> GetCorrespondingNeighbours(XmlNode chosenTile, XmlNode level)
+        {
+            List<XmlNode> neighboursToReturn = new List<XmlNode>();
+            foreach (XmlNode tile in GetTileNodes(level))
+            {
+                foreach (XmlNode constraint in GetConstraintNodes(tile))
+                {
+                    foreach (XmlNode neighbour in GetNeighbourNodes(constraint))
+                    {
+                        if (!IsNodeAttributeEqual(neighbour, "ID", GetNodeAttributeValue(chosenTile, "ID"))) continue;
+                        neighboursToReturn.Add(neighbour);
+                    }
+                }
+            }
+            return neighboursToReturn;
+        }
+
         public static string GetNodeAttributeValue(XmlNode node, string attribute)
         {
             return node.Attributes[attribute].Value;
@@ -68,6 +132,23 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
         public static bool IsNodeNameEqual(XmlNode node, string value)
         {
             return node.Name.Equals(value);
+        }
+
+        public static bool HasNodeChildren(XmlNode node)
+        {
+            return node.ChildNodes.Count > 0;
+        }
+
+        public static bool HasNodeListAttributeEqual(XmlNodeList nodes, string attribute, string value, out XmlNode foundNode)
+        {
+            foundNode = null;
+            foreach (XmlNode node in nodes) 
+            {
+                if (!IsNodeAttributeEqual(node, attribute, value)) continue;
+                foundNode = node;
+                break;
+            }
+            return foundNode != null;
         }
 
         #endregion
@@ -285,7 +366,7 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
 
         #region General
 
-        private static string TakeOppositeConstraintType(string contraintType)
+        public static string GetOppositeConstraintType(string contraintType)
         {
             string oppositeConstraintType = string.Empty;
 
