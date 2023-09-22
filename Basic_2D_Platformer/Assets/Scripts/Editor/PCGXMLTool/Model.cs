@@ -131,7 +131,7 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
                         string constraintType = Utils.GetNodeAttributeValue(constraint, "Type");
                         for (int i = 0; i < _possibleConstraintTypes.Length; i++)
                         {
-                            if (!Utils.IsNodeAttributeEqual(constraint, "Type", constraintType)) continue;
+                            if (!Utils.IsNodeAttributeEqual(constraint, "Type", _possibleConstraintTypes[i])) continue;
                             _indexesPerConstraint[level][tile][constraint] = i;
                             break;
                         }

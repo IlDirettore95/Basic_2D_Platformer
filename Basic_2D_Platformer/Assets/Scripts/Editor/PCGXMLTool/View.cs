@@ -163,7 +163,7 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
             GUILayout.BeginArea(_currentChildrenRect);
             GUILayout.BeginVertical();
             GUILayout.Label("CurrentChildren");
-
+            _currentChildrenScrollPosition = GUILayout.BeginScrollView(_currentChildrenScrollPosition, GUILayout.Width(_currentChildrenRect.width - 10), GUILayout.Height(_currentChildrenRect.height - 40));
             XmlNode currentNode = _model.GetCurrentNode();
             List<XmlNode> childrenList = Utils.GetCurrentChildren(currentNode);
             for (int i = 0; i < childrenList.Count; i++) 
@@ -180,6 +180,7 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
             }
             DrawAdding(currentNode);
 
+            GUILayout.EndScrollView();
             GUILayout.EndVertical();
             GUILayout.EndArea();
         }

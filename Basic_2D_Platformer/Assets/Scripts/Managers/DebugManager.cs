@@ -98,8 +98,7 @@ namespace GMDG.Basic2DPlatformer.System
             { 
                 text += pos.ToString() + "-";
             }
-
-            text = text.Remove(text.Length - 1);
+            if (text.Length > 0) text = text.Remove(text.Length - 1);
 
             return text;
         }

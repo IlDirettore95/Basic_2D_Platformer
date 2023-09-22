@@ -69,7 +69,10 @@ namespace GMDG.Basic2DPlatformer.System
         private void LoadNextLevel(object[] args)
         {
             _currentLevel += 1;
-            if (_currentLevel < _numberOfLevels) LoadFirstLevel(null);
+            if (_currentLevel < _numberOfLevels)
+            {
+                GenerateLevel();
+            }
             else
             {
                 Delete();

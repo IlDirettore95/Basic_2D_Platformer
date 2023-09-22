@@ -2,44 +2,334 @@
   <Levels List="">
     <Level ID="FOREST">
       <Settings List="">
-        <GridSize Element="" x="0" y="0" />
-        <CellSize Element="" x="0" y="0" />
-        <StartingCell Element="" x="0" y="0" />
-        <EndingCell Element="" x="0" y="0" />
+        <GridSize Element="" x="10" y="6" />
+        <CellSize Element="" x="15" y="10" />
+        <StartingCell Element="" x="0" y="4" />
+        <EndingCell Element="" x="9" y="0" />
       </Settings>
       <WFC>
         <Tiles List="">
-          <Tile ID="START" Frequency="">
-            <Prefab Element="" Path="" />
+          <Tile ID="START" Frequency="1">
+            <Prefab Element="" Path="Prefabs/Chunks/Level 1/Start" />
             <Constraints List="">
+              <Constraint Type="EAST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="GORGE_L" />
+                  <Neighbour Element="" ID="TERRAIN" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="SOUTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="GROUND" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="NORTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="AIR" />
+                </Neighbours>
+              </Constraint>
+            </Constraints>
+          </Tile>
+          <Tile ID="END" Frequency="1">
+            <Prefab Element="" Path="Prefabs/Chunks/Level 1/End" />
+            <Constraints List="">
+              <Constraint Type="WEST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="GORGE_L" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="NORTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="AIR" />
+                </Neighbours>
+              </Constraint>
+            </Constraints>
+          </Tile>
+          <Tile ID="GORGE_R" Frequency="3">
+            <Prefab Element="" Path="Prefabs/Chunks/Level 1/GorgeRight" />
+            <Constraints List="">
+              <Constraint Type="SOUTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="GROUND_R" />
+                  <Neighbour Element="" ID="GROUND_B_R" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="WEST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="GORGE_L" />
+                  <Neighbour Element="" ID="TERRAIN" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="EAST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="GORGE_L" />
+                  <Neighbour Element="" ID="TERRAIN" />
+                  <Neighbour Element="" ID="GROUND_B_R" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="NORTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="AIR" />
+                  <Neighbour Element="" ID="GROUND" />
+                  <Neighbour Element="" ID="GROUND_R" />
+                  <Neighbour Element="" ID="GROUND_L" />
+                </Neighbours>
+              </Constraint>
+            </Constraints>
+          </Tile>
+          <Tile ID="GORGE_L" Frequency="3">
+            <Prefab Element="" Path="Prefabs/Chunks/Level 1/GorgeLeft" />
+            <Constraints List="">
+              <Constraint Type="WEST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="START" />
+                  <Neighbour Element="" ID="GORGE_R" />
+                  <Neighbour Element="" ID="GROUND_B_L" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="EAST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="END" />
+                  <Neighbour Element="" ID="GORGE_R" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="SOUTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="GROUND_L" />
+                  <Neighbour Element="" ID="GROUND_B_L" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="NORTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="AIR" />
+                  <Neighbour Element="" ID="GROUND" />
+                  <Neighbour Element="" ID="GROUND_R" />
+                  <Neighbour Element="" ID="GROUND_L" />
+                </Neighbours>
+              </Constraint>
+            </Constraints>
+          </Tile>
+          <Tile ID="GROUND" Frequency="6">
+            <Prefab Element="" Path="Prefabs/Chunks/Level 1/Ground" />
+            <Constraints List="">
+              <Constraint Type="NORTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="TERRAIN" />
+                  <Neighbour Element="" ID="START" />
+                  <Neighbour Element="" ID="GROUND_B_R" />
+                  <Neighbour Element="" ID="GROUND_B_L" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="EAST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="GROUND_L" />
+                  <Neighbour Element="" ID="GROUND_B_L" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="WEST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="GROUND_R" />
+                  <Neighbour Element="" ID="GROUND_B_R" />
+                </Neighbours>
+              </Constraint>
               <Constraint Type="ALL">
                 <Neighbours List="">
-                  <Neighbour Element="" ID="GORGE" />
+                  <Neighbour Element="" ID="GROUND" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="SOUTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="TERRAIN" />
+                  <Neighbour Element="" ID="GORGE_R" />
+                  <Neighbour Element="" ID="GORGE_L" />
+                </Neighbours>
+              </Constraint>
+            </Constraints>
+          </Tile>
+          <Tile ID="GROUND_R" Frequency="5">
+            <Prefab Element="" Path="Prefabs/Chunks/Level 1/GroundRight" />
+            <Constraints List="">
+              <Constraint Type="NORTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="GORGE_R" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="EAST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="GROUND" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="VERTICAL">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="GROUND_R" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="WEST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="GROUND_L" />
+                  <Neighbour Element="" ID="AIR" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="SOUTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="GROUND_B_R" />
+                  <Neighbour Element="" ID="TERRAIN" />
+                  <Neighbour Element="" ID="GORGE_R" />
+                  <Neighbour Element="" ID="GORGE_L" />
+                </Neighbours>
+              </Constraint>
+            </Constraints>
+          </Tile>
+          <Tile ID="GROUND_L" Frequency="5">
+            <Prefab Element="" Path="Prefabs/Chunks/Level 1/GroundLeft" />
+            <Constraints List="">
+              <Constraint Type="NORTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="GORGE_L" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="WEST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="GROUND" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="EAST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="GROUND_R" />
+                  <Neighbour Element="" ID="AIR" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="VERTICAL">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="GROUND_L" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="SOUTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="GROUND_B_L" />
+                  <Neighbour Element="" ID="TERRAIN" />
+                  <Neighbour Element="" ID="GORGE_R" />
+                  <Neighbour Element="" ID="GORGE_L" />
+                </Neighbours>
+              </Constraint>
+            </Constraints>
+          </Tile>
+          <Tile ID="TERRAIN" Frequency="4">
+            <Prefab Element="" Path="Prefabs/Chunks/Level 1/Terrain" />
+            <Constraints List="">
+              <Constraint Type="WEST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="START" />
+                  <Neighbour Element="" ID="GORGE_R" />
+                  <Neighbour Element="" ID="GROUND_B_L" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="SOUTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="GROUND" />
+                  <Neighbour Element="" ID="GORGE_L" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="EAST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="GORGE_R" />
+                  <Neighbour Element="" ID="GROUND_B_R" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="NORTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="AIR" />
+                  <Neighbour Element="" ID="GROUND" />
+                  <Neighbour Element="" ID="GROUND_R" />
+                  <Neighbour Element="" ID="GROUND_L" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="HORIZONTAL">
+                <Neighbours List="">
                   <Neighbour Element="" ID="TERRAIN" />
                 </Neighbours>
               </Constraint>
             </Constraints>
           </Tile>
-          <Tile ID="END" Frequency="">
-            <Prefab Element="" Path="" />
-            <Constraints List="" />
-          </Tile>
-          <Tile ID="GORGE" Frequency="">
-            <Prefab Element="" Path="" />
+          <Tile ID="AIR" Frequency="10">
+            <Prefab Element="" Path="Prefabs/Chunks/Level 1/Air" />
             <Constraints List="">
               <Constraint Type="ALL">
                 <Neighbours List="">
+                  <Neighbour Element="" ID="AIR" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="SOUTH">
+                <Neighbours List="">
                   <Neighbour Element="" ID="START" />
+                  <Neighbour Element="" ID="END" />
+                  <Neighbour Element="" ID="GORGE_R" />
+                  <Neighbour Element="" ID="GORGE_L" />
+                  <Neighbour Element="" ID="TERRAIN" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="EAST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="GROUND_R" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="WEST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="GROUND_L" />
                 </Neighbours>
               </Constraint>
             </Constraints>
           </Tile>
-          <Tile ID="TERRAIN" Frequency="">
-            <Prefab Element="" Path="" />
+          <Tile ID="GROUND_B_R" Frequency="3">
+            <Prefab Element="" Path="Prefabs/Chunks/Level 1/GroundBottomRight" />
             <Constraints List="">
-              <Constraint Type="ALL">
+              <Constraint Type="NORTH">
                 <Neighbours List="">
-                  <Neighbour Element="" ID="START" />
+                  <Neighbour Element="" ID="GROUND_R" />
+                  <Neighbour Element="" ID="GORGE_R" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="SOUTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="GROUND" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="EAST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="GROUND" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="WEST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="TERRAIN" />
+                  <Neighbour Element="" ID="GORGE_R" />
+                </Neighbours>
+              </Constraint>
+            </Constraints>
+          </Tile>
+          <Tile ID="GROUND_B_L" Frequency="3">
+            <Prefab Element="" Path="Prefabs/Chunks/Level 1/GroundBottomLeft" />
+            <Constraints List="">
+              <Constraint Type="NORTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="GORGE_L" />
+                  <Neighbour Element="" ID="GROUND_L" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="WEST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="GROUND" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="SOUTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="GROUND" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="EAST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="TERRAIN" />
+                  <Neighbour Element="" ID="GORGE_L" />
                 </Neighbours>
               </Constraint>
             </Constraints>

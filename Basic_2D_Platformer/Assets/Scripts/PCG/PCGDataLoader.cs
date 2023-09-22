@@ -17,7 +17,7 @@ namespace GMDG.Basic2DPlatformer.PCG
             XmlDocument xmlDocument = new XmlDocument();
             TextAsset textAsset = Resources.Load<TextAsset>("XML/WorldGenerationData");
             xmlDocument.LoadXml(textAsset.text);
-            XmlNodeList xmlLevels = xmlDocument.DocumentElement.SelectNodes("/Levels/Level");
+            XmlNodeList xmlLevels = xmlDocument.SelectNodes("Root/Levels/Level");
 
             return xmlLevels.Count;
         }
@@ -31,7 +31,7 @@ namespace GMDG.Basic2DPlatformer.PCG
             XmlDocument xmlDocument = new XmlDocument();
             TextAsset textAsset = Resources.Load<TextAsset>("XML/WorldGenerationData");
             xmlDocument.LoadXml(textAsset.text);
-            XmlNodeList xmlLevels = xmlDocument.SelectNodes("/Levels/Level");
+            XmlNodeList xmlLevels = xmlDocument.SelectNodes("Root/Levels/Level");
 
             XmlNode level = xmlLevels[currentLevel];
 
@@ -146,9 +146,9 @@ namespace GMDG.Basic2DPlatformer.PCG
 
                     string id = tilesList[i].Attributes["ID"].Value;
                     XmlNodeList neighbours = node["Neighbours"].ChildNodes;
-                    string direction = node.Attributes["Direction"].Value;
+                    string directionType = node.Attributes["Type"].Value;
 
-                    List<Direction2D> directions = AddPossibleDirection(direction);
+                    List<Direction2D> directions = AddPossibleDirection(directionType);
 
                     for (int k = 0; k < directions.Count; k++)
                     {
