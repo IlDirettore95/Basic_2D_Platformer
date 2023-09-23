@@ -11,8 +11,6 @@ namespace GMDG.Basic2DPlatformer.System
     {
         private GameObject _player;
         private Transform _playerTransform;
-        private Movement _playerMovement;
-        private SpriteRenderer _playerRenderer;
 
         #region UnityMessages
 
@@ -24,6 +22,11 @@ namespace GMDG.Basic2DPlatformer.System
 
         private void OnEnable()
         {
+            // GameManager
+            EventManager.Instance.Subscribe(Event.OnWelcome, DespawnPlayer);
+            EventManager.Instance.Subscribe(Event.OnGameOver, DespawnPlayer);
+            EventManager.Instance.Subscribe(Event.OnVictory, DespawnPlayer);
+
             // Gameplay
             EventManager.Instance.Subscribe(Event.OnLevelGenerated, SpawnPlayer);
             EventManager.Instance.Subscribe(Event.OnEndGameOverTrasition, DespawnPlayer);
@@ -40,14 +43,15 @@ namespace GMDG.Basic2DPlatformer.System
             }
 
             _playerTransform = _player.transform;
-            _playerMovement = _player.GetComponent<Movement>();
-            _playerRenderer = _player.GetComponent<SpriteRenderer>();
-
-            DespawnPlayer(null);
         }
 
         private void OnDisable()
         {
+            // GameManager
+            EventManager.Instance.Unsubscribe(Event.OnWelcome, DespawnPlayer);
+            EventManager.Instance.Unsubscribe(Event.OnGameOver, DespawnPlayer);
+            EventManager.Instance.Unsubscribe(Event.OnVictory, DespawnPlayer);
+
             // Gameplay
             EventManager.Instance.Unsubscribe(Event.OnLevelGenerated, SpawnPlayer);
             EventManager.Instance.Unsubscribe(Event.OnEndGameOverTrasition, DespawnPlayer);
@@ -73,14 +77,12 @@ namespace GMDG.Basic2DPlatformer.System
             Vector2 position = GameObject.FindGameObjectWithTag("Spawn").transform.position;
 
             _playerTransform.position = position;
-            _playerMovement.enabled = true;
-            _playerRenderer.enabled = true;
+            _player.SetActive(true);
         }
 
         private void DespawnPlayer(object[] args)
         {
-            _playerMovement.enabled = false;
-            _playerRenderer.enabled = false;
+            _player.SetActive(false);
         }
 
         #endregion

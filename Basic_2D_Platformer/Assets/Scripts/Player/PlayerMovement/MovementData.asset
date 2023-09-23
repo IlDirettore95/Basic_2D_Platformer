@@ -21,4 +21,5 @@ MonoBehaviour:
   MaxYSpeed: 50
   JumpForce: 8.7
   JumpBufferTime: 0.1
+  FallDamageYThreshold: 5
   CollisionThreashold: 0.01

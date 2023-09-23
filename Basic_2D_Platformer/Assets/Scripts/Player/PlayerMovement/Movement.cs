@@ -174,7 +174,7 @@ namespace GMDG.Basic2DPlatformer.PlayerMovement
 
                 if (from is Idle) 
                 { 
-                    _oldSpeed = 0;
+                    _oldSpeed = _movement._data.WalkingSpeed / 2;
                 }
                 else if (from is Walking)
                 {

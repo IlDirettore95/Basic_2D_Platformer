@@ -29,7 +29,7 @@ namespace GMDG.Basic2DPlatformer.PCG
             if (isSimulated) yield return caller.StartCoroutine(new EvenSimplerTiledModel(caller, data).Generate(iterationLimit, timeout, isSimulated, isHardSimulated));
             else new EvenSimplerTiledModel(caller, data).Generate(iterationLimit, timeout, isSimulated, isHardSimulated).MoveNext();
 
-            EventManager.Instance.Publish(Event.OnLevelGenerated);
+            EventManager.Instance.Publish(Event.OnLevelGenerated, data);
         }
 
         private IEnumerator InitializeSuperPositions(Grid<HashSet<int>> grid, PCGData data, float timeout, bool isSimulated, bool isHardSimulated)

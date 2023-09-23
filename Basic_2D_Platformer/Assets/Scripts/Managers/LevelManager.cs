@@ -36,12 +36,24 @@ namespace GMDG.Basic2DPlatformer.System
 
         private void OnEnable()
         {
+            // GameManager
+            EventManager.Instance.Subscribe(Event.OnWelcome, Delete);
+            EventManager.Instance.Subscribe(Event.OnGameOver, Delete);
+            EventManager.Instance.Subscribe(Event.OnVictory, Delete);
+
+            // Gameplay
             EventManager.Instance.Subscribe(Event.OnGameplay, LoadFirstLevel);
             EventManager.Instance.Subscribe(Event.OnLevelCompleted, LoadNextLevel);
         }
 
         private void OnDisable()
         {
+            // GameManager
+            EventManager.Instance.Unsubscribe(Event.OnWelcome, Delete);
+            EventManager.Instance.Unsubscribe(Event.OnGameOver, Delete);
+            EventManager.Instance.Unsubscribe(Event.OnVictory, Delete);
+
+            // Gameplay
             EventManager.Instance.Unsubscribe(Event.OnGameplay, LoadFirstLevel);
             EventManager.Instance.Unsubscribe(Event.OnLevelCompleted, LoadNextLevel);
         }
@@ -79,6 +91,11 @@ namespace GMDG.Basic2DPlatformer.System
                 Delete();
                 EventManager.Instance.Publish(Event.OnEndVictoryTrasition);
             }
+        }
+
+        private void Delete(object[] args)
+        {
+            Delete();
         }
 
         #endregion

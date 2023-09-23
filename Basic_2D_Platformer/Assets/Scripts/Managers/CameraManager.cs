@@ -1,27 +1,34 @@
+using GMDG.Basic2DPlatformer.PCG;
+using GMDG.Basic2DPlatformer.PlayerMovement;
 using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
+using static UnityEditor.Experimental.GraphView.GraphView;
 
 namespace GMDG.Basic2DPlatformer.System
 {
     public class CameraManager : MonoBehaviour
     {
-        private Camera mainCamera;
-        private Transform mainCameraTransform;
-        private Light2D globalLight;
+        private Camera _mainCamera;
+        private Transform _mainCameraTransform;
+        private GameObject _player;
+        private Transform _playerTransform;
+        private Light2D _globalLight;
 
-        private Vector3 initialCameraPosition;
-        private float cameraMovingTime = 0.2f;
-        private float cameraMovingSpeed = 150;
+        private float _minXPosition;
+        private float _maxXPosition;
+        private float _minYPosition;
+        private float _maxYPosition;
 
-        private IEnumerator transitionCamera;
+        private float _screenHeight;
+        private float _screenWidth;
 
         #region UnityMessages
 
         private void Awake()
         {
-            globalLight = GetComponentInChildren<Light2D>();
+            _globalLight = GetComponentInChildren<Light2D>();
 
             enabled = false;
 
@@ -36,21 +43,25 @@ namespace GMDG.Basic2DPlatformer.System
             //EventManager.Instance.Subscribe(Event.OnPlayerDeath, (object[] args) => StartCoroutine(GLDeathTransition()));
             //EventManager.Instance.Subscribe(Event.OnDungeonCleared, (object[] args) => StartCoroutine(GLVictoryTransition()));
 
-            //// Gameplay
-            //EventManager.Instance.Subscribe(Event.OnRoomChanged, RoomChanghed);
+            // Gameplay
+            EventManager.Instance.Subscribe(Event.OnLevelGenerated, LevelLoaded);
         }
 
         private void Start()
         {
-            mainCamera = Camera.main;
+            _mainCamera = Camera.main;
+            _player = GameObject.FindGameObjectWithTag("Player");
 
-            if (mainCamera == null || globalLight == null)
+            if (_mainCamera == null || _globalLight == null || _player == null)
             {
                 Debug.LogError("CameraManager not correctly initialized");
             }
 
-            mainCameraTransform = Camera.main.transform;
-            initialCameraPosition = mainCameraTransform.position;
+            _mainCameraTransform = _mainCamera.transform;
+            _playerTransform = _player.transform;
+
+            _screenHeight = _mainCamera.orthographicSize * 2;
+            _screenWidth = _screenHeight * _mainCamera.aspect;
         }
 
         private void OnDisable()
@@ -61,8 +72,17 @@ namespace GMDG.Basic2DPlatformer.System
             //EventManager.Instance.Unsubscribe(Event.OnGameOver, (object[] args) => StartCoroutine(GLDeathTransition()));
             //EventManager.Instance.Unsubscribe(Event.OnVictory, (object[] args) => StartCoroutine(GLVictoryTransition()));
 
-            //// Gameplay
-            //EventManager.Instance.Unsubscribe(Event.OnRoomChanged, RoomChanghed);
+            // Gameplay
+            EventManager.Instance.Subscribe(Event.OnLevelGenerated, LevelLoaded);
+        }
+
+        private void LateUpdate()
+        {
+            float xPosition = Mathf.Clamp(_playerTransform.position.x, _minXPosition, _maxXPosition);
+            float yPosition = Mathf.Clamp(_playerTransform.position.y, _minYPosition, _maxYPosition);
+            Vector2 destination = new Vector2(xPosition, yPosition);
+            Debug.Log(destination);
+            MoveCameraToDestination(destination);
         }
 
         private void OnDestroy()
@@ -79,33 +99,26 @@ namespace GMDG.Basic2DPlatformer.System
             enabled = true;
         }
 
-        //private void RoomChanghed(object[] args)
-        //{
-        //    if(transitionCamera != null)
-        //    {
-        //        StopCoroutine(transitionCamera);
-        //    }
-        //    transitionCamera = TransitionCameraToDestination((Vector2)mainCameraTransform.position + (Vector2Int)args[0] * Room.Size);
-        //    StartCoroutine(transitionCamera);
-        //}
+        private void LevelLoaded(object[] args)
+        {
+            PCGData data = (PCGData)args[0];
+            Vector2Int gridSize = data.GridSize;
+            Vector2 cellSize = data.CellSize;
+
+            float xExtend = gridSize.x * cellSize.x / 2;
+            float yExtend = gridSize.y * cellSize.y / 2;
+
+            _minXPosition = -xExtend + _screenWidth / 2;
+            _maxXPosition = xExtend - _screenWidth / 2;
+            _minYPosition = -yExtend + _screenHeight / 2;
+            _maxYPosition = yExtend - _screenHeight / 2;
+        }
 
         #endregion
 
-        private IEnumerator TransitionCameraToDestination(Vector2 destination)
-        {
-            float distance = Vector2.Distance((Vector2)mainCameraTransform.position, destination);
-            while ((Vector2)mainCameraTransform.position != destination)
-            {
-                Vector2 movement = Vector2.MoveTowards(mainCameraTransform.position, destination, distance/cameraMovingTime * Time.deltaTime);
-                MoveCameraToDestination(movement);
-                yield return null;
-            }
-            transitionCamera = null;
-        }
-
         private void MoveCameraToDestination(Vector2 destination)
         {
-            mainCameraTransform.position = new Vector3(destination.x, destination.y, mainCameraTransform.position.z);
+            _mainCameraTransform.position = new Vector3(destination.x, destination.y, _mainCameraTransform.position.z);
         }
 
         private IEnumerator GLSpawnTransition()
@@ -115,10 +128,10 @@ namespace GMDG.Basic2DPlatformer.System
 
             while(true)
             {
-                globalLight.intensity = Mathf.Pow(k, -x + 1);
-                if(globalLight.intensity < 1)
+                _globalLight.intensity = Mathf.Pow(k, -x + 1);
+                if(_globalLight.intensity < 1)
                 {
-                    globalLight.intensity = 1f;
+                    _globalLight.intensity = 1f;
                     break;
                 }
                 x += Time.deltaTime;
@@ -133,10 +146,10 @@ namespace GMDG.Basic2DPlatformer.System
 
             while (true)
             {
-                globalLight.intensity = Mathf.Pow(k, x);
-                if (globalLight.intensity > 10000f)
+                _globalLight.intensity = Mathf.Pow(k, x);
+                if (_globalLight.intensity > 10000f)
                 {
-                    globalLight.intensity = 10000f;
+                    _globalLight.intensity = 10000f;
                     break;
                 }
                 x += Time.deltaTime;
@@ -149,12 +162,12 @@ namespace GMDG.Basic2DPlatformer.System
         private IEnumerator GLDeathTransition()
         {
             float rate = 0.4f;
-            globalLight.intensity = 1f;
+            _globalLight.intensity = 1f;
 
             while (true)
             {
-                globalLight.intensity -= rate * Time.deltaTime;
-                if (globalLight.intensity <= 0)
+                _globalLight.intensity -= rate * Time.deltaTime;
+                if (_globalLight.intensity <= 0)
                 {
                     break;
                 }
