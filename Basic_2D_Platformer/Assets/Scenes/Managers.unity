@@ -256,8 +256,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   IterationLimit: -1
-  Timeout: 0.005
-  IsSimulated: 1
+  Timeout: 0.1
+  IsSimulated: 0
+  IsHardSimulated: 0
 --- !u!1 &1571122075
 GameObject:
   m_ObjectHideFlags: 0

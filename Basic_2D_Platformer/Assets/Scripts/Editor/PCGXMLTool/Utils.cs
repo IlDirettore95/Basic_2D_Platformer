@@ -258,6 +258,7 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
             settings.AppendChild(CreateVector2Element(xmlDocument, "CellSize"));
             settings.AppendChild(CreateVector2Element(xmlDocument, "StartingCell"));
             settings.AppendChild(CreateVector2Element(xmlDocument, "EndingCell"));
+            settings.AppendChild(CreateVector2Element(xmlDocument, "PassageCell"));
 
             return settings;
         }
@@ -298,8 +299,12 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
         {
             XmlElement tile = xmlDocument.CreateElement("Tile");
             XmlAttribute id = xmlDocument.CreateAttribute("ID");
+            XmlAttribute rh = xmlDocument.CreateAttribute("RH");
+            XmlAttribute rv = xmlDocument.CreateAttribute("RV");
             XmlAttribute frequency = xmlDocument.CreateAttribute("Frequency");
             tile.Attributes.Append(id);
+            tile.Attributes.Append(rh);
+            tile.Attributes.Append(rv);
             tile.Attributes.Append(frequency);
             tile.AppendChild(CreatePrefabElement(xmlDocument));
             tile.AppendChild(CreateConstraintsElement(xmlDocument));

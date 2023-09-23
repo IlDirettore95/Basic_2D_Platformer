@@ -97,6 +97,9 @@ namespace GMDG.Basic2DPlatformer.System
         OnLevelGenerated,
 
         // Gameplay
-        OnLevelCompleted
+        OnLevelCompleted,
+        OnFallDamageTaken,
+        OnPlayerHit,
+        OnPlayerDeath
     }
 }

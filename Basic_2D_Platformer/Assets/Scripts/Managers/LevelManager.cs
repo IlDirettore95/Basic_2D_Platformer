@@ -13,6 +13,7 @@ namespace GMDG.Basic2DPlatformer.System
         public int IterationLimit;
         public float Timeout;
         public bool IsSimulated;
+        public bool IsHardSimulated;
 
         private PCGDataLoader _dataLoader = new PCGDataLoader();
         private int _currentLevel;
@@ -114,9 +115,9 @@ namespace GMDG.Basic2DPlatformer.System
         {
             Delete();
 
-            PCGData data = _dataLoader.LoadData(_currentLevel);
-            if (IsSimulated) StartCoroutine(new LevelGenerator().Generation?.Invoke(this, data, IterationLimit, Timeout, IsSimulated));
-            else new LevelGenerator().Generation?.Invoke(this, data, IterationLimit, Timeout, IsSimulated).MoveNext();
+            PCGData data = _dataLoader.LoadData(_currentLevel, this);
+            if (IsSimulated) StartCoroutine(new LevelGenerator().Generation?.Invoke(this, data, IterationLimit, Timeout, IsSimulated, IsHardSimulated));
+            else new LevelGenerator().Generation?.Invoke(this, data, IterationLimit, Timeout, IsSimulated, IsHardSimulated).MoveNext();
         }
     }
 }

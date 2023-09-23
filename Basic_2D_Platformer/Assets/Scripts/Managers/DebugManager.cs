@@ -68,6 +68,7 @@ namespace GMDG.Basic2DPlatformer.System
 
         private void UpdateGrid(object[] args)
         {
+            if (!_gridDebugGo.activeSelf) return;
             _grid = (Grid<HashSet<int>>)args[0];
 #if UNITY_EDITOR
             _grid?.DrawContent(_gridDebugGo, 20, ColorHeuristic, StringHeuristic);

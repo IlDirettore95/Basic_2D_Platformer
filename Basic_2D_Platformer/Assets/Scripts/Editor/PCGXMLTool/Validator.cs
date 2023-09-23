@@ -120,10 +120,23 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
                 return false;
             }
 
+            // EndingCell
+            if (!int.TryParse(Utils.GetNodeAttributeValue(settings["PassageCell"], "x"), out int xPassageCell))
+            {
+                _view.Message = "PassageCell X must be an integer";
+                return false;
+            }
+            if (!int.TryParse(Utils.GetNodeAttributeValue(settings["PassageCell"], "y"), out int yPassageCell))
+            {
+                _view.Message = "PassageCell Y must be an integer";
+                return false;
+            }
+
             bool gridSizeOk = xGridSize > 0 && yGridSize > 0;
             bool cellSizeOk = xCellSize > 0 && yCellSize > 0;
             bool startingCellOk = xStartingCell >= 0 && xStartingCell < xGridSize && yStartingCell >= 0 && yStartingCell < yGridSize;
             bool endingCellOk = xEndingCell >= 0 && xEndingCell < xGridSize && yEndingCell >= 0 && yEndingCell < yGridSize;
+            bool passageCellOk = xPassageCell >= 0 && xPassageCell < xGridSize && yPassageCell >= 0 && yPassageCell < yGridSize;
             bool startingEndingCellOk = xStartingCell != xEndingCell || yStartingCell != yEndingCell;
 
             if (!gridSizeOk)
@@ -147,6 +160,13 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
             if (!endingCellOk)
             {
                 _view.Message = "Ending cell must be in GridSize";
+                return false;
+            }
+
+
+            if (!passageCellOk)
+            {
+                _view.Message = "Passage cell must be in GridSize";
                 return false;
             }
 

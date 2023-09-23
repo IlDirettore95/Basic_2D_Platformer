@@ -24,30 +24,27 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
             _collapsedPositions = new Dictionary<Vector2, int>();
         }
 
-        public IEnumerator Generate(int iterationsLimit, float timeout, bool isSimulated)
+        public IEnumerator Generate(int iterationsLimit, float timeout, bool isSimulated, bool isHardSimulated)
         {
-            if (isSimulated) yield return _caller.StartCoroutine(SolverProcedure(iterationsLimit, timeout, isSimulated));
-            else SolverProcedure(iterationsLimit, timeout, isSimulated).MoveNext();
+            if (isSimulated) yield return _caller.StartCoroutine(SolverProcedure(iterationsLimit, timeout, isSimulated, isHardSimulated));
+            else SolverProcedure(iterationsLimit, timeout, isSimulated, isHardSimulated).MoveNext();
         }
 
-        public IEnumerator SolverProcedure(int iterationsLimit, float timeout, bool isSimulated)
+        public IEnumerator SolverProcedure(int iterationsLimit, float timeout, bool isSimulated, bool isHardSimulated)
         {
-            if (isSimulated) yield return _caller.StartCoroutine(Initialize(timeout, isSimulated));
-            else Initialize(timeout, isSimulated).MoveNext();
-
-            Debug.Log("Uncollapsed : " + _uncollapsedPositions.Keys.Count);
-            Debug.Log("Collapsed : " + _collapsedPositions.Keys.Count);
+            if (isHardSimulated) yield return _caller.StartCoroutine(Initialize(timeout, isSimulated, isHardSimulated));
+            else Initialize(timeout, isSimulated, isHardSimulated).MoveNext();
 
             for (int i = 0; i < iterationsLimit || iterationsLimit < 0; i++)
             {
                 bool positionFound = ChooseNextPosition(out Vector2 chosenPosition);
                 if (!positionFound) break;
 
-                if (isSimulated) yield return _caller.StartCoroutine(Observe(chosenPosition, timeout, isSimulated));
-                else Observe(chosenPosition, timeout, isSimulated).MoveNext();
+                if (isHardSimulated) yield return _caller.StartCoroutine(Observe(chosenPosition, timeout, isSimulated, isHardSimulated));
+                else Observe(chosenPosition, timeout, isSimulated, isHardSimulated).MoveNext();
 
-                if (isSimulated) yield return _caller.StartCoroutine(Propagate(chosenPosition, timeout, isSimulated));
-                else Propagate(chosenPosition, timeout, isSimulated).MoveNext();
+                if (isHardSimulated) yield return _caller.StartCoroutine(Propagate(chosenPosition, timeout, isSimulated, isHardSimulated));
+                else Propagate(chosenPosition, timeout, isSimulated, isHardSimulated).MoveNext();
 
                 if (isSimulated)
                 {
@@ -75,7 +72,7 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
             }
         }
 
-        private IEnumerator Initialize(float timeout, bool isSimulated)
+        private IEnumerator Initialize(float timeout, bool isSimulated, bool isHardSimulated)
         {
             _uncollapsedPositions = new Dictionary<Vector2, HashSet<int>>();
             for (int i = 0; i < _data.Grid.GridSize.y; i++)
@@ -97,14 +94,13 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
 
                     if (superPositions.Count == 1)
                     {
-                        Debug.Log(string.Format("Posizione {0} {1}", i, j));
                         CollapsePosition(position, superPositions.First());
 
-                        if (isSimulated) yield return _caller.StartCoroutine(Propagate(position, timeout, isSimulated));
-                        else Propagate(position, timeout, isSimulated).MoveNext();
+                        if (isHardSimulated) yield return _caller.StartCoroutine(Propagate(position, timeout, isSimulated, isHardSimulated));
+                        else Propagate(position, timeout, isSimulated, isHardSimulated).MoveNext();
                     }
 
-                    if (isSimulated)
+                    if (isHardSimulated)
                     {
                         EventManager.Instance.Publish(Event.OnGridUpdated, this._data.Grid);
                         yield return new WaitForSeconds(timeout);
@@ -143,7 +139,7 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
             return false;
         }
 
-        private IEnumerator Observe(Vector2 position, float timeout, bool isSimulated)
+        private IEnumerator Observe(Vector2 position, float timeout, bool isSimulated, bool isHardSimulated)
         {
             HashSet<int> superPositions = _uncollapsedPositions[position];
             int collapsedWave = -1;
@@ -168,14 +164,14 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
 
             CollapsePosition(position, collapsedWave);
 
-            if (isSimulated)
+            if (isHardSimulated)
             {
                 EventManager.Instance.Publish(Event.OnGridUpdated, _data.Grid);
                 yield return new WaitForSeconds(timeout);
             }
         }
 
-        private IEnumerator Propagate(Vector2 chosenPosition, float timeout, bool isSimulated)
+        private IEnumerator Propagate(Vector2 chosenPosition, float timeout, bool isSimulated, bool isHardSimulated)
         {
             Queue<Vector2> positionsToPropagate = new Queue<Vector2>();
             positionsToPropagate.Enqueue(chosenPosition);
@@ -201,16 +197,6 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
                         }
                     }
 
-                    if (currentPosition == _data.Grid.CellsPositions[4, 0])
-                    {
-                        Debug.Log("Direction : " + direction);
-                        Debug.Log("possibleNeighbours : ");
-                        foreach (int i in possibleNeighbours)
-                        {
-                            Debug.Log(_data.WFCTiles[i].Name);
-                        }
-                    }
-
                     Vector2Int directionInGrid = GridDirections2D[direction];
                     Vector2 positionInDirection = currentPosition + new Vector2Int(directionInGrid.y, directionInGrid.x) * _data.Grid.CellSize;
 
@@ -220,21 +206,11 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
 
                     neighbourSuperPositions.IntersectWith(possibleNeighbours);
 
-                    if (currentPosition == _data.Grid.CellsPositions[4, 0])
-                    {
-                        Debug.Log("Direction : " + direction);
-                        Debug.Log("possibleNeighbours after intersect : ");
-                        foreach (int i in neighbourSuperPositions)
-                        {
-                            Debug.Log(_data.WFCTiles[i].Name);
-                        }
-                    }
-
                     if (neighbourSuperPositions.Count == numberOfNeighbourSuperPositions) continue;
 
                     positionsToPropagate.Enqueue(positionInDirection);
 
-                    if (isSimulated)
+                    if (isHardSimulated)
                     {
                         EventManager.Instance.Publish(Event.OnGridUpdated, _data.Grid);
                         yield return new WaitForSeconds(timeout);
@@ -260,8 +236,9 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
             foreach (int superPosition in superPositions)
             {
                 float relativeFrequency = _data.WFCTiles[superPosition].RelativeFrequency;
+                float log2RelativeFrequency = _data.WFCTiles[superPosition].Log2RelativeFrequency;
                 totalFrequency += relativeFrequency;
-                totalSum += relativeFrequency * Mathf.Log(relativeFrequency, 2);
+                totalSum += relativeFrequency * log2RelativeFrequency;
             }
             return Mathf.Log(totalFrequency, 2) - totalSum / totalFrequency;
         }

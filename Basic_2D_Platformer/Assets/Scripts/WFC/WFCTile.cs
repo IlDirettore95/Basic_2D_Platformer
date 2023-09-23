@@ -8,6 +8,7 @@ public class WFCTile
     public string Name;
     public GameObject Prefab;
     public float RelativeFrequency;
+    public float Log2RelativeFrequency;
     public Dictionary<Direction2D, HashSet<int>> PossibleNeighbours = new Dictionary<Direction2D, HashSet<int>>()
     {
         { Direction2D.NORTH,  new HashSet<int>()},

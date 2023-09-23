@@ -38,7 +38,10 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
         private const int PADDING_CONTENT = 8;
         private const int BUTTON_SIMPLE_WIDTH = 100;
         private const int BUTTON_FILE_ACTIONS_WIDTH = 120;
-        private const int TEXTFIELDS_ATTRIBUTE_WIDTH = 80;
+        private const int TEXTFIELDS_ATTRIBUTE_WIDTH = 30;
+        private const int TEXTFIELDS_ATTRIBUTE_ID_WIDTH = 140;
+        private const int POPUP_CONSTRAINT_WIDTH = 100;
+        private const int TOGGLE_WIDTH = 10;
 
         #region Init
 
@@ -226,28 +229,48 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
 
                 if (Utils.IsNodeNameEqual(child, "Level") && Utils.IsAttributeNameEqual(attribute, "ID"))
                 {
-                    GUILayout.Space(20);
+                    GUILayout.Space(15);
                     GUILayout.Label(attribute.Name, GUILayout.ExpandWidth(false));
-                    attribute.Value = GUILayout.TextField(attribute.Value, GUILayout.Width(TEXTFIELDS_ATTRIBUTE_WIDTH));
+                    attribute.Value = GUILayout.TextField(attribute.Value, GUILayout.Width(TEXTFIELDS_ATTRIBUTE_ID_WIDTH));
                     _model.EditLevel(child);
                     continue;
                 }
 
                 if (Utils.IsNodeNameEqual(child, "Tile") && Utils.IsAttributeNameEqual(attribute, "ID"))
                 {
-                    GUILayout.Space(20);
+                    GUILayout.Space(15);
                     GUILayout.Label(attribute.Name, GUILayout.ExpandWidth(false));
-                    attribute.Value = GUILayout.TextField(attribute.Value, GUILayout.Width(TEXTFIELDS_ATTRIBUTE_WIDTH));
+                    attribute.Value = GUILayout.TextField(attribute.Value, GUILayout.Width(TEXTFIELDS_ATTRIBUTE_ID_WIDTH));
                     _model.EditTile(child);
+                    continue;
+                }
+
+                if (Utils.IsNodeNameEqual(child, "Tile") && Utils.IsAttributeNameEqual(attribute, "RH"))
+                {
+                    GUILayout.Space(15);
+                    GUILayout.Label(attribute.Name, GUILayout.ExpandWidth(false));
+                    bool oldBool = _model.GetRHBool(child);
+                    bool newBool = EditorGUILayout.Toggle(oldBool, GUILayout.Width(TOGGLE_WIDTH));
+                    _model.SetRHBool(child, newBool);
+                    continue;
+                }
+
+                if (Utils.IsNodeNameEqual(child, "Tile") && Utils.IsAttributeNameEqual(attribute, "RV"))
+                {
+                    GUILayout.Space(15);
+                    GUILayout.Label(attribute.Name, GUILayout.ExpandWidth(false));
+                    bool oldBool = _model.GetRVBool(child);
+                    bool newBool = EditorGUILayout.Toggle(oldBool, GUILayout.Width(TOGGLE_WIDTH));
+                    _model.SetRVBool(child, newBool);
                     continue;
                 }
 
                 if (Utils.IsNodeNameEqual(child, "Constraint") && Utils.IsAttributeNameEqual(attribute, "Type"))
                 {
-                    GUILayout.Space(20);
+                    GUILayout.Space(15);
                     string[] choices = _model.GetConstraintChoices();
                     int oldIndex = _model.GetConstraintIndex(child);
-                    int newIndex = EditorGUILayout.Popup(oldIndex, choices, GUILayout.ExpandWidth(false));
+                    int newIndex = EditorGUILayout.Popup(oldIndex, choices, GUILayout.Width(POPUP_CONSTRAINT_WIDTH));
                     if (newIndex == oldIndex) continue;
                     _model.EditConstraint(child, newIndex, oldIndex);
                     continue;
@@ -255,16 +278,16 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
 
                 if (Utils.IsNodeNameEqual(child, "Neighbour") && Utils.IsAttributeNameEqual(attribute, "ID"))
                 {
-                    GUILayout.Space(20);
+                    GUILayout.Space(15);
                     string[] choices = _model.GetNeighbourChoices();
                     int oldIndex = _model.GetNeighbourIndex(child);
-                    int newIndex = EditorGUILayout.Popup(oldIndex, choices, GUILayout.ExpandWidth(false));
+                    int newIndex = EditorGUILayout.Popup(oldIndex, choices, GUILayout.Width(TEXTFIELDS_ATTRIBUTE_ID_WIDTH));
                     if (newIndex == oldIndex) continue;
                     _model.EditNeighbour(child, newIndex, oldIndex);
                     continue;
                 }
 
-                GUILayout.Space(20);
+                GUILayout.Space(15);
                 GUILayout.Label(attribute.Name, GUILayout.ExpandWidth(false));
                 attribute.Value = GUILayout.TextField(attribute.Value, GUILayout.Width(TEXTFIELDS_ATTRIBUTE_WIDTH));
             }

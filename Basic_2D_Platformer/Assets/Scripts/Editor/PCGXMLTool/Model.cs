@@ -28,6 +28,8 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
         private List<XmlNode> _hierarchy; 
         private Dictionary<XmlNode, List<XmlNode>> _tilesPerLevel;
         private Dictionary<XmlNode, string[]> _neighbourChoicesPerLevel;
+        private Dictionary<XmlNode, Dictionary<XmlNode, bool>> _rhPerTile;
+        private Dictionary<XmlNode, Dictionary<XmlNode, bool>> _rvPerTile;
         private Dictionary<XmlNode, Dictionary<XmlNode, Dictionary<XmlNode, Dictionary<XmlNode, int>>>> _indexesPerNeighbour;
         private string[] _possibleConstraintTypes = { "ALL", "NORTH", "EAST", "SOUTH", "WEST", "HORIZONTAL", "VERTICAL", "N_NORTH", "N_EAST", "N_SOUTH", "N_WEST" };
         private Dictionary<XmlNode, Dictionary<XmlNode, Dictionary<XmlNode, int>>> _indexesPerConstraint;
@@ -82,6 +84,26 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
                 foreach (XmlNode tile in Utils.GetTileNodes(level))
                 {
                     _tilesPerLevel[level].Add(tile);
+                }
+            }
+
+            _rhPerTile = new Dictionary<XmlNode, Dictionary<XmlNode, bool>>();
+            foreach (XmlNode level in Utils.GetLevelNodes(_xmlDocument))
+            {
+                _rhPerTile[level] = new Dictionary<XmlNode, bool>();
+                foreach (XmlNode tile in Utils.GetTileNodes(level))
+                {
+                    _rhPerTile[level][tile] = Convert.ToBoolean(Utils.GetNodeAttributeValue(tile, "RH"));
+                }
+            }
+
+            _rvPerTile = new Dictionary<XmlNode, Dictionary<XmlNode, bool>>();
+            foreach (XmlNode level in Utils.GetLevelNodes(_xmlDocument))
+            {
+                _rvPerTile[level] = new Dictionary<XmlNode, bool>();
+                foreach (XmlNode tile in Utils.GetTileNodes(level))
+                {
+                    _rvPerTile[level][tile] = Convert.ToBoolean(Utils.GetNodeAttributeValue(tile, "RV"));
                 }
             }
 
@@ -199,6 +221,28 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
             _hierarchy.Add(child);
         }
 
+        public bool GetRHBool(XmlNode tile)
+        {
+            return _rhPerTile[_currentLevel][tile];
+        }
+
+        public bool GetRVBool(XmlNode tile)
+        {
+            return _rvPerTile[_currentLevel][tile];
+        }
+
+        public void SetRHBool(XmlNode tile, bool newBool)
+        {
+            Utils.SetNodeAttributeValue(tile, "RH", newBool.ToString());
+            _rhPerTile[_currentLevel][tile] = newBool;
+        }
+
+        public void SetRVBool(XmlNode tile, bool newBool)
+        {
+            Utils.SetNodeAttributeValue(tile, "RV", newBool.ToString());
+            _rvPerTile[_currentLevel][tile] = newBool;
+        }
+
         public string[] GetNeighbourChoices()
         {
             return _neighbourChoicesPerLevel[_currentLevel];
@@ -284,6 +328,8 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
 
             _tilesPerLevel[level] = new List<XmlNode>();
             _neighbourChoicesPerLevel[level] = new string[0];
+            _rhPerTile[level] = new Dictionary<XmlNode, bool>();
+            _rvPerTile[level] = new Dictionary<XmlNode, bool>();
             _indexesPerNeighbour[level] = new Dictionary<XmlNode, Dictionary<XmlNode, Dictionary<XmlNode, int>>>();
             _indexesPerConstraint[level] = new Dictionary<XmlNode, Dictionary<XmlNode, int>>();
 
@@ -297,6 +343,8 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
             _tilesPerLevel[currentLevel].Add(tile);
 
             _neighbourChoicesPerLevel[currentLevel] = AddNewChoice(tile, _neighbourChoicesPerLevel[currentLevel]);
+            _rhPerTile[currentLevel][tile] = false;
+            _rvPerTile[currentLevel][tile] = false;
             _indexesPerNeighbour[currentLevel][tile] = new Dictionary<XmlNode, Dictionary<XmlNode, int>>();
             _indexesPerConstraint[currentLevel][tile] = new Dictionary<XmlNode, int>();
 
@@ -568,6 +616,8 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
             text = string.Concat(text, DebugCurrentNodes());
             text = string.Concat(text, DebugHierarchy());
             text = string.Concat(text, DebugTilesPerLevel());
+            text = string.Concat(text, DebugRHPerTile());
+            text = string.Concat(text, DebugRVPerTile());
             text = string.Concat(text, DebugNeighbourChoicesPerLevel());
             text = string.Concat(text, DebugIndexesNeighbourPerLevel());
             text = string.Concat(text, DebugIndexesConstraintPerLevel());
@@ -617,6 +667,39 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
                 }
             }
 
+            return text;
+        }
+
+        private string DebugRHPerTile()
+        {
+            string text = string.Empty;
+
+            text = string.Concat(text, "RHPerTile\n");
+            foreach (XmlNode level in _rhPerTile.Keys)
+            {
+                text = string.Concat(text, string.Format("\tLevel: {0}\n", Utils.GetHierarchyButtonText(level)));
+                foreach (XmlNode tile in _rhPerTile[level].Keys)
+                {
+                    text = string.Concat(text, string.Format("\t\tTile: {0} RH : {1}\n", Utils.GetHierarchyButtonText(tile), _rhPerTile[level][tile]));
+                }
+            }
+
+            return text;
+        }
+
+        private string DebugRVPerTile()
+        {
+            string text = string.Empty;
+
+            text = string.Concat(text, "RVPerTile\n");
+            foreach (XmlNode level in _rvPerTile.Keys)
+            {
+                text = string.Concat(text, string.Format("\tLevel: {0}\n", Utils.GetHierarchyButtonText(level)));
+                foreach (XmlNode tile in _rvPerTile[level].Keys)
+                {
+                    text = string.Concat(text, string.Format("\t\tTile: {0} RV : {1}\n", Utils.GetHierarchyButtonText(tile), _rvPerTile[level][tile]));
+                }
+            }
             return text;
         }
 

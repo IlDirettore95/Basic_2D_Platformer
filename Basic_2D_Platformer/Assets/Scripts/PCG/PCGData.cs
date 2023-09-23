@@ -11,11 +11,13 @@ namespace GMDG.Basic2DPlatformer.PCG
         public Vector2 CellSize;
         public Vector2Int StartingCell;
         public Vector2Int EndingCell;
+        public Vector2Int PassageCell;
         public Grid<HashSet<int>> Grid;
         public List<WFCTile> WFCTiles = new List<WFCTile>();
 
         public const int START_CELL = 0;
         public const int END_CELL = 1;
+        public const int PASSAGE_CELL = 2;
 
         public override string ToString()
         {
@@ -26,6 +28,7 @@ namespace GMDG.Basic2DPlatformer.PCG
             text = string.Concat(text, string.Format("\tCellSize: {0}\n", CellSize));
             text = string.Concat(text, string.Format("\tStartingCell: {0}\n", StartingCell));
             text = string.Concat(text, string.Format("\tEndingCell: {0}\n", EndingCell));
+            text = string.Concat(text, string.Format("\tPassageCell: {0}\n", PassageCell));
             text = string.Concat(text, "Tiles\n");
 
             for (int i = 0; i < WFCTiles.Count; i++)

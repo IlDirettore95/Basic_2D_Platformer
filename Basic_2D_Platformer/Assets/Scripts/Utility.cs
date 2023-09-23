@@ -168,10 +168,8 @@ namespace GMDG.NoProduct.Utility
 
         public void Tick()
         {
-            var transition = GetTransition();
-            if (transition != null)
-                SetState(transition.To);
-
+            Transition transition = GetTransition();
+            if (transition != null) SetState(transition.To);
             _currentState?.Tick();
         }
 
@@ -185,14 +183,15 @@ namespace GMDG.NoProduct.Utility
             if (state == _currentState)
                 return;
 
-            _currentState?.OnExit();
+            _currentState?.OnExit(state);
+            IState oldState = _currentState;
             _currentState = state;
 
             _transitions.TryGetValue(_currentState.GetType(), out _currentTransitions);
             if (_currentTransitions == null)
                 _currentTransitions = EmptyTransitions;
 
-            _currentState.OnEnter();
+            _currentState.OnEnter(oldState);
         }
 
         public void AddTransition(IState from, IState to, Func<bool> predicate)
@@ -226,12 +225,17 @@ namespace GMDG.NoProduct.Utility
         private Transition GetTransition()
         {
             foreach (var transition in _anyTransitions)
-                if (transition.Condition())
-                    return transition;
+            {
+                if (!transition.Condition()) continue;
+                
+                return transition;
+            }
 
             foreach (var transition in _currentTransitions)
-                if (transition.Condition())
-                    return transition;
+            {
+                if (!transition.Condition()) continue;
+                return transition;
+            }
 
             return null;
         }
@@ -240,8 +244,8 @@ namespace GMDG.NoProduct.Utility
     public interface IState
     {
         void Tick();
-        void OnEnter();
-        void OnExit();
+        void OnEnter(IState from);
+        void OnExit(IState to);
     }
 
     #endregion
