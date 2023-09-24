@@ -83,8 +83,8 @@ namespace GMDG.Basic2DPlatformer.System
         OnVictory,
 
         // Camera
-        OnEndGameOverTrasition,
-        OnEndVictoryTrasition,
+        OnEndGameOverTransition,
+        OnEndVictoryTransition,
 
         // UI
         OnStartGameClicked,
@@ -98,6 +98,9 @@ namespace GMDG.Basic2DPlatformer.System
 
         // Gameplay
         OnLevelCompleted,
+        OnAllLevelCompleted,
+        OnPlayerSpawn,
+        OnPlayerDespawn,
         OnFallDamageTaken,
         OnPlayerHit,
         OnPlayerDeath

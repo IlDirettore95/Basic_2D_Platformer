@@ -24,13 +24,11 @@ namespace GMDG.Basic2DPlatformer.System
         {
             // GameManager
             EventManager.Instance.Subscribe(Event.OnWelcome, DespawnPlayer);
-            EventManager.Instance.Subscribe(Event.OnGameOver, DespawnPlayer);
-            EventManager.Instance.Subscribe(Event.OnVictory, DespawnPlayer);
 
             // Gameplay
             EventManager.Instance.Subscribe(Event.OnLevelGenerated, SpawnPlayer);
-            EventManager.Instance.Subscribe(Event.OnEndGameOverTrasition, DespawnPlayer);
-            EventManager.Instance.Subscribe(Event.OnEndVictoryTrasition, DespawnPlayer);
+            EventManager.Instance.Subscribe(Event.OnEndGameOverTransition, DespawnPlayer);
+            EventManager.Instance.Subscribe(Event.OnEndVictoryTransition, DespawnPlayer);
         }
 
         private void Start()
@@ -49,13 +47,11 @@ namespace GMDG.Basic2DPlatformer.System
         {
             // GameManager
             EventManager.Instance.Unsubscribe(Event.OnWelcome, DespawnPlayer);
-            EventManager.Instance.Unsubscribe(Event.OnGameOver, DespawnPlayer);
-            EventManager.Instance.Unsubscribe(Event.OnVictory, DespawnPlayer);
 
             // Gameplay
             EventManager.Instance.Unsubscribe(Event.OnLevelGenerated, SpawnPlayer);
-            EventManager.Instance.Unsubscribe(Event.OnEndGameOverTrasition, DespawnPlayer);
-            EventManager.Instance.Unsubscribe(Event.OnEndVictoryTrasition, DespawnPlayer);
+            EventManager.Instance.Unsubscribe(Event.OnEndGameOverTransition, DespawnPlayer);
+            EventManager.Instance.Unsubscribe(Event.OnEndVictoryTransition, DespawnPlayer);
         }
 
         private void OnDestroy()
@@ -78,11 +74,15 @@ namespace GMDG.Basic2DPlatformer.System
 
             _playerTransform.position = position;
             _player.SetActive(true);
+
+            EventManager.Instance.Publish(Event.OnPlayerSpawn);
         }
 
         private void DespawnPlayer(object[] args)
         {
             _player.SetActive(false);
+
+            EventManager.Instance.Publish(Event.OnPlayerDespawn);
         }
 
         #endregion

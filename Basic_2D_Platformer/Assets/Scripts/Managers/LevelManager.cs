@@ -88,8 +88,7 @@ namespace GMDG.Basic2DPlatformer.System
             }
             else
             {
-                Delete();
-                EventManager.Instance.Publish(Event.OnEndVictoryTrasition);
+                EventManager.Instance.Publish(Event.OnAllLevelCompleted);
             }
         }
 

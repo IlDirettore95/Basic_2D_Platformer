@@ -38,10 +38,9 @@ namespace GMDG.Basic2DPlatformer.System
         private void OnEnable()
         {
             //// Game Manager
-            //EventManager.Instance.Subscribe(Event.OnWelcome, (object[] args) => mainCameraTransform.position = initialCameraPosition);
-            //EventManager.Instance.Subscribe(Event.OnGameplay, (object[] args) => StartCoroutine(GLSpawnTransition()));
-            //EventManager.Instance.Subscribe(Event.OnPlayerDeath, (object[] args) => StartCoroutine(GLDeathTransition()));
-            //EventManager.Instance.Subscribe(Event.OnDungeonCleared, (object[] args) => StartCoroutine(GLVictoryTransition()));
+            EventManager.Instance.Subscribe(Event.OnPlayerSpawn, GLSpawnTransition);
+            EventManager.Instance.Subscribe(Event.OnPlayerDeath, GLDeathTransition);
+            EventManager.Instance.Subscribe(Event.OnAllLevelCompleted, GLVictoryTransition);
 
             // Gameplay
             EventManager.Instance.Subscribe(Event.OnLevelGenerated, LevelLoaded);
@@ -67,13 +66,12 @@ namespace GMDG.Basic2DPlatformer.System
         private void OnDisable()
         {
             // Game Manager
-            //EventManager.Instance.Unsubscribe(Event.OnWelcome, (object[] args) => mainCameraTransform.position = initialCameraPosition);
-            //EventManager.Instance.Unsubscribe(Event.OnGameplay, (object[] args) => StartCoroutine(GLSpawnTransition()));
-            //EventManager.Instance.Unsubscribe(Event.OnGameOver, (object[] args) => StartCoroutine(GLDeathTransition()));
-            //EventManager.Instance.Unsubscribe(Event.OnVictory, (object[] args) => StartCoroutine(GLVictoryTransition()));
+            EventManager.Instance.Unsubscribe(Event.OnPlayerSpawn, GLSpawnTransition);
+            EventManager.Instance.Unsubscribe(Event.OnPlayerDeath, GLDeathTransition);
+            EventManager.Instance.Unsubscribe(Event.OnAllLevelCompleted, GLVictoryTransition);
 
             // Gameplay
-            EventManager.Instance.Subscribe(Event.OnLevelGenerated, LevelLoaded);
+            EventManager.Instance.Unsubscribe(Event.OnLevelGenerated, LevelLoaded);
         }
 
         private void LateUpdate()
@@ -81,7 +79,7 @@ namespace GMDG.Basic2DPlatformer.System
             float xPosition = Mathf.Clamp(_playerTransform.position.x, _minXPosition, _maxXPosition);
             float yPosition = Mathf.Clamp(_playerTransform.position.y, _minYPosition, _maxYPosition);
             Vector2 destination = new Vector2(xPosition, yPosition);
-            Debug.Log(destination);
+
             MoveCameraToDestination(destination);
         }
 
@@ -114,6 +112,21 @@ namespace GMDG.Basic2DPlatformer.System
             _maxYPosition = yExtend - _screenHeight / 2;
         }
 
+        private void GLSpawnTransition(object[] args)
+        {
+            StartCoroutine(GLSpawnTransition());
+        }
+
+        private void GLDeathTransition(object[] args)
+        {
+            StartCoroutine(GLDeathTransition());
+        }
+
+        private void GLVictoryTransition(object[] args)
+        {
+            StartCoroutine(GLVictoryTransition());
+        }
+
         #endregion
 
         private void MoveCameraToDestination(Vector2 destination)
@@ -139,6 +152,24 @@ namespace GMDG.Basic2DPlatformer.System
             }
         }
 
+        private IEnumerator GLDeathTransition()
+        {
+            float rate = 0.4f;
+            _globalLight.intensity = 1f;
+
+            while (true)
+            {
+                _globalLight.intensity -= rate * Time.deltaTime;
+                if (_globalLight.intensity <= 0)
+                {
+                    break;
+                }
+                yield return null;
+            }
+
+            EventManager.Instance.Publish(Event.OnEndGameOverTransition);
+        }
+        
         private IEnumerator GLVictoryTransition()
         {
             float k = 10000f;
@@ -156,25 +187,7 @@ namespace GMDG.Basic2DPlatformer.System
                 yield return null;
             }
 
-            EventManager.Instance.Publish(Event.OnEndVictoryTrasition);
-        }
-
-        private IEnumerator GLDeathTransition()
-        {
-            float rate = 0.4f;
-            _globalLight.intensity = 1f;
-
-            while (true)
-            {
-                _globalLight.intensity -= rate * Time.deltaTime;
-                if (_globalLight.intensity <= 0)
-                {
-                    break;
-                }
-                yield return null;
-            }
-
-            EventManager.Instance.Publish(Event.OnEndGameOverTrasition);
+            EventManager.Instance.Publish(Event.OnEndVictoryTransition);
         }
     }
 }

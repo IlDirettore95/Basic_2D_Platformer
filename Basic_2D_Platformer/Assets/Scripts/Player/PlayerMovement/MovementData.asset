@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   WalkingSpeed: 8
   WalkingBuildUpSpeed: 4
-  FallingSpeed: 6
-  FallingBuildUpSpeed: 0.6
+  FallingSpeed: 7
+  FallingBuildUpSpeed: 1
   Gravity: 10
   GravityMultiplier: 4
   MaxYSpeed: 50
   JumpForce: 8.7
   JumpBufferTime: 0.1
-  FallDamageYThreshold: 5
-  CollisionThreashold: 0.01
+  FallDamageYThreshold: 15
+  CollisionThreashold: 0.05

@@ -56,7 +56,6 @@ namespace GMDG.Basic2DPlatformer.PlayerStatistics
             {
                 gameObject.SetActive(false);
                 EventManager.Instance.Publish(Event.OnPlayerDeath);
-                EventManager.Instance.Publish(Event.OnEndGameOverTrasition);
             }
             else
             {

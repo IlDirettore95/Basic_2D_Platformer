@@ -16,7 +16,6 @@ namespace GMDG.Basic2DPlatformer.PlayerMovement
         public bool HasJumped { get; private set; }
         public bool IsPressingJumping { get; private set; }
         public bool IsJumpingWithTollerance { get; private set; }
-        public bool IsOnEdge { get; private set; }
         public float HorizontalInput { get; private set; }
         public float VerticalInput { get; private set; }
         public float DistanceFromCollision { get; private set; }
@@ -124,8 +123,8 @@ namespace GMDG.Basic2DPlatformer.PlayerMovement
                 Debug.DrawLine(transform.position, hits[i].point, Color.blue);
                 DistanceFromGround = hits[i].distance;
                 if (_kinematicStatus.Velocity.y > 0) return false;
-                if (hits[i].distance > _collider.size.y / 2 + _data.CollisionThreashold) return false;
-                transform.position += Vector3.up * (_collider.size.y / 2 + _data.CollisionThreashold / 2 - hits[i].distance);
+                if (DistanceFromGround > _collider.size.y / 2 + _data.CollisionThreashold) return false;
+                transform.position += Vector3.up * (_collider.size.y / 2 + _data.CollisionThreashold / 2 - DistanceFromGround);
                 return true;
             }
             DistanceFromGround = float.PositiveInfinity;
@@ -144,16 +143,8 @@ namespace GMDG.Basic2DPlatformer.PlayerMovement
                 if (hits[i].collider.isTrigger) continue;
                 Debug.DrawLine(transform.position, hits[i].point, Color.red);
                 DistanceFromCollision = hits[i].distance;
-                if (_kinematicStatus.Velocity.y < 0 && !IsGrounded && hits[i].distance <= _data.CollisionThreashold)
-                {
-                    IsOnEdge = true;
-                }
-                else
-                {
-                    IsOnEdge = false;
-                }
-                if (hits[i].distance > velocity.magnitude * Time.deltaTime + _data.CollisionThreashold) break;
-                transform.position += (Vector3)velocity.normalized * (hits[i].distance - _data.CollisionThreashold / 2);
+                if (DistanceFromCollision > velocity.magnitude * Time.deltaTime + _data.CollisionThreashold) break;
+                transform.position += (Vector3)velocity.normalized * (DistanceFromCollision - _data.CollisionThreashold / 2);
                 velocity = Vector2.zero;
                 break;
             }

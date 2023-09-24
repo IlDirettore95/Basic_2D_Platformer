@@ -15,8 +15,8 @@ namespace GMDG.Basic2DPlatformer.System
             EventManager.Instance.Subscribe(Event.OnSystemsLoaded, Activate);
             EventManager.Instance.Subscribe(Event.OnStartGameClicked, StartGameplay);
             EventManager.Instance.Subscribe(Event.OnBackToMenuClicked, BackToMenu);
-            EventManager.Instance.Subscribe(Event.OnEndGameOverTrasition, StartGameOver);
-            EventManager.Instance.Subscribe(Event.OnEndVictoryTrasition, StartVictory);
+            EventManager.Instance.Subscribe(Event.OnEndGameOverTransition, StartGameOver);
+            EventManager.Instance.Subscribe(Event.OnEndVictoryTransition, StartVictory);
         }
 
         private void OnDestroy()
@@ -24,8 +24,8 @@ namespace GMDG.Basic2DPlatformer.System
             EventManager.Instance.Unsubscribe(Event.OnSystemsLoaded, Activate);
             EventManager.Instance.Unsubscribe(Event.OnStartGameClicked, StartGameplay);
             EventManager.Instance.Unsubscribe(Event.OnBackToMenuClicked, BackToMenu);
-            EventManager.Instance.Unsubscribe(Event.OnEndGameOverTrasition, StartGameOver);
-            EventManager.Instance.Unsubscribe(Event.OnEndVictoryTrasition, StartVictory);
+            EventManager.Instance.Unsubscribe(Event.OnEndGameOverTransition, StartGameOver);
+            EventManager.Instance.Unsubscribe(Event.OnEndVictoryTransition, StartVictory);
         }
 
         private void Start()

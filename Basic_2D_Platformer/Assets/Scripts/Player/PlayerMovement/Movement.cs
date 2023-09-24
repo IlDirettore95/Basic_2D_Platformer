@@ -53,20 +53,20 @@ namespace GMDG.Basic2DPlatformer.PlayerMovement
         private void OnGUI()
         {
             GUIStyle style = new GUIStyle();
-            style.fontSize = 22;
+            style.fontSize = 24;
             style.normal.textColor = Color.white;
             GUI.Box(new Rect(10, 20, 300, 40), "State: " + _stateMachine.GetState().GetType().Name, style);
             GUI.Box(new Rect(10, 60, 300, 40), string.Format("IsGrounded: {0} ({1})", _sensors.IsGrounded, _sensors.DistanceFromGround), style);
-            GUI.Box(new Rect(10, 140, 300, 40), string.Format("IsWalking: {0}", _sensors.IsWalking), style);
-            GUI.Box(new Rect(10, 180, 300, 40), string.Format("HasJumped: {0}", _sensors.HasJumped), style);
-            GUI.Box(new Rect(10, 220, 300, 40), string.Format("IsPressingJumping: {0}", _sensors.IsPressingJumping), style);
-            GUI.Box(new Rect(10, 260, 300, 40), string.Format("IsJumpingWithTollerance: {0}", _sensors.IsJumpingWithTollerance), style);
-            GUI.Box(new Rect(10, 300, 300, 40), string.Format("MaxYReached: {0}", _sensors.MaxYReached), style);
-            GUI.Box(new Rect(10, 340, 300, 40), "IsOnEdge: " + _sensors.IsOnEdge, style);
-            GUI.Box(new Rect(10, 380, 300, 40), string.Format("HorizontalInput: {0}", _sensors.HorizontalInput), style);
-            GUI.Box(new Rect(10, 420, 300, 40), string.Format("VerticalInput: {0}", _sensors.VerticalInput), style);
-            GUI.Box(new Rect(10, 460, 300, 40), string.Format("DistanceFromCollision: {0}", _sensors.DistanceFromCollision), style);
-    }
+            GUI.Box(new Rect(10, 100, 300, 40), string.Format("IsWalking: {0}", _sensors.IsWalking), style);
+            GUI.Box(new Rect(10, 140, 300, 40), string.Format("HasJumped: {0}", _sensors.HasJumped), style);
+            GUI.Box(new Rect(10, 180, 300, 40), string.Format("IsPressingJumping: {0}", _sensors.IsPressingJumping), style);
+            GUI.Box(new Rect(10, 220, 300, 40), string.Format("IsJumpingWithTollerance: {0}", _sensors.IsJumpingWithTollerance), style);
+            GUI.Box(new Rect(10, 260, 300, 40), string.Format("MaxYReached: {0}", _sensors.MaxYReached), style);
+            GUI.Box(new Rect(10, 300, 300, 40), string.Format("HorizontalInput: {0}", _sensors.HorizontalInput), style);
+            GUI.Box(new Rect(10, 340, 300, 40), string.Format("VerticalInput: {0}", _sensors.VerticalInput), style);
+            GUI.Box(new Rect(10, 380, 300, 40), string.Format("DistanceFromCollision: {0}", _sensors.DistanceFromCollision), style);
+            GUI.Box(new Rect(10, 420, 300, 40), string.Format("Velocity: {0}", _velocity), style);
+        }
 
         private void UpdateSensors()
         {
@@ -165,10 +165,6 @@ namespace GMDG.Basic2DPlatformer.PlayerMovement
             public void OnEnter(IState from) 
             {
                 _waitForInput = _movement._sensors.HasJumped;
-                if (_movement._sensors.HasJumped)
-                {
-                    _movement._velocity = new Vector2(_movement._velocity.x, _movement._sensors.VerticalInput * _movement._data.JumpForce);
-                }
 
                 _currentBuildUp = 0;
 
@@ -190,7 +186,7 @@ namespace GMDG.Basic2DPlatformer.PlayerMovement
                     _movement._sensors.ResetMaxYReached();
                     float actualY = _movement._kinematicStatus.Position.y;
 
-                    if ( maxYReached - actualY > _movement._data.FallDamageYThreshold ) 
+                    if (maxYReached - actualY > _movement._data.FallDamageYThreshold) 
                     {
                         EventManager.Instance.Publish(Event.OnFallDamageTaken);
                     }

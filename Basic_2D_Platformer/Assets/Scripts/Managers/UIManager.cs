@@ -30,8 +30,8 @@ namespace GMDG.Basic2DPlatformer.System
             EventManager.Instance.Subscribe(Event.OnGameplay, DeactiveMainMenu);
             EventManager.Instance.Subscribe(Event.OnPause, ActivePause);
             EventManager.Instance.Subscribe(Event.OnUnpause, DeactivatePause);
-            EventManager.Instance.Subscribe(Event.OnEndGameOverTrasition, ActiveGameOver);
-            EventManager.Instance.Subscribe(Event.OnEndVictoryTrasition, ActiveVictory);
+            EventManager.Instance.Subscribe(Event.OnEndGameOverTransition, ActiveGameOver);
+            EventManager.Instance.Subscribe(Event.OnEndVictoryTransition, ActiveVictory);
         }
 
         private void OnDestroy()
@@ -42,8 +42,8 @@ namespace GMDG.Basic2DPlatformer.System
             EventManager.Instance.Unsubscribe(Event.OnGameplay, DeactiveMainMenu);
             EventManager.Instance.Unsubscribe(Event.OnPause, ActivePause);
             EventManager.Instance.Unsubscribe(Event.OnUnpause, DeactivatePause);
-            EventManager.Instance.Unsubscribe(Event.OnEndGameOverTrasition, ActiveGameOver);
-            EventManager.Instance.Unsubscribe(Event.OnEndVictoryTrasition, ActiveVictory);
+            EventManager.Instance.Unsubscribe(Event.OnEndGameOverTransition, ActiveGameOver);
+            EventManager.Instance.Unsubscribe(Event.OnEndVictoryTransition, ActiveVictory);
         }
 
         #endregion
