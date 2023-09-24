@@ -27,6 +27,7 @@ namespace GMDG.Basic2DPlatformer.System
 
             // Gameplay
             EventManager.Instance.Subscribe(Event.OnLevelGenerated, SpawnPlayer);
+            EventManager.Instance.Subscribe(Event.OnCheckPointGameplay, SpawnPlayer);
             EventManager.Instance.Subscribe(Event.OnEndGameOverTransition, DespawnPlayer);
             EventManager.Instance.Subscribe(Event.OnEndVictoryTransition, DespawnPlayer);
         }
@@ -50,6 +51,7 @@ namespace GMDG.Basic2DPlatformer.System
 
             // Gameplay
             EventManager.Instance.Unsubscribe(Event.OnLevelGenerated, SpawnPlayer);
+            EventManager.Instance.Unsubscribe(Event.OnCheckPointGameplay, SpawnPlayer);
             EventManager.Instance.Unsubscribe(Event.OnEndGameOverTransition, DespawnPlayer);
             EventManager.Instance.Unsubscribe(Event.OnEndVictoryTransition, DespawnPlayer);
         }

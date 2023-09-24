@@ -22,15 +22,19 @@ namespace GMDG.Basic2DPlatformer.System
 
         private EventManager() { }
 
-        public void Subscribe(Event eventName, Action<object[]> listener)
+        public void Subscribe(Event eventName, params Action<object[]>[] listeners)
         {
-            if (!_listenersDictionary.ContainsKey(eventName))
+            for (int i = 0; i < listeners.Length; i++) 
             {
-                _listenersDictionary[eventName] = listener;
-            }
-            else
-            {
-                _listenersDictionary[eventName] += listener;
+                Action<object[]> listener = listeners[i];
+                if (!_listenersDictionary.ContainsKey(eventName))
+                {
+                    _listenersDictionary[eventName] = listener;
+                }
+                else
+                {
+                    _listenersDictionary[eventName] += listener;
+                }
             }
         }
 
@@ -77,6 +81,7 @@ namespace GMDG.Basic2DPlatformer.System
         OnWelcome,
         OnMainMenu,
         OnGameplay,
+        OnCheckPointGameplay,
         OnPause,
         OnUnpause,
         OnGameOver,

@@ -37,7 +37,7 @@ namespace GMDG.Basic2DPlatformer.PlayerStatistics
 
 
         // Update is called once per frame
-        void Update()
+        private void Update()
         {
             if (invincibilityTimer > 0)
             {

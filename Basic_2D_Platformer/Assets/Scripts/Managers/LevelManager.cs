@@ -38,7 +38,6 @@ namespace GMDG.Basic2DPlatformer.System
         {
             // GameManager
             EventManager.Instance.Subscribe(Event.OnWelcome, Delete);
-            EventManager.Instance.Subscribe(Event.OnGameOver, Delete);
             EventManager.Instance.Subscribe(Event.OnVictory, Delete);
 
             // Gameplay
@@ -50,7 +49,6 @@ namespace GMDG.Basic2DPlatformer.System
         {
             // GameManager
             EventManager.Instance.Unsubscribe(Event.OnWelcome, Delete);
-            EventManager.Instance.Unsubscribe(Event.OnGameOver, Delete);
             EventManager.Instance.Unsubscribe(Event.OnVictory, Delete);
 
             // Gameplay

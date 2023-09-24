@@ -146,8 +146,8 @@ namespace GMDG.Basic2DPlatformer.System
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                ChangeState(State.Welcome);
-                EventManager.Instance.Publish(Event.OnWelcome);
+                ChangeState(State.Gameplay);
+                EventManager.Instance.Publish(Event.OnCheckPointGameplay);
             }
         }
 
