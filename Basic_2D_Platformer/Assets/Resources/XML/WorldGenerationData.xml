@@ -10,7 +10,7 @@
       </Settings>
       <WFC>
         <Tiles List="">
-          <Tile ID="START" RH="False" RV="False" N_IN="False" N_OUT="False" E_IN="False" E_OUT="False" S_IN="False" S_OUT="False" W_IN="False" W_OUT="False" Frequency="1">
+          <Tile ID="START" RH="False" RV="False" N_IN="False" N_OUT="False" E_IN="True" E_OUT="True" S_IN="False" S_OUT="False" W_IN="False" W_OUT="False" Frequency="1">
             <Prefab Element="" Path="Prefabs/Chunks/Level 1/Start/Start" />
             <Constraints List="">
               <Constraint Type="EAST">
@@ -31,7 +31,7 @@
               </Constraint>
             </Constraints>
           </Tile>
-          <Tile ID="END" RH="False" RV="False" N_IN="False" N_OUT="False" E_IN="False" E_OUT="False" S_IN="False" S_OUT="False" W_IN="False" W_OUT="False" Frequency="1">
+          <Tile ID="END" RH="False" RV="False" N_IN="False" N_OUT="False" E_IN="False" E_OUT="False" S_IN="False" S_OUT="False" W_IN="True" W_OUT="True" Frequency="1">
             <Prefab Element="" Path="Prefabs/Chunks/Level 1/End/End" />
             <Constraints List="">
               <Constraint Type="WEST">
@@ -47,7 +47,7 @@
               </Constraint>
             </Constraints>
           </Tile>
-          <Tile ID="PASSAGE" RH="False" RV="False" N_IN="False" N_OUT="False" E_IN="False" E_OUT="False" S_IN="False" S_OUT="False" W_IN="False" W_OUT="False" Frequency="1">
+          <Tile ID="PASSAGE" RH="False" RV="False" N_IN="False" N_OUT="False" E_IN="False" E_OUT="False" S_IN="False" S_OUT="True" W_IN="True" W_OUT="True" Frequency="1">
             <Prefab Element="" Path="Prefabs/Chunks/Level 1/Passage/Passage" />
             <Constraints List="">
               <Constraint Type="WEST">
@@ -76,7 +76,7 @@
               </Constraint>
             </Constraints>
           </Tile>
-          <Tile ID="F_TERRAIN" RH="False" RV="False" N_IN="False" N_OUT="False" E_IN="False" E_OUT="False" S_IN="False" S_OUT="False" W_IN="False" W_OUT="False" Frequency="3">
+          <Tile ID="F_TERRAIN" RH="False" RV="False" N_IN="False" N_OUT="False" E_IN="True" E_OUT="True" S_IN="False" S_OUT="False" W_IN="True" W_OUT="True" Frequency="3">
             <Prefab Element="" Path="Prefabs/Chunks/Level 1/Forest/F_Terrain" />
             <Constraints List="">
               <Constraint Type="WEST">
@@ -108,7 +108,7 @@
               </Constraint>
             </Constraints>
           </Tile>
-          <Tile ID="F_PLATFORMS" RH="False" RV="False" N_IN="False" N_OUT="False" E_IN="False" E_OUT="False" S_IN="False" S_OUT="False" W_IN="False" W_OUT="False" Frequency="3">
+          <Tile ID="F_PLATFORMS" RH="False" RV="False" N_IN="False" N_OUT="False" E_IN="True" E_OUT="True" S_IN="False" S_OUT="False" W_IN="True" W_OUT="True" Frequency="3">
             <Prefab Element="" Path="Prefabs/Chunks/Level 1/Forest/F_Platforms" />
             <Constraints List="">
               <Constraint Type="WEST">
@@ -173,7 +173,7 @@
               </Constraint>
             </Constraints>
           </Tile>
-          <Tile ID="C_TERRAIN" RH="False" RV="False" N_IN="False" N_OUT="False" E_IN="False" E_OUT="False" S_IN="False" S_OUT="False" W_IN="False" W_OUT="False" Frequency="3">
+          <Tile ID="C_TERRAIN" RH="False" RV="False" N_IN="False" N_OUT="False" E_IN="True" E_OUT="True" S_IN="False" S_OUT="False" W_IN="True" W_OUT="True" Frequency="3">
             <Prefab Element="" Path="Prefabs/Chunks/Level 1/Cave/C_Terrain" />
             <Constraints List="">
               <Constraint Type="HORIZONTAL">
@@ -199,7 +199,7 @@
               </Constraint>
             </Constraints>
           </Tile>
-          <Tile ID="C_TERRAINT" RH="False" RV="False" N_IN="False" N_OUT="False" E_IN="False" E_OUT="False" S_IN="False" S_OUT="False" W_IN="False" W_OUT="False" Frequency="2">
+          <Tile ID="C_TERRAINT" RH="False" RV="False" N_IN="True" N_OUT="False" E_IN="True" E_OUT="True" S_IN="False" S_OUT="False" W_IN="True" W_OUT="True" Frequency="2">
             <Prefab Element="" Path="Prefabs/Chunks/Level 1/Cave/C_TerrainT" />
             <Constraints List="">
               <Constraint Type="HORIZONTAL">
@@ -267,7 +267,7 @@
               </Constraint>
             </Constraints>
           </Tile>
-          <Tile ID="C_GORGE" RH="False" RV="False" N_IN="False" N_OUT="False" E_IN="False" E_OUT="False" S_IN="False" S_OUT="False" W_IN="False" W_OUT="False" Frequency="1">
+          <Tile ID="C_GORGE" RH="False" RV="False" N_IN="True" N_OUT="False" E_IN="False" E_OUT="False" S_IN="False" S_OUT="True" W_IN="False" W_OUT="False" Frequency="1">
             <Prefab Element="" Path="Prefabs/Chunks/Level 1/Cave/C_Gorge" />
             <Constraints List="">
               <Constraint Type="NORTH">
@@ -293,7 +293,7 @@
               </Constraint>
             </Constraints>
           </Tile>
-          <Tile ID="C_DEADEND" RH="False" RV="False" N_IN="False" N_OUT="False" E_IN="False" E_OUT="False" S_IN="False" S_OUT="False" W_IN="False" W_OUT="False" Frequency="1">
+          <Tile ID="C_DEADEND" RH="False" RV="False" N_IN="False" N_OUT="False" E_IN="True" E_OUT="True" S_IN="False" S_OUT="False" W_IN="False" W_OUT="False" Frequency="1">
             <Prefab Element="" Path="Prefabs/Chunks/Level 1/Cave/C_DeadEnd" />
             <Constraints List="">
               <Constraint Type="EAST">

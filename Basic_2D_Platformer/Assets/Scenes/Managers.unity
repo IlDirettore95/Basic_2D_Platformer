@@ -354,7 +354,7 @@ Camera:
   far clip plane: 1000
   field of view: 34
   orthographic: 1
-  orthographic size: 10
+  orthographic size: 70
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -460,8 +460,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   IterationLimit: -1
   Timeout: 0.1
-  IsSimulated: 0
-  IsHardSimulated: 0
+  IsSimulated: 1
+  IsHardSimulated: 1
 --- !u!1 &1571122075
 GameObject:
   m_ObjectHideFlags: 0

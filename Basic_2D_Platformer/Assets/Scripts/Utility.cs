@@ -653,7 +653,7 @@ namespace GMDG.NoProduct.Utility
                 }
             }
 
-            public void DrawContent(GameObject parent, Func<T,Color> colorHeuristic)
+            public void DrawContent(GameObject parent, Vector2 size, Func<T,Color> colorHeuristic)
             {
                 for (int i = 0; i < parent.transform.childCount; i++)
                 {
@@ -664,7 +664,7 @@ namespace GMDG.NoProduct.Utility
                 {
                     for (int j = 0; j < GridSize.x; j++)
                     {
-                        cells[i, j].DrawContent(parent, colorHeuristic);
+                        cells[i, j].DrawContent(parent, size, colorHeuristic);
                     }
                 }
             }
@@ -698,10 +698,10 @@ namespace GMDG.NoProduct.Utility
                     Debug.DrawLine(PositionInWorld + new Vector2(-Size.x / 2, -Size.y / 2), PositionInWorld + new Vector2(-Size.x / 2, Size.y / 2), Color.black);
                 }
 
-                public void DrawContent(GameObject parent, Func<S, Color> colorHeuristic)
+                public void DrawContent(GameObject parent, Vector2 size, Func<S, Color> colorHeuristic)
                 {
                     Color color = colorHeuristic.Invoke(Content);
-                    TextUtility.CreateWorldText(Content.ToString(), 6, PositionInWorld, color, parent.transform);
+                    TextUtility.CreateWorldText(Content.ToString(), 6, PositionInWorld, size, color, parent.transform);
                 }
             }
         }
@@ -759,10 +759,11 @@ namespace GMDG.NoProduct.Utility
 
     public class TextUtility
     {
-        public static GameObject CreateWorldText(string text, int fontSize, Vector3 position, Color color, Transform parent)
+        public static GameObject CreateWorldText(string text, int fontSize, Vector3 position, Vector2 Size, Color color, Transform parent)
         {
             GameObject go = new GameObject("WorldText", typeof(TextMeshPro));
-            go.transform.position = position;
+            go.transform.position = position - Vector3.forward;
+            ((RectTransform)go.transform).sizeDelta = Size;
             go.transform.SetParent(parent);
             TextMeshPro textComponent = go.GetComponent<TextMeshPro>();
             textComponent.text = text;

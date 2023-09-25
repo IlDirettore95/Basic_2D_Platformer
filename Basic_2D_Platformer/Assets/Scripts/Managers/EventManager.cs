@@ -98,7 +98,7 @@ namespace GMDG.Basic2DPlatformer.System
         OnButtonOver,
 
         // PCG
-        OnGridUpdated,
+        OnPCGUpdated,
         OnLevelGenerated,
 
         // Gameplay

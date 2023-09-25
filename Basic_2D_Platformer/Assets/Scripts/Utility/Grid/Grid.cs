@@ -39,6 +39,16 @@ namespace GMDG.Basic2DPlatformer.Utility
             }
         }
 
+        public Vector2 GetPosition(Vector2Int indicies)
+        {
+            if (indicies.y < 0 || indicies.x < 0 || indicies.y > GridSize.y - 1 || indicies.x > GridSize.x - 1)
+            {
+                throw new ArgumentException();
+            }
+
+            return CellsPositions[indicies.y, indicies.x];
+        }
+
         public Vector2 GetPosition(int i, int j)
         {
             if (i < 0 || j < 0 || i > GridSize.y - 1 || j > GridSize.x - 1)
@@ -162,7 +172,7 @@ namespace GMDG.Basic2DPlatformer.Utility
             {
                 Color color = colorHeuristic.Invoke(Content);
                 string text = stringHeuristic.Invoke(Content);
-                TextUtility.CreateWorldText(text, fontSize, PositionInWorld, color, parent.transform);
+                TextUtility.CreateWorldText(text, fontSize, PositionInWorld, Size, color, parent.transform);
             }
         }
     }

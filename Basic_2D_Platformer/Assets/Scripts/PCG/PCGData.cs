@@ -13,6 +13,7 @@ namespace GMDG.Basic2DPlatformer.PCG
         public Vector2Int EndingCell;
         public Vector2Int PassageCell;
         public Grid<HashSet<int>> Grid;
+        public List<Vector2Int> FeasiblePath;
         public List<WFCTile> WFCTiles = new List<WFCTile>();
 
         public const int START_CELL = 0;
