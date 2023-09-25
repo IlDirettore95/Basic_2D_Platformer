@@ -1,10 +1,7 @@
-using System;
 using System.Collections.Generic;
 using System.Xml;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.UIElements;
-using static Unity.VisualScripting.Metadata;
 
 namespace GMDG.Basic2DPlatformer.Tools.XML
 {
@@ -32,14 +29,13 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
         private Rect _fileActionsRect;
         private Rect _messageRect;
 
-        private Vector2 _currentHierarchyScrollPosition;
         private Vector2 _currentChildrenScrollPosition;
 
         private const int PADDING_CONTENT = 8;
         private const int BUTTON_SIMPLE_WIDTH = 100;
         private const int BUTTON_FILE_ACTIONS_WIDTH = 120;
         private const int TEXTFIELDS_ATTRIBUTE_WIDTH = 30;
-        private const int TEXTFIELDS_ATTRIBUTE_ID_WIDTH = 140;
+        private const int TEXTFIELDS_ATTRIBUTE_ID_WIDTH = 90;
         private const int POPUP_CONSTRAINT_WIDTH = 100;
         private const int TOGGLE_WIDTH = 10;
 
@@ -73,22 +69,22 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
 
             _hierarchyRect.x = 0;
             _hierarchyRect.y = 0;
-            _hierarchyRect.width = 800;
+            _hierarchyRect.width = 1000;
             _hierarchyRect.height = 80;
 
             _currentChildrenRect.x = 0;
             _currentChildrenRect.y = 80;
-            _currentChildrenRect.width = 600;
-            _currentChildrenRect.height = 240;
+            _currentChildrenRect.width = 840;
+            _currentChildrenRect.height = 640;
 
-            _fileActionsRect.x = 600;
+            _fileActionsRect.x = 840;
             _fileActionsRect.y = 80;
-            _fileActionsRect.width = 200;
-            _fileActionsRect.height = 240;
+            _fileActionsRect.width = 160;
+            _fileActionsRect.height = 640;
 
             _messageRect.x = 0;
-            _messageRect.y = 320;
-            _messageRect.width = 800;
+            _messageRect.y = 720;
+            _messageRect.width = 1000;
             _messageRect.height = 80;
         }
 
@@ -247,8 +243,8 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
 
                 if (Utils.IsNodeNameEqual(child, "Tile") && Utils.IsAttributeNameEqual(attribute, "RH"))
                 {
-                    GUILayout.Space(15);
-                    GUILayout.Label(attribute.Name, GUILayout.ExpandWidth(false));
+                    GUILayout.Space(10);
+                    GUILayout.Label("R (H-V)", GUILayout.ExpandWidth(false));
                     bool oldBool = _model.GetRHBool(child);
                     bool newBool = EditorGUILayout.Toggle(oldBool, GUILayout.Width(TOGGLE_WIDTH));
                     _model.SetRHBool(child, newBool);
@@ -257,11 +253,86 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
 
                 if (Utils.IsNodeNameEqual(child, "Tile") && Utils.IsAttributeNameEqual(attribute, "RV"))
                 {
-                    GUILayout.Space(15);
-                    GUILayout.Label(attribute.Name, GUILayout.ExpandWidth(false));
+                    GUILayout.Space(5);
                     bool oldBool = _model.GetRVBool(child);
                     bool newBool = EditorGUILayout.Toggle(oldBool, GUILayout.Width(TOGGLE_WIDTH));
                     _model.SetRVBool(child, newBool);
+                    continue;
+                }
+
+                if (Utils.IsNodeNameEqual(child, "Tile") && Utils.IsAttributeNameEqual(attribute, "N_IN"))
+                {
+                    GUILayout.Space(10);
+                    GUILayout.Label("N (I-O)", GUILayout.ExpandWidth(false));
+                    bool oldBool = _model.GetNInBool(child);
+                    bool newBool = EditorGUILayout.Toggle(oldBool, GUILayout.Width(TOGGLE_WIDTH));
+                    _model.SetNInBool(child, newBool);
+                    continue;
+                }
+
+                if (Utils.IsNodeNameEqual(child, "Tile") && Utils.IsAttributeNameEqual(attribute, "N_OUT"))
+                {
+                    GUILayout.Space(5);
+                    bool oldBool = _model.GetNOutBool(child);
+                    bool newBool = EditorGUILayout.Toggle(oldBool, GUILayout.Width(TOGGLE_WIDTH));
+                    _model.SetNOutBool(child, newBool);
+                    continue;
+                }
+
+                if (Utils.IsNodeNameEqual(child, "Tile") && Utils.IsAttributeNameEqual(attribute, "E_IN"))
+                {
+                    GUILayout.Space(10);
+                    GUILayout.Label("E (I-O)", GUILayout.ExpandWidth(false));
+                    bool oldBool = _model.GetEInBool(child);
+                    bool newBool = EditorGUILayout.Toggle(oldBool, GUILayout.Width(TOGGLE_WIDTH));
+                    _model.SetEInBool(child, newBool);
+                    continue;
+                }
+
+                if (Utils.IsNodeNameEqual(child, "Tile") && Utils.IsAttributeNameEqual(attribute, "E_OUT"))
+                {
+                    GUILayout.Space(5);
+                    bool oldBool = _model.GetEOutBool(child);
+                    bool newBool = EditorGUILayout.Toggle(oldBool, GUILayout.Width(TOGGLE_WIDTH));
+                    _model.SetEOutBool(child, newBool);
+                    continue;
+                }
+
+                if (Utils.IsNodeNameEqual(child, "Tile") && Utils.IsAttributeNameEqual(attribute, "S_IN"))
+                {
+                    GUILayout.Space(10);
+                    GUILayout.Label("S (I-O)", GUILayout.ExpandWidth(false));
+                    bool oldBool = _model.GetSInBool(child);
+                    bool newBool = EditorGUILayout.Toggle(oldBool, GUILayout.Width(TOGGLE_WIDTH));
+                    _model.SetSInBool(child, newBool);
+                    continue;
+                }
+
+                if (Utils.IsNodeNameEqual(child, "Tile") && Utils.IsAttributeNameEqual(attribute, "S_OUT"))
+                {
+                    GUILayout.Space(5);
+                    bool oldBool = _model.GetSOutBool(child);
+                    bool newBool = EditorGUILayout.Toggle(oldBool, GUILayout.Width(TOGGLE_WIDTH));
+                    _model.SetSOutBool(child, newBool);
+                    continue;
+                }
+
+                if (Utils.IsNodeNameEqual(child, "Tile") && Utils.IsAttributeNameEqual(attribute, "W_IN"))
+                {
+                    GUILayout.Space(10);
+                    GUILayout.Label("W (I-O)", GUILayout.ExpandWidth(false));
+                    bool oldBool = _model.GetWInBool(child);
+                    bool newBool = EditorGUILayout.Toggle(oldBool, GUILayout.Width(TOGGLE_WIDTH));
+                    _model.SetWInBool(child, newBool);
+                    continue;
+                }
+
+                if (Utils.IsNodeNameEqual(child, "Tile") && Utils.IsAttributeNameEqual(attribute, "W_OUT"))
+                {
+                    GUILayout.Space(5);
+                    bool oldBool = _model.GetWOutBool(child);
+                    bool newBool = EditorGUILayout.Toggle(oldBool, GUILayout.Width(TOGGLE_WIDTH));
+                    _model.SetWOutBool(child, newBool);
                     continue;
                 }
 

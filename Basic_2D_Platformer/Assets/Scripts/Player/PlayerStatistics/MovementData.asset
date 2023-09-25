@@ -10,10 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ac21c5af2b0d3cc48b071d79c27162cc, type: 3}
-  m_Name: StatisticsData
+  m_Name: MovementData
   m_EditorClassIdentifier: 
-  MaxHealth: 3
-  LifeColors:
-  - {r: 0.7735849, g: 0.09122462, b: 0.09122462, a: 1}
-  - {r: 0.8018868, g: 0.4085084, b: 0.06430225, a: 1}
-  - {r: 0.23304644, g: 0.7735849, b: 0.16420436, a: 1}
+  MaxHealth: 0
+  LifeColors: []

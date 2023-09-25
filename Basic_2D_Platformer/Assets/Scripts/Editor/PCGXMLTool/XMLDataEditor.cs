@@ -8,8 +8,8 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
         private Model _model;
         private View _view;
 
-        private const int WINDOW_WIDTH = 800;
-        private const int WINDOW_HEIGHT = 400;
+        private const int WINDOW_WIDTH = 1000;
+        private const int WINDOW_HEIGHT = 800;
 
         [MenuItem("Window/PCG/XMLDataEditor")]
         private static void Init()

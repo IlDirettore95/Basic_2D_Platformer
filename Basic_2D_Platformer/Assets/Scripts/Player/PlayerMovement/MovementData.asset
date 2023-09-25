@@ -18,7 +18,7 @@ MonoBehaviour:
   FallingBuildUpSpeed: 1
   Gravity: 10
   GravityMultiplier: 4
-  MaxYSpeed: 50
+  MaxYSpeed: 45
   JumpForce: 8.7
   JumpBufferTime: 0.1
   FallDamageYThreshold: 15

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using static GMDG.NoProduct.Utility.Utility2D;
 
@@ -9,6 +10,16 @@ public class WFCTile
     public GameObject Prefab;
     public float RelativeFrequency;
     public float Log2RelativeFrequency;
+
+    public bool NIn;    
+    public bool NOut;
+    public bool EIn;    
+    public bool EOut;
+    public bool SIn;    
+    public bool SOut;
+    public bool WIn;    
+    public bool WOut;
+
     public Dictionary<Direction2D, HashSet<int>> PossibleNeighbours = new Dictionary<Direction2D, HashSet<int>>()
     {
         { Direction2D.NORTH,  new HashSet<int>()},

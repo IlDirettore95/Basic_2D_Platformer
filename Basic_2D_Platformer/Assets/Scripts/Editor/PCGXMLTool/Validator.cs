@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Xml;
 
 namespace GMDG.Basic2DPlatformer.Tools.XML
@@ -20,6 +21,8 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
         public bool ValidateXmlDocument(XmlDocument document)
         {
             bool errorsFound = false;
+
+            _view.Message = string.Empty;
 
             foreach (XmlNode level in Utils.GetLevelNodes(document))
             {
@@ -44,6 +47,30 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
                         errorsFound = true;
                         break;
                     }
+
+                    foreach (XmlNode constraint in Utils.GetConstraintNodes(tile))
+                    {
+                        foreach (XmlNode neighbour in Utils.GetNeighbourNodes(constraint))
+                        {
+                            if (!ValidateNeighbour(neighbour, level, tile, constraint))
+                            {
+                                errorsFound = true;
+                                break;
+                            }
+                        }
+
+                        if (errorsFound)
+                        {
+                            break;
+                        }
+
+                    }
+
+                    if (errorsFound)
+                    {
+                        break;
+                    }
+
                 }
 
                 if (errorsFound)
@@ -53,6 +80,7 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
             }
 
             if (errorsFound) _view.Message += " (Validation Unsuccessful)";
+            else _view.Message += " (Validation Successful)";
 
             return !errorsFound;
         }
@@ -181,26 +209,214 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
 
         private bool ValidateTile(XmlNode tile)
         {
+            string tileName = Utils.GetNodeAttributeValue(tile, "ID");
             
             if (!int.TryParse(Utils.GetNodeAttributeValue(tile, "Frequency"), out int frequency))
             {
-                _view.Message = "frequency must be an integer";
+                _view.Message = string.Format("Frequency must be an integer on Tile ({0})", tileName);
                 return false;
             }
 
             if (frequency <= 0)
             {
-                _view.Message = "frequency must be above 0";
+                _view.Message = string.Format("Frequency must be above 0 on Tile ({0})", tileName);
                 return false;
             }
             
             if (Utils.IsNodeAttributeEqual(tile["Prefab"], "Path", string.Empty))
             {
-                _view.Message = "prefab asset is missing";
+                //_view.Message = string.Format("Prefab is missing on Tile ({0})", tileName);
+                //return false;
+            }
+
+            return true;
+        }
+
+        private bool ValidateNeighbour(XmlNode neighbour, XmlNode currentLevel, XmlNode currentTile, XmlNode currentConstraint)
+        {
+            XmlNode correspondingTile = null;
+
+            foreach (XmlNode tile in Utils.GetTileNodes(currentLevel))
+            {
+                if (!Utils.IsNodeAttributeEqual(tile, "ID", Utils.GetNodeAttributeValue(neighbour, "ID"))) continue;
+                correspondingTile = tile;
+            }
+
+            if (correspondingTile == null) 
+            {
+                _view.Message = string.Format("Neighbour ({0}) is not found in Tiles of Level ({1})", Utils.GetNodeAttributeValue(neighbour, "ID"), Utils.GetNodeAttributeValue(currentLevel, "ID"));
+                return true;
+            }
+
+            string currentTileName = Utils.GetNodeAttributeValue(currentTile, "ID");
+            string correspondingTileName = Utils.GetNodeAttributeValue(correspondingTile, "ID");
+            string constraintType = Utils.GetNodeAttributeValue(currentConstraint, "Type");
+
+            if (!ValidateAdjacenciesPerConstarintType(currentTile, constraintType, correspondingTile))
+            {
+                _view.Message = string.Format("Tile ({0}) cannot be near Tile ({1}) with constraint ({2})", currentTileName, correspondingTileName, constraintType);
                 return false;
             }
 
             return true;
+        }
+
+        public bool ValidateAdjacenciesPerConstarintType(XmlNode currentTile, string constraintType, XmlNode otherTile)
+        {
+            bool currentNIn = bool.Parse(Utils.GetNodeAttributeValue(currentTile, "N_IN"));
+            bool currentNOut = bool.Parse(Utils.GetNodeAttributeValue(currentTile, "N_OUT"));
+            bool currentEIn = bool.Parse(Utils.GetNodeAttributeValue(currentTile, "E_IN"));
+            bool currentEOut = bool.Parse(Utils.GetNodeAttributeValue(currentTile, "E_OUT"));
+            bool currentSIn = bool.Parse(Utils.GetNodeAttributeValue(currentTile, "S_IN"));
+            bool currentSOut = bool.Parse(Utils.GetNodeAttributeValue(currentTile, "S_OUT"));
+            bool currentWIn = bool.Parse(Utils.GetNodeAttributeValue(currentTile, "W_IN"));
+            bool currentWOut = bool.Parse(Utils.GetNodeAttributeValue(currentTile, "W_OUT"));
+
+            bool otherNIn = bool.Parse(Utils.GetNodeAttributeValue(otherTile, "N_IN"));
+            bool otherNOut = bool.Parse(Utils.GetNodeAttributeValue(otherTile, "N_OUT"));
+            bool otherEIn = bool.Parse(Utils.GetNodeAttributeValue(otherTile, "E_IN"));
+            bool otherEOut = bool.Parse(Utils.GetNodeAttributeValue(otherTile, "E_OUT"));
+            bool otherSIn = bool.Parse(Utils.GetNodeAttributeValue(otherTile, "S_IN"));
+            bool otherSOut = bool.Parse(Utils.GetNodeAttributeValue(otherTile, "S_OUT"));
+            bool otherWIn = bool.Parse(Utils.GetNodeAttributeValue(otherTile, "W_IN"));
+            bool otherWOut = bool.Parse(Utils.GetNodeAttributeValue(otherTile, "W_OUT"));
+
+            if (constraintType.Equals("ALL"))
+            {
+                if(!ValidateDirectionFlags(currentNIn, currentNOut, otherSIn, otherSOut))
+                {
+                    return false;
+                }
+                if (!ValidateDirectionFlags(currentEIn, currentEOut, otherWIn, otherWOut))
+                {
+                    return false;
+                }
+                if (!ValidateDirectionFlags(currentSIn, currentSOut, otherNIn, otherNOut))
+                {
+                    return false;
+                }
+                if (!ValidateDirectionFlags(currentWIn, currentWOut, otherEIn, otherEOut))
+                {
+                    return false;
+                }
+            }
+            else if (constraintType.Equals("NORTH"))
+            {
+                if (!ValidateDirectionFlags(currentNIn, currentNOut, otherSIn, otherSOut))
+                {
+                    return false;
+                }
+            }
+            else if (constraintType.Equals("SOUTH"))
+            {
+                if (!ValidateDirectionFlags(currentSIn, currentSOut, otherNIn, otherNOut))
+                {
+                    return false;
+                }
+            }
+            else if (constraintType.Equals("EAST"))
+            {
+                if (!ValidateDirectionFlags(currentEIn, currentEOut, otherWIn, otherWOut))
+                {
+                    return false;
+                }
+            }
+            else if (constraintType.Equals("WEST"))
+            {
+                if (!ValidateDirectionFlags(currentWIn, currentWOut, otherEIn, otherEOut))
+                {
+                    return false;
+                }
+            }
+            else if (constraintType.Equals("VERTICAL"))
+            {
+                if (!ValidateDirectionFlags(currentNIn, currentNOut, otherSIn, otherSOut))
+                {
+                    return false;
+                }
+                if (!ValidateDirectionFlags(currentSIn, currentSOut, otherNIn, otherNOut))
+                {
+                    return false;
+                }
+            }
+            else if (constraintType.Equals("HORIZONTAL"))
+            {
+                if (!ValidateDirectionFlags(currentEIn, currentEOut, otherWIn, otherWOut))
+                {
+                    return false;
+                }
+                if (!ValidateDirectionFlags(currentWIn, currentWOut, otherEIn, otherEOut))
+                {
+                    return false;
+                }
+            }
+            else if (constraintType.Equals("N_NORTH"))
+            {
+                if (!ValidateDirectionFlags(currentEIn, currentEOut, otherWIn, otherWOut))
+                {
+                    return false;
+                }
+                if (!ValidateDirectionFlags(currentSIn, currentSOut, otherNIn, otherNOut))
+                {
+                    return false;
+                }
+                if (!ValidateDirectionFlags(currentWIn, currentWOut, otherEIn, otherEOut))
+                {
+                    return false;
+                }
+            }
+            else if (constraintType.Equals("N_SOUTH"))
+            {
+                if (!ValidateDirectionFlags(currentNIn, currentNOut, otherSIn, otherSOut))
+                {
+                    return false;
+                }
+                if (!ValidateDirectionFlags(currentEIn, currentEOut, otherWIn, otherWOut))
+                {
+                    return false;
+                }
+                if (!ValidateDirectionFlags(currentWIn, currentWOut, otherEIn, otherEOut))
+                {
+                    return false;
+                }
+            }
+            else if (constraintType.Equals("N_EAST"))
+            {
+                if (!ValidateDirectionFlags(currentNIn, currentNOut, otherSIn, otherSOut))
+                {
+                    return false;
+                }
+                if (!ValidateDirectionFlags(currentSIn, currentSOut, otherNIn, otherNOut))
+                {
+                    return false;
+                }
+                if (!ValidateDirectionFlags(currentWIn, currentWOut, otherEIn, otherEOut))
+                {
+                    return false;
+                }
+            }
+            else if (constraintType.Equals("N_WEST"))
+            {
+                if (!ValidateDirectionFlags(currentNIn, currentNOut, otherSIn, otherSOut))
+                {
+                    return false;
+                }
+                if (!ValidateDirectionFlags(currentEIn, currentEOut, otherWIn, otherWOut))
+                {
+                    return false;
+                }
+                if (!ValidateDirectionFlags(currentSIn, currentSOut, otherNIn, otherNOut))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private bool ValidateDirectionFlags(bool currentIn, bool currentOut, bool otherIn, bool otherOut)
+        {
+            return ((currentIn == otherOut) && (currentOut == otherIn));
         }
 
         #endregion

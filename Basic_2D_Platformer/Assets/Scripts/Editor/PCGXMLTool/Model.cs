@@ -4,11 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Xml;
-using Unity.Collections.LowLevel.Unsafe;
 using UnityEditor;
-using UnityEditor.Rendering.LookDev;
 using UnityEngine;
-using static UnityEngine.RuleTile.TilingRuleOutput;
 
 namespace GMDG.Basic2DPlatformer.Tools.XML
 {
@@ -30,6 +27,14 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
         private Dictionary<XmlNode, string[]> _neighbourChoicesPerLevel;
         private Dictionary<XmlNode, Dictionary<XmlNode, bool>> _rhPerTile;
         private Dictionary<XmlNode, Dictionary<XmlNode, bool>> _rvPerTile;
+        private Dictionary<XmlNode, Dictionary<XmlNode, bool>> _nInPerTile;
+        private Dictionary<XmlNode, Dictionary<XmlNode, bool>> _nOutPerTile;
+        private Dictionary<XmlNode, Dictionary<XmlNode, bool>> _eInPerTile;
+        private Dictionary<XmlNode, Dictionary<XmlNode, bool>> _eOutPerTile;
+        private Dictionary<XmlNode, Dictionary<XmlNode, bool>> _sInPerTile;
+        private Dictionary<XmlNode, Dictionary<XmlNode, bool>> _sOutPerTile;
+        private Dictionary<XmlNode, Dictionary<XmlNode, bool>> _wInPerTile;
+        private Dictionary<XmlNode, Dictionary<XmlNode, bool>> _wOutPerTile;
         private Dictionary<XmlNode, Dictionary<XmlNode, Dictionary<XmlNode, Dictionary<XmlNode, int>>>> _indexesPerNeighbour;
         private string[] _possibleConstraintTypes = { "ALL", "NORTH", "EAST", "SOUTH", "WEST", "HORIZONTAL", "VERTICAL", "N_NORTH", "N_EAST", "N_SOUTH", "N_WEST" };
         private Dictionary<XmlNode, Dictionary<XmlNode, Dictionary<XmlNode, int>>> _indexesPerConstraint;
@@ -88,24 +93,42 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
             }
 
             _rhPerTile = new Dictionary<XmlNode, Dictionary<XmlNode, bool>>();
+            _rvPerTile = new Dictionary<XmlNode, Dictionary<XmlNode, bool>>();
+            _nInPerTile = new Dictionary<XmlNode, Dictionary<XmlNode, bool>>();
+            _nOutPerTile = new Dictionary<XmlNode, Dictionary<XmlNode, bool>>();
+            _eInPerTile = new Dictionary<XmlNode, Dictionary<XmlNode, bool>>();
+            _eOutPerTile = new Dictionary<XmlNode, Dictionary<XmlNode, bool>>();
+            _sInPerTile = new Dictionary<XmlNode, Dictionary<XmlNode, bool>>();
+            _sOutPerTile = new Dictionary<XmlNode, Dictionary<XmlNode, bool>>();
+            _wInPerTile = new Dictionary<XmlNode, Dictionary<XmlNode, bool>>();
+            _wOutPerTile = new Dictionary<XmlNode, Dictionary<XmlNode, bool>>();
             foreach (XmlNode level in Utils.GetLevelNodes(_xmlDocument))
             {
                 _rhPerTile[level] = new Dictionary<XmlNode, bool>();
+                _rvPerTile[level] = new Dictionary<XmlNode, bool>();
+                _nInPerTile[level] = new Dictionary<XmlNode, bool>();
+                _nOutPerTile[level] = new Dictionary<XmlNode, bool>();
+                _eInPerTile[level] = new Dictionary<XmlNode, bool>();
+                _eOutPerTile[level] = new Dictionary<XmlNode, bool>();
+                _sInPerTile[level] = new Dictionary<XmlNode, bool>();
+                _sOutPerTile[level] = new Dictionary<XmlNode, bool>();
+                _wInPerTile[level] = new Dictionary<XmlNode, bool>();
+                _wOutPerTile[level] = new Dictionary<XmlNode, bool>();
                 foreach (XmlNode tile in Utils.GetTileNodes(level))
                 {
                     _rhPerTile[level][tile] = Convert.ToBoolean(Utils.GetNodeAttributeValue(tile, "RH"));
-                }
-            }
-
-            _rvPerTile = new Dictionary<XmlNode, Dictionary<XmlNode, bool>>();
-            foreach (XmlNode level in Utils.GetLevelNodes(_xmlDocument))
-            {
-                _rvPerTile[level] = new Dictionary<XmlNode, bool>();
-                foreach (XmlNode tile in Utils.GetTileNodes(level))
-                {
                     _rvPerTile[level][tile] = Convert.ToBoolean(Utils.GetNodeAttributeValue(tile, "RV"));
+                    _nInPerTile[level][tile] = Convert.ToBoolean(Utils.GetNodeAttributeValue(tile, "N_IN"));
+                    _nOutPerTile[level][tile] = Convert.ToBoolean(Utils.GetNodeAttributeValue(tile, "N_OUT"));
+                    _eInPerTile[level][tile] = Convert.ToBoolean(Utils.GetNodeAttributeValue(tile, "E_IN"));
+                    _eOutPerTile[level][tile] = Convert.ToBoolean(Utils.GetNodeAttributeValue(tile, "E_OUT"));
+                    _sInPerTile[level][tile] = Convert.ToBoolean(Utils.GetNodeAttributeValue(tile, "S_IN"));
+                    _sOutPerTile[level][tile] = Convert.ToBoolean(Utils.GetNodeAttributeValue(tile, "S_OUT"));
+                    _wInPerTile[level][tile] = Convert.ToBoolean(Utils.GetNodeAttributeValue(tile, "W_IN"));
+                    _wOutPerTile[level][tile] = Convert.ToBoolean(Utils.GetNodeAttributeValue(tile, "W_OUT"));
                 }
             }
+       
 
             _neighbourChoicesPerLevel = new Dictionary<XmlNode, string[]>();
             foreach (XmlNode level in Utils.GetLevelNodes(_xmlDocument))
@@ -231,6 +254,46 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
             return _rvPerTile[_currentLevel][tile];
         }
 
+        public bool GetNInBool(XmlNode tile)
+        {
+            return _nInPerTile[_currentLevel][tile];
+        }
+
+        public bool GetNOutBool(XmlNode tile)
+        {
+            return _nOutPerTile[_currentLevel][tile];
+        }
+
+        public bool GetEInBool(XmlNode tile)
+        {
+            return _eInPerTile[_currentLevel][tile];
+        }
+
+        public bool GetEOutBool(XmlNode tile)
+        {
+            return _eOutPerTile[_currentLevel][tile];
+        }
+
+        public bool GetSInBool(XmlNode tile)
+        {
+            return _sInPerTile[_currentLevel][tile];
+        }
+
+        public bool GetSOutBool(XmlNode tile)
+        {
+            return _sOutPerTile[_currentLevel][tile];
+        }
+
+        public bool GetWInBool(XmlNode tile)
+        {
+            return _wInPerTile[_currentLevel][tile];
+        }
+
+        public bool GetWOutBool(XmlNode tile)
+        {
+            return _wOutPerTile[_currentLevel][tile];
+        }
+
         public void SetRHBool(XmlNode tile, bool newBool)
         {
             Utils.SetNodeAttributeValue(tile, "RH", newBool.ToString());
@@ -241,6 +304,54 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
         {
             Utils.SetNodeAttributeValue(tile, "RV", newBool.ToString());
             _rvPerTile[_currentLevel][tile] = newBool;
+        }
+
+        public void SetNInBool(XmlNode tile, bool newBool)
+        {
+            Utils.SetNodeAttributeValue(tile, "N_IN", newBool.ToString());
+            _nInPerTile[_currentLevel][tile] = newBool;
+        }
+
+        public void SetNOutBool(XmlNode tile, bool newBool)
+        {
+            Utils.SetNodeAttributeValue(tile, "N_OUT", newBool.ToString());
+            _nOutPerTile[_currentLevel][tile] = newBool;
+        }
+
+        public void SetEInBool(XmlNode tile, bool newBool)
+        {
+            Utils.SetNodeAttributeValue(tile, "E_IN", newBool.ToString());
+            _eInPerTile[_currentLevel][tile] = newBool;
+        }
+
+        public void SetEOutBool(XmlNode tile, bool newBool)
+        {
+            Utils.SetNodeAttributeValue(tile, "E_OUT", newBool.ToString());
+            _eOutPerTile[_currentLevel][tile] = newBool;
+        }
+
+        public void SetSInBool(XmlNode tile, bool newBool)
+        {
+            Utils.SetNodeAttributeValue(tile, "S_IN", newBool.ToString());
+            _sInPerTile[_currentLevel][tile] = newBool;
+        }
+
+        public void SetSOutBool(XmlNode tile, bool newBool)
+        {
+            Utils.SetNodeAttributeValue(tile, "S_OUT", newBool.ToString());
+            _sOutPerTile[_currentLevel][tile] = newBool;
+        }
+
+        public void SetWInBool(XmlNode tile, bool newBool)
+        {
+            Utils.SetNodeAttributeValue(tile, "W_IN", newBool.ToString());
+            _wInPerTile[_currentLevel][tile] = newBool;
+        }
+
+        public void SetWOutBool(XmlNode tile, bool newBool)
+        {
+            Utils.SetNodeAttributeValue(tile, "W_OUT", newBool.ToString());
+            _wOutPerTile[_currentLevel][tile] = newBool;
         }
 
         public string[] GetNeighbourChoices()
@@ -330,6 +441,14 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
             _neighbourChoicesPerLevel[level] = new string[0];
             _rhPerTile[level] = new Dictionary<XmlNode, bool>();
             _rvPerTile[level] = new Dictionary<XmlNode, bool>();
+            _nInPerTile[level] = new Dictionary<XmlNode, bool>();
+            _nOutPerTile[level] = new Dictionary<XmlNode, bool>();
+            _eInPerTile[level] = new Dictionary<XmlNode, bool>();
+            _eOutPerTile[level] = new Dictionary<XmlNode, bool>();
+            _sInPerTile[level] = new Dictionary<XmlNode, bool>();
+            _sOutPerTile[level] = new Dictionary<XmlNode, bool>();
+            _wInPerTile[level] = new Dictionary<XmlNode, bool>();
+            _wOutPerTile[level] = new Dictionary<XmlNode, bool>();
             _indexesPerNeighbour[level] = new Dictionary<XmlNode, Dictionary<XmlNode, Dictionary<XmlNode, int>>>();
             _indexesPerConstraint[level] = new Dictionary<XmlNode, Dictionary<XmlNode, int>>();
 
@@ -345,6 +464,14 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
             _neighbourChoicesPerLevel[currentLevel] = AddNewChoice(tile, _neighbourChoicesPerLevel[currentLevel]);
             _rhPerTile[currentLevel][tile] = false;
             _rvPerTile[currentLevel][tile] = false;
+            _nInPerTile[currentLevel][tile] = false;
+            _nOutPerTile[currentLevel][tile] = false;
+            _eInPerTile[currentLevel][tile] = false;
+            _eOutPerTile[currentLevel][tile] = false;
+            _sInPerTile[currentLevel][tile] = false;
+            _sOutPerTile[currentLevel][tile] = false;
+            _wInPerTile[currentLevel][tile] = false;
+            _wOutPerTile[currentLevel][tile] = false;
             _indexesPerNeighbour[currentLevel][tile] = new Dictionary<XmlNode, Dictionary<XmlNode, int>>();
             _indexesPerConstraint[currentLevel][tile] = new Dictionary<XmlNode, int>();
 
@@ -410,6 +537,18 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
         {
             _tilesPerLevel.Remove(level);
             _neighbourChoicesPerLevel.Remove(level);
+
+            _rhPerTile.Remove(level);
+            _rvPerTile.Remove(level);
+            _nInPerTile.Remove(level);
+            _nOutPerTile.Remove(level);
+            _eInPerTile.Remove(level);
+            _eOutPerTile.Remove(level);
+            _sInPerTile.Remove(level);
+            _sOutPerTile.Remove(level);
+            _wInPerTile.Remove(level);
+            _wOutPerTile.Remove(level);
+
             _indexesPerNeighbour.Remove(level);
         }
 
@@ -429,6 +568,17 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
                 newChoices[i] = Utils.GetNodeAttributeValue(_tilesPerLevel[_currentLevel][i], "ID");
             }
             _neighbourChoicesPerLevel[_currentLevel] = newChoices;
+
+            _rhPerTile[_currentLevel].Remove(tile);
+            _rvPerTile[_currentLevel].Remove(tile);
+            _nInPerTile[_currentLevel].Remove(tile);
+            _nOutPerTile[_currentLevel].Remove(tile);
+            _eInPerTile[_currentLevel].Remove(tile);
+            _eOutPerTile[_currentLevel].Remove(tile);
+            _sInPerTile[_currentLevel].Remove(tile);
+            _sOutPerTile[_currentLevel].Remove(tile);
+            _wInPerTile[_currentLevel].Remove(tile);
+            _wOutPerTile[_currentLevel].Remove(tile);
 
             List<XmlNode> tiles = new List<XmlNode>();
             List<XmlNode> constraints = new List<XmlNode>();
@@ -616,8 +766,8 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
             text = string.Concat(text, DebugCurrentNodes());
             text = string.Concat(text, DebugHierarchy());
             text = string.Concat(text, DebugTilesPerLevel());
-            text = string.Concat(text, DebugRHPerTile());
-            text = string.Concat(text, DebugRVPerTile());
+            text = string.Concat(text, DebugRPerTile());
+            text = string.Concat(text, DebugNESWInOutPerTile());
             text = string.Concat(text, DebugNeighbourChoicesPerLevel());
             text = string.Concat(text, DebugIndexesNeighbourPerLevel());
             text = string.Concat(text, DebugIndexesConstraintPerLevel());
@@ -670,36 +820,45 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
             return text;
         }
 
-        private string DebugRHPerTile()
+        private string DebugRPerTile()
         {
             string text = string.Empty;
 
-            text = string.Concat(text, "RHPerTile\n");
+            text = string.Concat(text, "RPerTile\n");
             foreach (XmlNode level in _rhPerTile.Keys)
             {
                 text = string.Concat(text, string.Format("\tLevel: {0}\n", Utils.GetHierarchyButtonText(level)));
                 foreach (XmlNode tile in _rhPerTile[level].Keys)
                 {
                     text = string.Concat(text, string.Format("\t\tTile: {0} RH : {1}\n", Utils.GetHierarchyButtonText(tile), _rhPerTile[level][tile]));
+                    text = string.Concat(text, string.Format("\t\tTile: {0} RV : {1}\n", Utils.GetHierarchyButtonText(tile), _rvPerTile[level][tile]));
                 }
             }
 
             return text;
         }
 
-        private string DebugRVPerTile()
+        private string DebugNESWInOutPerTile()
         {
             string text = string.Empty;
 
-            text = string.Concat(text, "RVPerTile\n");
-            foreach (XmlNode level in _rvPerTile.Keys)
+            text = string.Concat(text, "NESWInOutPerTile\n");
+            foreach (XmlNode level in _nInPerTile.Keys)
             {
                 text = string.Concat(text, string.Format("\tLevel: {0}\n", Utils.GetHierarchyButtonText(level)));
-                foreach (XmlNode tile in _rvPerTile[level].Keys)
+                foreach (XmlNode tile in _nOutPerTile[level].Keys)
                 {
-                    text = string.Concat(text, string.Format("\t\tTile: {0} RV : {1}\n", Utils.GetHierarchyButtonText(tile), _rvPerTile[level][tile]));
+                    text = string.Concat(text, string.Format("\t\tTile: {0} N_IN : {1}\n", Utils.GetHierarchyButtonText(tile), _nInPerTile[level][tile]));
+                    text = string.Concat(text, string.Format("\t\tTile: {0} N_OUT : {1}\n", Utils.GetHierarchyButtonText(tile), _nOutPerTile[level][tile]));
+                    text = string.Concat(text, string.Format("\t\tTile: {0} E_IN : {1}\n", Utils.GetHierarchyButtonText(tile), _eInPerTile[level][tile]));
+                    text = string.Concat(text, string.Format("\t\tTile: {0} E_OUT : {1}\n", Utils.GetHierarchyButtonText(tile), _eOutPerTile[level][tile]));
+                    text = string.Concat(text, string.Format("\t\tTile: {0} S_IN : {1}\n", Utils.GetHierarchyButtonText(tile), _sInPerTile[level][tile]));
+                    text = string.Concat(text, string.Format("\t\tTile: {0} S_OUT : {1}\n", Utils.GetHierarchyButtonText(tile), _sOutPerTile[level][tile]));
+                    text = string.Concat(text, string.Format("\t\tTile: {0} W_IN : {1}\n", Utils.GetHierarchyButtonText(tile), _wInPerTile[level][tile]));
+                    text = string.Concat(text, string.Format("\t\tTile: {0} W_OUT : {1}\n", Utils.GetHierarchyButtonText(tile), _wOutPerTile[level][tile]));
                 }
             }
+
             return text;
         }
 
