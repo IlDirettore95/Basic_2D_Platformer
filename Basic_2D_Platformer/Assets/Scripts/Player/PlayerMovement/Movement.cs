@@ -50,24 +50,24 @@ namespace GMDG.Basic2DPlatformer.PlayerMovement
             ExecuteMovement();
         }
 
-        private void OnGUI()
-        {
-            GUIStyle style = new GUIStyle();
-            style.fontSize = 24;
-            style.normal.textColor = Color.white;
-            GUI.Box(new Rect(10, 20, 300, 40), "State: " + _stateMachine.GetState().GetType().Name, style);
-            GUI.Box(new Rect(10, 60, 300, 40), string.Format("IsGrounded: {0} ({1:F2}) Land: {2} TakenOff: {3}", _sensors.IsGrounded, _sensors.DistanceFromGround, _sensors.HasJustLanded, _sensors.HasJustTakenOff), style);
-            GUI.Box(new Rect(10, 100, 300, 40), string.Format("HasJumped: {0}", _sensors.HasJustJumped), style);
-            GUI.Box(new Rect(10, 140, 300, 40), string.Format("LongJump: {0}", _sensors.IsPerformingALongJump), style);
-            GUI.Box(new Rect(10, 180, 300, 40), string.Format("HasJumpInBuffer: {0}", _sensors.HasJumpInBuffer), style);
-            GUI.Box(new Rect(10, 220, 300, 40), string.Format("CanCoyoteJump: {0}", _sensors.CanPerformCoyoteJump), style);
-            GUI.Box(new Rect(10, 260, 300, 40), string.Format("FallDistance: {0}", _sensors.FallDistance), style);
-            GUI.Box(new Rect(10, 300, 300, 40), string.Format("MaxYReached: {0}", _sensors.MaxYReached), style);
-            GUI.Box(new Rect(10, 340, 300, 40), string.Format("HorizontalInput: {0}", _sensors.HorizontalInput), style);
-            GUI.Box(new Rect(10, 380, 300, 40), string.Format("VerticalInput: {0}", _sensors.VerticalInput), style);
-            GUI.Box(new Rect(10, 420, 300, 40), string.Format("DistanceFromCollision: {0}", _sensors.DistanceFromCollision), style);
-            GUI.Box(new Rect(10, 460, 300, 40), string.Format("Velocity: {0}", _velocity), style);
-        }
+        //private void OnGUI()
+        //{
+        //    GUIStyle style = new GUIStyle();
+        //    style.fontSize = 24;
+        //    style.normal.textColor = Color.white;
+        //    GUI.Box(new Rect(10, 20, 300, 40), "State: " + _stateMachine.GetState().GetType().Name, style);
+        //    GUI.Box(new Rect(10, 60, 300, 40), string.Format("IsGrounded: {0} ({1:F2}) Land: {2} TakenOff: {3}", _sensors.IsGrounded, _sensors.DistanceFromGround, _sensors.HasJustLanded, _sensors.HasJustTakenOff), style);
+        //    GUI.Box(new Rect(10, 100, 300, 40), string.Format("HasJumped: {0}", _sensors.HasJustJumped), style);
+        //    GUI.Box(new Rect(10, 140, 300, 40), string.Format("LongJump: {0}", _sensors.IsPerformingALongJump), style);
+        //    GUI.Box(new Rect(10, 180, 300, 40), string.Format("HasJumpInBuffer: {0}", _sensors.HasJumpInBuffer), style);
+        //    GUI.Box(new Rect(10, 220, 300, 40), string.Format("CanCoyoteJump: {0}", _sensors.CanPerformCoyoteJump), style);
+        //    GUI.Box(new Rect(10, 260, 300, 40), string.Format("FallDistance: {0}", _sensors.FallDistance), style);
+        //    GUI.Box(new Rect(10, 300, 300, 40), string.Format("MaxYReached: {0}", _sensors.MaxYReached), style);
+        //    GUI.Box(new Rect(10, 340, 300, 40), string.Format("HorizontalInput: {0}", _sensors.HorizontalInput), style);
+        //    GUI.Box(new Rect(10, 380, 300, 40), string.Format("VerticalInput: {0}", _sensors.VerticalInput), style);
+        //    GUI.Box(new Rect(10, 420, 300, 40), string.Format("DistanceFromCollision: {0}", _sensors.DistanceFromCollision), style);
+        //    GUI.Box(new Rect(10, 460, 300, 40), string.Format("Velocity: {0}", _velocity), style);
+        //}
 
         private void UpdateSensors()
         {

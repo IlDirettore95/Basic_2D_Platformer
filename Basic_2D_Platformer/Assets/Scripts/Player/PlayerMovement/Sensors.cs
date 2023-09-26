@@ -62,7 +62,7 @@ namespace GMDG.Basic2DPlatformer.PlayerMovement
             {
                 if (hits[i].collider == _collider) continue;
                 if (hits[i].collider.isTrigger) continue;
-                Debug.DrawLine(transform.position, hits[i].point, Color.red);
+                //Debug.DrawLine(transform.position, hits[i].point, Color.red);
                 DistanceFromCollision = hits[i].distance;
                 if (DistanceFromCollision > velocity.magnitude * Time.deltaTime + _data.CollisionThreashold) break;
                 transform.position += (Vector3)velocity.normalized * (DistanceFromCollision - _data.CollisionThreashold / 2);
@@ -83,7 +83,7 @@ namespace GMDG.Basic2DPlatformer.PlayerMovement
             {
                 if (hits[i].collider == _collider) continue;
                 if (hits[i].collider.isTrigger) continue;
-                Debug.DrawLine(transform.position, hits[i].point, Color.blue);
+                //Debug.DrawLine(transform.position, hits[i].point, Color.blue);
                 DistanceFromGround = hits[i].distance;
                 if (_kinematicStatus.Velocity.y > 0) return false;
                 if (DistanceFromGround > _collider.size.y / 2 + _data.CollisionThreashold) return false;
@@ -187,7 +187,7 @@ namespace GMDG.Basic2DPlatformer.PlayerMovement
                 return MaxYReached;
             }
 
-            return 0;
+            return float.NegativeInfinity;
         }
 
         private float GetDistanceOfFall()

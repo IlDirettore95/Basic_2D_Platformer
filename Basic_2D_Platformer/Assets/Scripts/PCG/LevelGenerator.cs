@@ -264,33 +264,17 @@ namespace GMDG.Basic2DPlatformer.PCG
 
         private IEnumerator PlaceFeasiblePathBetween(Vector2Int start, WFCTile startTile, Vector2Int end, WFCTile endTile, Grid<HashSet<int>> grid, PCGData data, float timeout, bool isSimulated, bool isHardSimulated)
         {
-            List<Vector2Int> currentStartPath = new List<Vector2Int> { start };
-            List<Vector2Int> currentEndPath = new List<Vector2Int> { end };
+            List<Vector2Int> path = new List<Vector2Int> { start };
 
-            Vector2Int currentStartPosition = start;
-            Vector2Int currentEndPosition = end;
+            Vector2Int currentStartPosition = start + TakeAGridPositionBasedOnTileInfo(startTile, true);
+            Vector2Int currentEndPosition = end + TakeAGridPositionBasedOnTileInfo(endTile, false);
 
-            Vector2Int nextStartPosition = currentStartPosition + TakeAGridPositionBasedOnTileInfo(startTile, true);
-            Vector2Int nextEndPosition = currentEndPosition + TakeAGridPositionBasedOnTileInfo(endTile, false);
-
-            currentStartPath.Add(nextStartPosition);
-            currentEndPath.Add(nextEndPosition);
-
-            currentStartPosition = nextStartPosition;
-            currentEndPosition = nextEndPosition;
+            path.Add(currentStartPosition);
 
             while (currentStartPosition != currentEndPosition)
             {
-                nextStartPosition = GetNextPosition(currentStartPosition, currentEndPosition, currentStartPath, currentEndPath);
-                currentStartPath.Add(nextStartPosition);
-
-                if (currentEndPosition == nextStartPosition) break;
-
-                nextEndPosition = GetNextPosition(currentEndPosition, nextStartPosition, currentStartPath, currentEndPath);
-                currentEndPath.Add(nextEndPosition);
-
-                currentStartPosition = nextStartPosition;
-                currentEndPosition = nextEndPosition;
+                currentStartPosition = GetNextPosition(currentStartPosition, currentEndPosition, path);
+                path.Add(currentStartPosition);
 
                 if (isHardSimulated)
                 {
@@ -299,33 +283,38 @@ namespace GMDG.Basic2DPlatformer.PCG
                 }
             }
 
-            if (data.FeasiblePath.Contains(start)) data.FeasiblePath.AddRange(currentStartPath.Skip(1));
-            else data.FeasiblePath.AddRange(currentStartPath);
-
-            currentEndPath.Reverse();
-            data.FeasiblePath.AddRange(currentEndPath);
+            if (data.FeasiblePath.Contains(start)) data.FeasiblePath.AddRange(path.Skip(1));
+            else data.FeasiblePath.AddRange(path);
         }
 
-        private Vector2Int GetNextPosition(Vector2Int currentPosition, Vector2Int end) 
+        private Vector2Int GetNextPosition(Vector2Int currentPosition, Vector2Int end, List<Vector2Int> path) 
         {
             int nextX = currentPosition.x;
             int nextY = currentPosition.y;
+
+            List<Utility2D.Direction2D> directions = new List<Utility2D.Direction2D>(); 
             
-            if (currentPosition.x < end.x)
+            if (currentPosition.x < end.x) directions.Add(Utility2D.Direction2D.EAST);
+            if (currentPosition.x > end.x) directions.Add(Utility2D.Direction2D.WEST);
+            if (currentPosition.y < end.y) directions.Add(Utility2D.Direction2D.NORTH);
+            if (currentPosition.y > end.y) directions.Add(Utility2D.Direction2D.SOUTH);
+
+            Utility2D.Direction2D randomDirection = directions[UnityEngine.Random.Range(0, directions.Count)];
+
+            switch(randomDirection)
             {
-                nextX++;
-            }
-            else if (currentPosition.x > end.x)
-            {
-                nextX--;
-            }
-            else if (currentPosition.y < end.y)
-            {
-                nextY++;
-            }
-            else if (currentPosition.y > end.y)
-            {
-                nextY--;
+                case Utility2D.Direction2D.NORTH:
+                    nextY++;
+                    break;
+                case Utility2D.Direction2D.EAST:
+                    nextX++;
+                    break;
+                case Utility2D.Direction2D.SOUTH:
+                    nextY--;
+                    break;
+                case Utility2D.Direction2D.WEST:
+                    nextX--;
+                    break;
             }
 
             return new Vector2Int(nextX, nextY);
