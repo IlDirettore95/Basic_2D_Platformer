@@ -225,8 +225,8 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
             
             if (Utils.IsNodeAttributeEqual(tile["Prefab"], "Path", string.Empty))
             {
-                //_view.Message = string.Format("Prefab is missing on Tile ({0})", tileName);
-                //return false;
+                _view.Message = string.Format("Prefab is missing on Tile ({0})", tileName);
+                return false;
             }
 
             return true;

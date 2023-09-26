@@ -35,7 +35,7 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
         private const int BUTTON_SIMPLE_WIDTH = 100;
         private const int BUTTON_FILE_ACTIONS_WIDTH = 120;
         private const int TEXTFIELDS_ATTRIBUTE_WIDTH = 30;
-        private const int TEXTFIELDS_ATTRIBUTE_ID_WIDTH = 90;
+        private const int TEXTFIELDS_ATTRIBUTE_ID_WIDTH = 100;
         private const int POPUP_CONSTRAINT_WIDTH = 100;
         private const int TOGGLE_WIDTH = 10;
 
@@ -352,7 +352,7 @@ namespace GMDG.Basic2DPlatformer.Tools.XML
                     GUILayout.Space(15);
                     string[] choices = _model.GetNeighbourChoices();
                     int oldIndex = _model.GetNeighbourIndex(child);
-                    int newIndex = EditorGUILayout.Popup(oldIndex, choices, GUILayout.Width(TEXTFIELDS_ATTRIBUTE_ID_WIDTH));
+                    int newIndex = EditorGUILayout.Popup(oldIndex, choices, GUILayout.Width(TEXTFIELDS_ATTRIBUTE_ID_WIDTH + 20));
                     if (newIndex == oldIndex) continue;
                     _model.EditNeighbour(child, newIndex, oldIndex);
                     continue;

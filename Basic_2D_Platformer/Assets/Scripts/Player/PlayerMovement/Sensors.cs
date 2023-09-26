@@ -1,5 +1,4 @@
 using GMDG.NoProduct.Utility;
-using System.Collections;
 using UnityEngine;
 
 namespace GMDG.Basic2DPlatformer.PlayerMovement
@@ -10,104 +9,68 @@ namespace GMDG.Basic2DPlatformer.PlayerMovement
         private CapsuleCollider2D _collider;
         private MovementData _data;
 
-        public bool IsGrounded { get; private set; }
-        public float DistanceFromGround { get; private set; }
-        public bool IsWalking { get; private set; }
-        public bool HasJumped { get; private set; }
-        public bool IsPressingJumping { get; private set; }
-        public bool IsJumpingWithTollerance { get; private set; }
+        public bool IsGrounded { get; private set; } 
+        public bool WasGrounded { get; private set; }
+        public bool HasJustLanded { get; private set; }
+        public bool HasJustTakenOff { get; private set; }
+        public bool HasJustJumped { get; private set; }
+        public bool IsPerformingALongJump { get; private set; }
+        public bool HasJumpInBuffer { get; private set; }
+        public bool CanPerformCoyoteJump { get; private set; }
         public float HorizontalInput { get; private set; }
         public float VerticalInput { get; private set; }
-        public float DistanceFromCollision { get; private set; }
+        public float FallDistance { get; private set; }
         public float MaxYReached { get; private set; }
+        public float DistanceFromGround { get; private set; }
+        public float DistanceFromCollision { get; private set; }
 
-        private MonoBehaviour _caller;
-        private IEnumerator JumpWithTolleranceTimerCoroutine;
+        private float currentJumpInBufferTime;
+        private float currentJumpInBufferNextTime;
+        private float currentCoyoteTime;
+        private float currentCoyoteNextTime;
 
-        public Sensors(Kinematic2D kinematicStatus, CapsuleCollider2D collider, MovementData data, MonoBehaviour caller) 
+        public Sensors(Kinematic2D kinematicStatus, CapsuleCollider2D collider, MovementData data) 
         { 
             _kinematicStatus = kinematicStatus;
             _collider = collider;
             _data = data;
-
-            _caller = caller;
-            JumpWithTolleranceTimerCoroutine = JumpWithTolleranceTimer();
         }
 
         public void Update()
         {
+            WasGrounded = IsGrounded;
             IsGrounded = CheckGrounded();
-            
-            HorizontalInput = GetHorizontalMovement();
-            IsWalking = HorizontalInput != 0;
-
-            VerticalInput = GetJumpMovement();
-            IsPressingJumping = IsJumpButtonPressed();         
-            HasJumped = VerticalInput != 0 && IsGrounded;
+            HasJustLanded = !WasGrounded && IsGrounded;
+            HasJustTakenOff = WasGrounded && !IsGrounded;
+            HorizontalInput = GetHorizontalInput();
+            VerticalInput = GetVerticalInput();
+            HasJustJumped = GetHasJustJumped();
+            IsPerformingALongJump = GetIsPerformingALongJump();
+            HasJumpInBuffer = GetHasJumpInBuffer();
+            CanPerformCoyoteJump = GetCanPerformCoyoteJump();
+            FallDistance = GetDistanceOfFall();
             MaxYReached = GetMaxYReached();
         }
 
-        private float GetHorizontalMovement()
+        public Vector2 CheckForCollisions(Vector2 velocity)
         {
-            float input = 0f;
-            if (Input.GetKey(KeyCode.A))
+            Transform transform = _kinematicStatus.Transform;
+
+            RaycastHit2D[] hits;
+            hits = Physics2D.CapsuleCastAll(transform.position, _collider.size, _collider.direction, 0, velocity.normalized);
+            for (int i = 0; i < hits.Length; i++)
             {
-                input -= 1f;
-            }
-            if (Input.GetKey(KeyCode.D))
-            {
-                input += 1f;
-            }
-            return input;
-        }
-
-        private float GetJumpMovement()
-        {
-            float input = 0f;
-            if(Input.GetKeyDown(KeyCode.Space) || IsJumpingWithTollerance)
-            {
-                if (IsGrounded)
-                {
-                    _caller.StopCoroutine(JumpWithTolleranceTimerCoroutine);
-                    IsJumpingWithTollerance = false;
-                }
-                else if (!IsJumpingWithTollerance)
-                {
-                    _caller.StopCoroutine(JumpWithTolleranceTimerCoroutine);
-                    JumpWithTolleranceTimerCoroutine = JumpWithTolleranceTimer();
-                    _caller.StartCoroutine(JumpWithTolleranceTimerCoroutine);
-                }
-
-                input = 1f;
-            }
-            return input;
-        }
-
-        private IEnumerator JumpWithTolleranceTimer()
-        {
-            IsJumpingWithTollerance = true;
-            yield return new WaitForSeconds(_data.JumpBufferTime);
-            IsJumpingWithTollerance = false;
-        }
-
-        private bool IsJumpButtonPressed()
-        {
-            return Input.GetKey(KeyCode.Space);
-        }
-
-        private float GetMaxYReached()
-        {
-            if (!IsGrounded && _kinematicStatus.Velocity.y > 0) 
-            { 
-                return _kinematicStatus.Position.y;
+                if (hits[i].collider == _collider) continue;
+                if (hits[i].collider.isTrigger) continue;
+                Debug.DrawLine(transform.position, hits[i].point, Color.red);
+                DistanceFromCollision = hits[i].distance;
+                if (DistanceFromCollision > velocity.magnitude * Time.deltaTime + _data.CollisionThreashold) break;
+                transform.position += (Vector3)velocity.normalized * (DistanceFromCollision - _data.CollisionThreashold / 2);
+                velocity = Vector2.zero;
+                break;
             }
 
-            return MaxYReached;
-        }
-
-        public void ResetMaxYReached()
-        {
-            MaxYReached = _kinematicStatus.Position.y;
+            return velocity;
         }
 
         private bool CheckGrounded()
@@ -131,26 +94,110 @@ namespace GMDG.Basic2DPlatformer.PlayerMovement
             return false;
         }
 
-        public Vector2 CheckForCollisions(Vector2 velocity)
+        private float GetHorizontalInput()
         {
-            Transform transform = _kinematicStatus.Transform;
-
-            RaycastHit2D[] hits;
-            hits = Physics2D.CapsuleCastAll(transform.position, _collider.size, _collider.direction, 0, velocity.normalized);
-            for (int i = 0; i < hits.Length; i++)
+            float input = 0f;
+            if (Input.GetKey(KeyCode.A))
             {
-                if (hits[i].collider == _collider) continue;
-                if (hits[i].collider.isTrigger) continue;
-                Debug.DrawLine(transform.position, hits[i].point, Color.red);
-                DistanceFromCollision = hits[i].distance;
-                if (DistanceFromCollision > velocity.magnitude * Time.deltaTime + _data.CollisionThreashold) break;
-                transform.position += (Vector3)velocity.normalized * (DistanceFromCollision - _data.CollisionThreashold / 2);
-                velocity = Vector2.zero;
-                break;
+                input -= 1f;
+            }
+            if (Input.GetKey(KeyCode.D))
+            {
+                input += 1f;
+            }
+            return input;
+        }
+
+        private float GetVerticalInput()
+        {
+            float input = 0f;
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                input = 1f;
+            }
+            return input;
+        }
+
+        private bool GetHasJustJumped()
+        {
+            if (IsGrounded && !HasJustLanded && HasJumpInBuffer)
+            {
+                HasJumpInBuffer = false;
+                return true;
+            }
+            
+            return IsGrounded && VerticalInput == 1  || !IsGrounded && VerticalInput == 1 && CanPerformCoyoteJump;
+        }
+
+        private bool GetIsPerformingALongJump()
+        {
+            return HasJustJumped || IsPerformingALongJump && Input.GetKey(KeyCode.Space) && _kinematicStatus.Velocity.y > 0;
+        }
+
+        private bool GetHasJumpInBuffer()
+        {
+            if (HasJustLanded && HasJumpInBuffer)
+            {
+                return true;
+            }
+            else if (!IsGrounded && VerticalInput == 1)
+            {
+                currentJumpInBufferTime = Time.time;
+                currentJumpInBufferNextTime = currentJumpInBufferTime + _data.JumpBufferTime;
+                return true;
+            }
+            else if (!IsGrounded && HasJumpInBuffer && currentJumpInBufferTime < currentJumpInBufferNextTime)
+            {
+                currentJumpInBufferTime += Time.deltaTime;
+                return true;
             }
 
-            return velocity;
+            return false;
+        }
+
+        private bool GetCanPerformCoyoteJump()
+        {
+            if (HasJustJumped)
+            {
+                return false;
+            }
+            else if (HasJustTakenOff && _kinematicStatus.Velocity.y <= 0)
+            {
+                currentCoyoteTime = Time.time;
+                currentCoyoteNextTime = currentCoyoteTime + _data.JumpCoyoteTime;
+                return true;
+            }
+            else if (!IsGrounded && CanPerformCoyoteJump && currentCoyoteTime < currentCoyoteNextTime)
+            {
+                currentCoyoteTime += Time.deltaTime;
+                return true;
+            }
+
+            return false;
+        }
+
+        private float GetMaxYReached()
+        {
+            if (!IsGrounded) 
+            { 
+                return Mathf.Max(MaxYReached, _kinematicStatus.Position.y);
+            }
+            else if (!IsGrounded)
+            {
+                return MaxYReached;
+            }
+
+            return 0;
+        }
+
+        private float GetDistanceOfFall()
+        {
+            if(HasJustLanded)
+            {
+                return MaxYReached - _kinematicStatus.Position.y;
+            }
+
+            return 0;
         }
     }
 }
-

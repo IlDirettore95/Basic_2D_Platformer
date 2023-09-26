@@ -20,7 +20,7 @@ namespace GMDG.Basic2DPlatformer.PlayerMovement
         private void Awake()
         {
             _kinematicStatus = new Kinematic2D(transform);
-            _sensors = new Sensors(_kinematicStatus, GetComponent<CapsuleCollider2D>(), _data, this);
+            _sensors = new Sensors(_kinematicStatus, GetComponent<CapsuleCollider2D>(), _data);
             _stateMachine = new StateMachine();
             
             BuildStateMachine();
@@ -32,12 +32,12 @@ namespace GMDG.Basic2DPlatformer.PlayerMovement
             Walking walking = new Walking(this);
             Falling falling = new Falling(this);
 
-            _stateMachine.AddTransition(idle, walking, () => _sensors.IsWalking && _sensors.IsGrounded);
-            _stateMachine.AddTransition(walking, idle, () => !_sensors.IsWalking && _sensors.IsGrounded);
-            _stateMachine.AddTransition(idle, falling, () => _sensors.HasJumped || !_sensors.IsGrounded);
-            _stateMachine.AddTransition(falling, idle, () => !_sensors.IsWalking && _sensors.IsGrounded && !_sensors.HasJumped);
-            _stateMachine.AddTransition(walking, falling, () => _sensors.HasJumped || !_sensors.IsGrounded);
-            _stateMachine.AddTransition(falling, walking, () => _sensors.IsWalking && _sensors.IsGrounded && !_sensors.HasJumped);
+            _stateMachine.AddTransition(idle, walking, () => _sensors.HorizontalInput != 0 && _sensors.IsGrounded);
+            _stateMachine.AddTransition(walking, idle, () => _sensors.HorizontalInput == 0 && _sensors.IsGrounded);
+            _stateMachine.AddTransition(idle, falling, () => _sensors.HasJustJumped || !_sensors.IsGrounded);
+            _stateMachine.AddTransition(falling, idle, () => _sensors.HorizontalInput == 0 && _sensors.IsGrounded);
+            _stateMachine.AddTransition(walking, falling, () => _sensors.HasJustJumped || !_sensors.IsGrounded);
+            _stateMachine.AddTransition(falling, walking, () => _sensors.HorizontalInput != 0 && _sensors.IsGrounded);
 
             _stateMachine.SetState(idle);
         }
@@ -56,16 +56,17 @@ namespace GMDG.Basic2DPlatformer.PlayerMovement
             style.fontSize = 24;
             style.normal.textColor = Color.white;
             GUI.Box(new Rect(10, 20, 300, 40), "State: " + _stateMachine.GetState().GetType().Name, style);
-            GUI.Box(new Rect(10, 60, 300, 40), string.Format("IsGrounded: {0} ({1})", _sensors.IsGrounded, _sensors.DistanceFromGround), style);
-            GUI.Box(new Rect(10, 100, 300, 40), string.Format("IsWalking: {0}", _sensors.IsWalking), style);
-            GUI.Box(new Rect(10, 140, 300, 40), string.Format("HasJumped: {0}", _sensors.HasJumped), style);
-            GUI.Box(new Rect(10, 180, 300, 40), string.Format("IsPressingJumping: {0}", _sensors.IsPressingJumping), style);
-            GUI.Box(new Rect(10, 220, 300, 40), string.Format("IsJumpingWithTollerance: {0}", _sensors.IsJumpingWithTollerance), style);
-            GUI.Box(new Rect(10, 260, 300, 40), string.Format("MaxYReached: {0}", _sensors.MaxYReached), style);
-            GUI.Box(new Rect(10, 300, 300, 40), string.Format("HorizontalInput: {0}", _sensors.HorizontalInput), style);
-            GUI.Box(new Rect(10, 340, 300, 40), string.Format("VerticalInput: {0}", _sensors.VerticalInput), style);
-            GUI.Box(new Rect(10, 380, 300, 40), string.Format("DistanceFromCollision: {0}", _sensors.DistanceFromCollision), style);
-            GUI.Box(new Rect(10, 420, 300, 40), string.Format("Velocity: {0}", _velocity), style);
+            GUI.Box(new Rect(10, 60, 300, 40), string.Format("IsGrounded: {0} ({1:F2}) Land: {2} TakenOff: {3}", _sensors.IsGrounded, _sensors.DistanceFromGround, _sensors.HasJustLanded, _sensors.HasJustTakenOff), style);
+            GUI.Box(new Rect(10, 100, 300, 40), string.Format("HasJumped: {0}", _sensors.HasJustJumped), style);
+            GUI.Box(new Rect(10, 140, 300, 40), string.Format("LongJump: {0}", _sensors.IsPerformingALongJump), style);
+            GUI.Box(new Rect(10, 180, 300, 40), string.Format("HasJumpInBuffer: {0}", _sensors.HasJumpInBuffer), style);
+            GUI.Box(new Rect(10, 220, 300, 40), string.Format("CanCoyoteJump: {0}", _sensors.CanPerformCoyoteJump), style);
+            GUI.Box(new Rect(10, 260, 300, 40), string.Format("FallDistance: {0}", _sensors.FallDistance), style);
+            GUI.Box(new Rect(10, 300, 300, 40), string.Format("MaxYReached: {0}", _sensors.MaxYReached), style);
+            GUI.Box(new Rect(10, 340, 300, 40), string.Format("HorizontalInput: {0}", _sensors.HorizontalInput), style);
+            GUI.Box(new Rect(10, 380, 300, 40), string.Format("VerticalInput: {0}", _sensors.VerticalInput), style);
+            GUI.Box(new Rect(10, 420, 300, 40), string.Format("DistanceFromCollision: {0}", _sensors.DistanceFromCollision), style);
+            GUI.Box(new Rect(10, 460, 300, 40), string.Format("Velocity: {0}", _velocity), style);
         }
 
         private void UpdateSensors()
@@ -164,8 +165,6 @@ namespace GMDG.Basic2DPlatformer.PlayerMovement
 
             public void OnEnter(IState from) 
             {
-                _waitForInput = _movement._sensors.HasJumped;
-
                 _currentBuildUp = 0;
 
                 if (from is Idle) 
@@ -182,11 +181,7 @@ namespace GMDG.Basic2DPlatformer.PlayerMovement
             {
                 if (to is Idle || to is Walking)
                 {
-                    float maxYReached = _movement._sensors.MaxYReached;
-                    _movement._sensors.ResetMaxYReached();
-                    float actualY = _movement._kinematicStatus.Position.y;
-
-                    if (maxYReached - actualY > _movement._data.FallDamageYThreshold) 
+                    if (_movement._sensors.FallDistance > _movement._data.FallDamageYThreshold) 
                     {
                         EventManager.Instance.Publish(Event.OnFallDamageTaken);
                     }
@@ -195,18 +190,21 @@ namespace GMDG.Basic2DPlatformer.PlayerMovement
 
             public void Tick() 
             {
-                if (_movement._sensors.HasJumped)
+                if (_movement._sensors.HasJustJumped)
                 {
-                    _movement._velocity = new Vector2(_movement._velocity.x, _movement._sensors.VerticalInput * _movement._data.JumpForce);
+                    _movement._velocity = new Vector2(_movement._velocity.x, _movement._data.JumpForce);
                 }
 
-                float gravityMultiplier = 1;
-
-                if (_waitForInput && _movement._velocity.y > 0 && !_movement._sensors.IsPressingJumping)
+                float gravityMultiplier = 0;
+                if (_movement._sensors.IsPerformingALongJump)
+                {
+                    gravityMultiplier = 1;
+                }
+                else if (_movement._velocity.y > 0)
                 {
                     gravityMultiplier = _movement._data.GravityMultiplier * 0.75f;                
                 }
-                else if (_movement._velocity.y < 0)
+                else if (_movement._velocity.y <= 0)
                 {
                     gravityMultiplier = _movement._data.GravityMultiplier;
                 }

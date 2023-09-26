@@ -23,6 +23,7 @@ namespace GMDG.Basic2DPlatformer.PlayerMovement
 
         public float JumpForce;
         public float JumpBufferTime;
+        public float JumpCoyoteTime;
 
         public float FallDamageYThreshold;
         

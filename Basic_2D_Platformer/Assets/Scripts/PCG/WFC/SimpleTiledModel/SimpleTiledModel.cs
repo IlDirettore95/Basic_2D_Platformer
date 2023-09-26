@@ -226,7 +226,7 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
             superPositions.Clear();
             superPositions.Add(collapsedWave);
 
-            GameObject.Instantiate(_data.WFCTiles[collapsedWave].Prefab, position, Quaternion.identity, _caller.gameObject.transform);
+            GameObject.Instantiate(_data.WFCTiles[collapsedWave].Prefab, position, Quaternion.identity, _caller.gameObject.transform).SetActive(true);
         }
 
         private float Entropy(HashSet<int> superPositions)

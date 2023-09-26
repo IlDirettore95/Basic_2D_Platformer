@@ -36,7 +36,15 @@ namespace GMDG.Basic2DPlatformer.PCG
             {
                 WFCTile tile = WFCTiles[i];
 
+                text = string.Concat(text, string.Format("\t ({0}) {1}\n", i, tile.Name));
+            }
+
+            for (int i = 0; i < WFCTiles.Count; i++)
+            {
+                WFCTile tile = WFCTiles[i];
+
                 text = string.Concat(text, string.Format("\tName: {0}\n", tile.Name));
+                text = string.Concat(text, string.Format("\tFlags:\tN(I-O): {0},{1}  E(I-O): {2},{3}  S(I-O): {4},{5}  W(I-O): {6},{7}\n", tile.PassabilityFlags[WFCTile.N_IN], tile.PassabilityFlags[WFCTile.N_OUT], tile.PassabilityFlags[WFCTile.E_IN], tile.PassabilityFlags[WFCTile.E_OUT], tile.PassabilityFlags[WFCTile.S_IN], tile.PassabilityFlags[WFCTile.S_OUT], tile.PassabilityFlags[WFCTile.W_IN], tile.PassabilityFlags[WFCTile.W_OUT]));
                 text = string.Concat(text, string.Format("\tRelative Frequency: {0}\n", tile.RelativeFrequency));
                 text = string.Concat(text, "\tConstraints\n");
                 foreach (Direction2D direction in tile.PossibleNeighbours.Keys)

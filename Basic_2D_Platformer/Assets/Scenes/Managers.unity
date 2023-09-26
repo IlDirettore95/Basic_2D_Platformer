@@ -354,7 +354,7 @@ Camera:
   far clip plane: 1000
   field of view: 34
   orthographic: 1
-  orthographic size: 70
+  orthographic size: 10
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -459,9 +459,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   IterationLimit: -1
-  Timeout: 0.1
-  IsSimulated: 1
-  IsHardSimulated: 1
+  Timeout: 0.08
+  IsSimulated: 0
+  IsHardSimulated: 0
 --- !u!1 &1571122075
 GameObject:
   m_ObjectHideFlags: 0
@@ -1078,7 +1078,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Basic Platformer
+  m_text: Basic 2D Platformer
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -3151,8 +3151,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Goal:\t\tClear all the rooms in the dungeon.\n\nComands:\t\n\t\tMove \t\t\tWASD\n\t\tShoot\t\t\tLeft
-    Click, Spacebar\n\t\tRotate\t\tMouse\n\t\t\n\t\tPause\t\tEsc\n\t\tShow FPS\t\tP"
+  m_text: "Goal:\t\tReach the End of each of the three levels.\n\nComands:\t\n\t\tMove
+    \t\t\tWASD\n\t\tJump\t\t\tSpacebar\n\t\t\n\t\tPause\t\tEsc\n\t\tShow FPS\t\tP"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}

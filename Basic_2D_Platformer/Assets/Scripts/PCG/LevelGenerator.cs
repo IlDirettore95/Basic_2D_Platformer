@@ -87,34 +87,36 @@ namespace GMDG.Basic2DPlatformer.PCG
 
         private IEnumerator PlacePOISuperPositions(Grid<HashSet<int>> grid, PCGData data, float timeout, bool isSimulated, bool isHardSimulated)
         {
-            // Starting Cell
-            HashSet<int> superPositions = grid.GetElement(data.StartingCell);
-            superPositions.IntersectWith(new HashSet<int> { PCGData.START_CELL });
-
-            if (isHardSimulated)
+            for (int i = 0; i < grid.GridSize.y; i++)
             {
-                EventManager.Instance.Publish(Event.OnPCGUpdated, data);
-                yield return new WaitForSeconds(timeout);
-            }
+                for (int j = 0; j < grid.GridSize.x; j++)
+                {
+                    Vector2Int position = new Vector2Int(j, i);
 
-            // End Cell
-            superPositions = grid.GetElement(data.EndingCell);
-            superPositions.IntersectWith(new HashSet<int> { PCGData.END_CELL });
+                    HashSet<int> superPositions = grid.GetElement(position);
 
-            if (isHardSimulated)
-            {
-                EventManager.Instance.Publish(Event.OnPCGUpdated, data);
-                yield return new WaitForSeconds(timeout);
-            }
-
-            // Passage Cell
-            superPositions = grid.GetElement(data.PassageCell);
-            superPositions.IntersectWith(new HashSet<int> { PCGData.PASSAGE_CELL });
-
-            if (isHardSimulated)
-            {
-                EventManager.Instance.Publish(Event.OnPCGUpdated, data);
-                yield return new WaitForSeconds(timeout);
+                    if (position == data.StartingCell)
+                    {
+                        superPositions.IntersectWith(new HashSet<int> { PCGData.START_CELL });
+                    }
+                    else if (position == data.EndingCell)
+                    {
+                        superPositions.IntersectWith(new HashSet<int> { PCGData.END_CELL });
+                    }
+                    else if (position == data.PassageCell)
+                    {
+                        superPositions.IntersectWith(new HashSet<int> { PCGData.PASSAGE_CELL });
+                    }
+                    else
+                    {
+                        superPositions.ExceptWith(new HashSet<int> { PCGData.START_CELL, PCGData.END_CELL, PCGData.PASSAGE_CELL });
+                    }
+                    if (isHardSimulated)
+                    {
+                        EventManager.Instance.Publish(Event.OnPCGUpdated, data);
+                        yield return new WaitForSeconds(timeout);
+                    }
+                }
             }
         }
 
@@ -279,13 +281,12 @@ namespace GMDG.Basic2DPlatformer.PCG
 
             while (currentStartPosition != currentEndPosition)
             {
-                nextStartPosition = GetNextPosition(currentStartPosition, currentEndPosition);
+                nextStartPosition = GetNextPosition(currentStartPosition, currentEndPosition, currentStartPath, currentEndPath);
+                currentStartPath.Add(nextStartPosition);
 
                 if (currentEndPosition == nextStartPosition) break;
 
-                nextEndPosition = GetNextPosition(currentEndPosition, nextStartPosition);
-
-                currentStartPath.Add(nextStartPosition);
+                nextEndPosition = GetNextPosition(currentEndPosition, nextStartPosition, currentStartPath, currentEndPath);
                 currentEndPath.Add(nextEndPosition);
 
                 currentStartPosition = nextStartPosition;

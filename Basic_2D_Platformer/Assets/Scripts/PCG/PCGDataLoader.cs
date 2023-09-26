@@ -142,12 +142,12 @@ namespace GMDG.Basic2DPlatformer.PCG
                     tileRH.Prefab = rhGO;
                     tileRH.PassabilityFlags[WFCTile.N_IN] = nIn;
                     tileRH.PassabilityFlags[WFCTile.N_OUT] = nOut;
-                    tileRH.PassabilityFlags[WFCTile.E_IN] = eIn;
-                    tileRH.PassabilityFlags[WFCTile.E_OUT] = eOut;
+                    tileRH.PassabilityFlags[WFCTile.E_IN] = wIn;
+                    tileRH.PassabilityFlags[WFCTile.E_OUT] = wOut;
                     tileRH.PassabilityFlags[WFCTile.S_IN] = sIn;
                     tileRH.PassabilityFlags[WFCTile.S_OUT] = sOut;
-                    tileRH.PassabilityFlags[WFCTile.W_IN] = wIn;
-                    tileRH.PassabilityFlags[WFCTile.W_OUT] = wOut;
+                    tileRH.PassabilityFlags[WFCTile.W_IN] = eIn;
+                    tileRH.PassabilityFlags[WFCTile.W_OUT] = eOut;
 
                     visitedWFCTiles[tileRH.Name] = tileRH;
                     totalFrequency += frequency;
@@ -170,12 +170,12 @@ namespace GMDG.Basic2DPlatformer.PCG
                     tileRV.RelativeFrequency = frequency;
                     tileRV.Log2RelativeFrequency = Mathf.Log(tile.RelativeFrequency, 2);
                     tileRV.Prefab = (GameObject)Resources.Load(string.Format("{0}", prefabPath));
-                    tileRV.PassabilityFlags[WFCTile.N_IN] = nIn;
-                    tileRV.PassabilityFlags[WFCTile.N_OUT] = nOut;
+                    tileRV.PassabilityFlags[WFCTile.N_IN] = sIn;
+                    tileRV.PassabilityFlags[WFCTile.N_OUT] = sOut;
                     tileRV.PassabilityFlags[WFCTile.E_IN] = eIn;
                     tileRV.PassabilityFlags[WFCTile.E_OUT] = eOut;
-                    tileRV.PassabilityFlags[WFCTile.S_IN] = sIn;
-                    tileRV.PassabilityFlags[WFCTile.S_OUT] = sOut;
+                    tileRV.PassabilityFlags[WFCTile.S_IN] = nIn;
+                    tileRV.PassabilityFlags[WFCTile.S_OUT] = nOut;
                     tileRV.PassabilityFlags[WFCTile.W_IN] = wIn;
                     tileRV.PassabilityFlags[WFCTile.W_OUT] = wOut;
 
