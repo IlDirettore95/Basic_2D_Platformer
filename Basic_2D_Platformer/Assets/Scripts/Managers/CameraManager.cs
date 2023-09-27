@@ -1,10 +1,7 @@
 using GMDG.Basic2DPlatformer.PCG;
-using GMDG.Basic2DPlatformer.PlayerMovement;
-using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
-using static UnityEditor.Experimental.GraphView.GraphView;
 
 namespace GMDG.Basic2DPlatformer.System
 {
