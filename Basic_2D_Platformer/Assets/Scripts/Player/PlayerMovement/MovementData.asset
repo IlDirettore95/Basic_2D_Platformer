@@ -21,6 +21,6 @@ MonoBehaviour:
   MaxYSpeed: 45
   JumpForce: 8.5
   JumpBufferTime: 0.1
-  JumpCoyoteTime: 0.15
-  FallDamageYThreshold: 20
+  JumpCoyoteTime: 0.2
+  FallDamageYThreshold: 16
   CollisionThreashold: 0.05

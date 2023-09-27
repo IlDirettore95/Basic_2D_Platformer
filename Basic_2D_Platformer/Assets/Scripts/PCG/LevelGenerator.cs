@@ -15,14 +15,14 @@ namespace GMDG.Basic2DPlatformer.PCG
 {
     public class LevelGenerator
     {
-        public Func<MonoBehaviour, PCGData, int, float, bool, bool, IEnumerator> Generation;
+        public Func<MonoBehaviour, PCGData, int, float, bool, bool, int, IEnumerator> Generation;
 
         public LevelGenerator() 
         {
             Generation = Generate;       
         }
 
-        private IEnumerator Generate(MonoBehaviour caller, PCGData data, int iterationLimit, float timeout, bool isSimulated, bool isHardSimulated)
+        private IEnumerator Generate(MonoBehaviour caller, PCGData data, int iterationLimit, float timeout, bool isSimulated, bool isHardSimulated, int Seed)
         {
             // Generate a Path from Start to Passage to End
 
@@ -32,10 +32,8 @@ namespace GMDG.Basic2DPlatformer.PCG
 
 
             // Use WFC for placing chunks
-            if (isSimulated) yield return caller.StartCoroutine(new SimpleTiledModel(caller, data).Generate(iterationLimit, timeout, isSimulated, isHardSimulated));
-            else new SimpleTiledModel(caller, data).Generate(iterationLimit, timeout, isSimulated, isHardSimulated).MoveNext();
-
-            EventManager.Instance.Publish(Event.OnLevelGenerated, data);
+            if (isSimulated) yield return caller.StartCoroutine(new SimpleTiledModel(caller, data).Generate(iterationLimit, timeout, isSimulated, isHardSimulated, Seed));
+            else new SimpleTiledModel(caller, data).Generate(iterationLimit, timeout, isSimulated, isHardSimulated, Seed).MoveNext();
         }
 
         private IEnumerator InitializeSuperPositions(MonoBehaviour caller, Grid<HashSet<int>> grid, PCGData data, float timeout, bool isSimulated, bool isHardSimulated)

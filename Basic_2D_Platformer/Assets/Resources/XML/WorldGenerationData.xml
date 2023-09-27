@@ -484,5 +484,835 @@
         </Tiles>
       </WFC>
     </Level>
+    <Level ID="CAVE">
+      <Settings List="">
+        <GridSize Element="" x="6" y="7" />
+        <CellSize Element="" x="20" y="15" />
+        <StartingCell Element="" x="1" y="6" />
+        <EndingCell Element="" x="5" y="1" />
+        <PassageCell Element="" x="3" y="4" />
+      </Settings>
+      <WFC>
+        <Tiles List="">
+          <Tile ID="START" RH="False" RV="False" N_IN="False" N_OUT="False" E_IN="True" E_OUT="True" S_IN="False" S_OUT="False" W_IN="True" W_OUT="True" Frequency="1">
+            <Prefab Element="" Path="Prefabs/Chunks/Level 2/Start/Start" />
+            <Constraints List="">
+              <Constraint Type="N_NORTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_TERRAIN" />
+                  <Neighbour Element="" ID="C_PLATFORMS" />
+                  <Neighbour Element="" ID="C_TERRAINTR" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="EAST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_DEADEND" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="SOUTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_GROUND" />
+                </Neighbours>
+              </Constraint>
+            </Constraints>
+          </Tile>
+          <Tile ID="END" RH="False" RV="False" N_IN="False" N_OUT="False" E_IN="False" E_OUT="False" S_IN="False" S_OUT="False" W_IN="True" W_OUT="True" Frequency="1">
+            <Prefab Element="" Path="Prefabs/Chunks/Level 2/End/End" />
+            <Constraints List="">
+              <Constraint Type="N_WEST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_GROUND" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="WEST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_TERRAIN" />
+                  <Neighbour Element="" ID="C_PLATFORMS" />
+                  <Neighbour Element="" ID="C_TERRAINTR" />
+                  <Neighbour Element="" ID="C_TERRAINL" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="NORTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_TERRAIN" />
+                  <Neighbour Element="" ID="C_PLATFORMS" />
+                  <Neighbour Element="" ID="C_TERRAINL" />
+                  <Neighbour Element="" ID="C_DEADEND" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="SOUTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_TERRAIN" />
+                  <Neighbour Element="" ID="C_PLATFORMS" />
+                  <Neighbour Element="" ID="C_DEADEND" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="EAST">
+                <Neighbours List="">
+                </Neighbours>
+              </Constraint>
+            </Constraints>
+          </Tile>
+          <Tile ID="PASSAGE" RH="False" RV="False" N_IN="True" N_OUT="False" E_IN="False" E_OUT="False" S_IN="False" S_OUT="True" W_IN="False" W_OUT="False" Frequency="1">
+            <Prefab Element="" Path="Prefabs/Chunks/Level 2/Cave/C_Gorge" />
+            <Constraints List="">
+              <Constraint Type="HORIZONTAL">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_GROUND" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="WEST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_DEADEND" />
+                  <Neighbour Element="" ID="C_GORGE" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="NORTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_TERRAINTR" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="SOUTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_TERRAINL" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="VERTICAL">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_GORGE" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="EAST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_GROUND" />
+                </Neighbours>
+              </Constraint>
+            </Constraints>
+          </Tile>
+          <Tile ID="C_TERRAIN" RH="False" RV="False" N_IN="False" N_OUT="False" E_IN="True" E_OUT="True" S_IN="False" S_OUT="False" W_IN="True" W_OUT="True" Frequency="3">
+            <Prefab Element="" Path="Prefabs/Chunks/Level 2/Cave/C_Terrain" />
+            <Constraints List="">
+              <Constraint Type="N_SOUTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="START" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="EAST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="END" />
+                  <Neighbour Element="" ID="C_DEADEND" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="SOUTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="END" />
+                  <Neighbour Element="" ID="C_TERRAINTR" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="NORTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="END" />
+                  <Neighbour Element="" ID="C_TERRAINL" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="HORIZONTAL">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_TERRAIN" />
+                  <Neighbour Element="" ID="C_PLATFORMS" />
+                  <Neighbour Element="" ID="C_TERRAINTR" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="WEST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_TERRAINL" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="ALL">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_PLATFORMS" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="VERTICAL">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_GROUND" />
+                </Neighbours>
+              </Constraint>
+            </Constraints>
+          </Tile>
+          <Tile ID="C_PLATFORMS" RH="False" RV="False" N_IN="False" N_OUT="False" E_IN="True" E_OUT="True" S_IN="False" S_OUT="False" W_IN="True" W_OUT="True" Frequency="3">
+            <Prefab Element="" Path="Prefabs/Chunks/Level 2/Cave/C_Platforms" />
+            <Constraints List="">
+              <Constraint Type="N_SOUTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="START" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="EAST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="END" />
+                  <Neighbour Element="" ID="C_DEADEND" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="SOUTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="END" />
+                  <Neighbour Element="" ID="C_TERRAINTR" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="NORTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="END" />
+                  <Neighbour Element="" ID="C_TERRAINL" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="HORIZONTAL">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_TERRAIN" />
+                  <Neighbour Element="" ID="C_PLATFORMS" />
+                  <Neighbour Element="" ID="C_TERRAINTR" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="ALL">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_TERRAIN" />
+                  <Neighbour Element="" ID="C_PLATFORMS" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="WEST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_TERRAINL" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="VERTICAL">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_GROUND" />
+                </Neighbours>
+              </Constraint>
+            </Constraints>
+          </Tile>
+          <Tile ID="C_TERRAINL" RH="True" RV="True" N_IN="True" N_OUT="False" E_IN="True" E_OUT="True" S_IN="False" S_OUT="False" W_IN="False" W_OUT="False" Frequency="4">
+            <Prefab Element="" Path="Prefabs/Chunks/Level 2/Cave/C_TerrainL" />
+            <Constraints List="">
+              <Constraint Type="EAST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="END" />
+                  <Neighbour Element="" ID="C_TERRAIN" />
+                  <Neighbour Element="" ID="C_PLATFORMS" />
+                  <Neighbour Element="" ID="C_TERRAINTR" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="SOUTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="END" />
+                  <Neighbour Element="" ID="C_GROUND" />
+                  <Neighbour Element="" ID="C_TERRAIN" />
+                  <Neighbour Element="" ID="C_PLATFORMS" />
+                  <Neighbour Element="" ID="C_TERRAINTR" />
+                  <Neighbour Element="" ID="C_DEADEND" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="NORTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="PASSAGE" />
+                  <Neighbour Element="" ID="C_GORGE" />
+                  <Neighbour Element="" ID="C_TERRAINTR" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="WEST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_GROUND" />
+                  <Neighbour Element="" ID="C_DEADEND" />
+                  <Neighbour Element="" ID="C_GORGE" />
+                </Neighbours>
+              </Constraint>
+            </Constraints>
+          </Tile>
+          <Tile ID="C_TERRAINTR" RH="False" RV="False" N_IN="False" N_OUT="False" E_IN="True" E_OUT="True" S_IN="False" S_OUT="True" W_IN="True" W_OUT="True" Frequency="4">
+            <Prefab Element="" Path="Prefabs/Chunks/Level 2/Cave/C_TerrainTR" />
+            <Constraints List="">
+              <Constraint Type="N_SOUTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="START" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="EAST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="END" />
+                  <Neighbour Element="" ID="C_DEADEND" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="SOUTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="PASSAGE" />
+                  <Neighbour Element="" ID="C_TERRAINL" />
+                  <Neighbour Element="" ID="C_GORGE" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="HORIZONTAL">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_TERRAIN" />
+                  <Neighbour Element="" ID="C_PLATFORMS" />
+                  <Neighbour Element="" ID="C_TERRAINTR" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="WEST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_TERRAINL" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="NORTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_TERRAINL" />
+                  <Neighbour Element="" ID="C_GROUND" />
+                  <Neighbour Element="" ID="C_TERRAIN" />
+                  <Neighbour Element="" ID="C_PLATFORMS" />
+                </Neighbours>
+              </Constraint>
+            </Constraints>
+          </Tile>
+          <Tile ID="C_GORGE" RH="False" RV="False" N_IN="True" N_OUT="False" E_IN="False" E_OUT="False" S_IN="False" S_OUT="True" W_IN="False" W_OUT="False" Frequency="3">
+            <Prefab Element="" Path="Prefabs/Chunks/Level 2/Cave/C_Gorge" />
+            <Constraints List="">
+              <Constraint Type="SOUTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_TERRAINL" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="VERTICAL">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="PASSAGE" />
+                  <Neighbour Element="" ID="C_GORGE" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="HORIZONTAL">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_GROUND" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="EAST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_TERRAINL" />
+                  <Neighbour Element="" ID="C_GORGE" />
+                  <Neighbour Element="" ID="PASSAGE" />
+                  <Neighbour Element="" ID="C_GROUND" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="WEST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_GORGE" />
+                  <Neighbour Element="" ID="C_DEADEND" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="NORTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_TERRAINTR" />
+                </Neighbours>
+              </Constraint>
+            </Constraints>
+          </Tile>
+          <Tile ID="C_DEADEND" RH="True" RV="False" N_IN="False" N_OUT="False" E_IN="False" E_OUT="False" S_IN="False" S_OUT="False" W_IN="True" W_OUT="True" Frequency="3">
+            <Prefab Element="" Path="Prefabs/Chunks/Level 2/Cave/C_DeadEnd" />
+            <Constraints List="">
+              <Constraint Type="WEST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="START" />
+                  <Neighbour Element="" ID="C_TERRAIN" />
+                  <Neighbour Element="" ID="C_PLATFORMS" />
+                  <Neighbour Element="" ID="C_TERRAINTR" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="SOUTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="END" />
+                  <Neighbour Element="" ID="C_GROUND" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="NORTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="END" />
+                  <Neighbour Element="" ID="C_TERRAINL" />
+                  <Neighbour Element="" ID="C_GROUND" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="EAST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="PASSAGE" />
+                  <Neighbour Element="" ID="C_TERRAINL" />
+                  <Neighbour Element="" ID="C_GORGE" />
+                  <Neighbour Element="" ID="C_GROUND" />
+                </Neighbours>
+              </Constraint>
+            </Constraints>
+          </Tile>
+          <Tile ID="C_GROUND" RH="False" RV="False" N_IN="False" N_OUT="False" E_IN="False" E_OUT="False" S_IN="False" S_OUT="False" W_IN="False" W_OUT="False" Frequency="1">
+            <Prefab Element="" Path="Prefabs/Chunks/Level 2/Cave/C_Ground" />
+            <Constraints List="">
+              <Constraint Type="NORTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="START" />
+                  <Neighbour Element="" ID="C_TERRAINL" />
+                  <Neighbour Element="" ID="C_DEADEND" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="N_EAST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="END" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="HORIZONTAL">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="PASSAGE" />
+                  <Neighbour Element="" ID="C_GORGE" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="EAST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_TERRAINL" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="SOUTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_TERRAINTR" />
+                  <Neighbour Element="" ID="C_DEADEND" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="WEST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_DEADEND" />
+                  <Neighbour Element="" ID="C_GORGE" />
+                  <Neighbour Element="" ID="PASSAGE" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="VERTICAL">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_TERRAIN" />
+                  <Neighbour Element="" ID="C_PLATFORMS" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="ALL">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_GROUND" />
+                </Neighbours>
+              </Constraint>
+            </Constraints>
+          </Tile>
+        </Tiles>
+      </WFC>
+    </Level>
+    <Level ID="LAVA">
+      <Settings List="">
+        <GridSize Element="" x="6" y="7" />
+        <CellSize Element="" x="20" y="15" />
+        <StartingCell Element="" x="1" y="6" />
+        <EndingCell Element="" x="5" y="1" />
+        <PassageCell Element="" x="3" y="4" />
+      </Settings>
+      <WFC>
+        <Tiles List="">
+          <Tile ID="START" RH="False" RV="False" N_IN="False" N_OUT="False" E_IN="True" E_OUT="True" S_IN="False" S_OUT="False" W_IN="True" W_OUT="True" Frequency="1">
+            <Prefab Element="" Path="Prefabs/Chunks/Level 3/Start/Start" />
+            <Constraints List="">
+              <Constraint Type="N_NORTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_TERRAIN" />
+                  <Neighbour Element="" ID="C_PLATFORMS" />
+                  <Neighbour Element="" ID="C_TERRAINTR" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="EAST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_DEADEND" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="SOUTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_GROUND" />
+                </Neighbours>
+              </Constraint>
+            </Constraints>
+          </Tile>
+          <Tile ID="END" RH="False" RV="False" N_IN="False" N_OUT="False" E_IN="False" E_OUT="False" S_IN="False" S_OUT="False" W_IN="True" W_OUT="True" Frequency="1">
+            <Prefab Element="" Path="Prefabs/Chunks/Level 3/End/End" />
+            <Constraints List="">
+              <Constraint Type="N_WEST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_GROUND" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="WEST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_TERRAIN" />
+                  <Neighbour Element="" ID="C_PLATFORMS" />
+                  <Neighbour Element="" ID="C_TERRAINTR" />
+                  <Neighbour Element="" ID="C_TERRAINL" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="NORTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_TERRAIN" />
+                  <Neighbour Element="" ID="C_PLATFORMS" />
+                  <Neighbour Element="" ID="C_TERRAINL" />
+                  <Neighbour Element="" ID="C_DEADEND" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="SOUTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_TERRAIN" />
+                  <Neighbour Element="" ID="C_PLATFORMS" />
+                  <Neighbour Element="" ID="C_DEADEND" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="EAST">
+                <Neighbours List="">
+                </Neighbours>
+              </Constraint>
+            </Constraints>
+          </Tile>
+          <Tile ID="PASSAGE" RH="False" RV="False" N_IN="True" N_OUT="False" E_IN="False" E_OUT="False" S_IN="False" S_OUT="True" W_IN="False" W_OUT="False" Frequency="1">
+            <Prefab Element="" Path="Prefabs/Chunks/Level 3/Cave/C_Gorge" />
+            <Constraints List="">
+              <Constraint Type="HORIZONTAL">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_GROUND" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="WEST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_DEADEND" />
+                  <Neighbour Element="" ID="C_GORGE" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="NORTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_TERRAINTR" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="SOUTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_TERRAINL" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="VERTICAL">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_GORGE" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="EAST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_GROUND" />
+                </Neighbours>
+              </Constraint>
+            </Constraints>
+          </Tile>
+          <Tile ID="C_TERRAIN" RH="False" RV="False" N_IN="False" N_OUT="False" E_IN="True" E_OUT="True" S_IN="False" S_OUT="False" W_IN="True" W_OUT="True" Frequency="3">
+            <Prefab Element="" Path="Prefabs/Chunks/Level 3/Cave/C_Terrain" />
+            <Constraints List="">
+              <Constraint Type="N_SOUTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="START" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="EAST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="END" />
+                  <Neighbour Element="" ID="C_DEADEND" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="SOUTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="END" />
+                  <Neighbour Element="" ID="C_TERRAINTR" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="NORTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="END" />
+                  <Neighbour Element="" ID="C_TERRAINL" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="HORIZONTAL">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_TERRAIN" />
+                  <Neighbour Element="" ID="C_PLATFORMS" />
+                  <Neighbour Element="" ID="C_TERRAINTR" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="WEST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_TERRAINL" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="ALL">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_PLATFORMS" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="VERTICAL">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_GROUND" />
+                </Neighbours>
+              </Constraint>
+            </Constraints>
+          </Tile>
+          <Tile ID="C_PLATFORMS" RH="False" RV="False" N_IN="False" N_OUT="False" E_IN="True" E_OUT="True" S_IN="False" S_OUT="False" W_IN="True" W_OUT="True" Frequency="3">
+            <Prefab Element="" Path="Prefabs/Chunks/Level 3/Cave/C_Platforms" />
+            <Constraints List="">
+              <Constraint Type="N_SOUTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="START" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="EAST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="END" />
+                  <Neighbour Element="" ID="C_DEADEND" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="SOUTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="END" />
+                  <Neighbour Element="" ID="C_TERRAINTR" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="NORTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="END" />
+                  <Neighbour Element="" ID="C_TERRAINL" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="HORIZONTAL">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_TERRAIN" />
+                  <Neighbour Element="" ID="C_PLATFORMS" />
+                  <Neighbour Element="" ID="C_TERRAINTR" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="ALL">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_TERRAIN" />
+                  <Neighbour Element="" ID="C_PLATFORMS" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="WEST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_TERRAINL" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="VERTICAL">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_GROUND" />
+                </Neighbours>
+              </Constraint>
+            </Constraints>
+          </Tile>
+          <Tile ID="C_TERRAINL" RH="True" RV="True" N_IN="True" N_OUT="False" E_IN="True" E_OUT="True" S_IN="False" S_OUT="False" W_IN="False" W_OUT="False" Frequency="4">
+            <Prefab Element="" Path="Prefabs/Chunks/Level 3/Cave/C_TerrainL" />
+            <Constraints List="">
+              <Constraint Type="EAST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="END" />
+                  <Neighbour Element="" ID="C_TERRAIN" />
+                  <Neighbour Element="" ID="C_PLATFORMS" />
+                  <Neighbour Element="" ID="C_TERRAINTR" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="SOUTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="END" />
+                  <Neighbour Element="" ID="C_GROUND" />
+                  <Neighbour Element="" ID="C_TERRAIN" />
+                  <Neighbour Element="" ID="C_PLATFORMS" />
+                  <Neighbour Element="" ID="C_TERRAINTR" />
+                  <Neighbour Element="" ID="C_DEADEND" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="NORTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="PASSAGE" />
+                  <Neighbour Element="" ID="C_GORGE" />
+                  <Neighbour Element="" ID="C_TERRAINTR" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="WEST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_GROUND" />
+                  <Neighbour Element="" ID="C_DEADEND" />
+                  <Neighbour Element="" ID="C_GORGE" />
+                </Neighbours>
+              </Constraint>
+            </Constraints>
+          </Tile>
+          <Tile ID="C_TERRAINTR" RH="False" RV="False" N_IN="False" N_OUT="False" E_IN="True" E_OUT="True" S_IN="False" S_OUT="True" W_IN="True" W_OUT="True" Frequency="4">
+            <Prefab Element="" Path="Prefabs/Chunks/Level 3/Cave/C_TerrainTR" />
+            <Constraints List="">
+              <Constraint Type="N_SOUTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="START" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="EAST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="END" />
+                  <Neighbour Element="" ID="C_DEADEND" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="SOUTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="PASSAGE" />
+                  <Neighbour Element="" ID="C_TERRAINL" />
+                  <Neighbour Element="" ID="C_GORGE" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="HORIZONTAL">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_TERRAIN" />
+                  <Neighbour Element="" ID="C_PLATFORMS" />
+                  <Neighbour Element="" ID="C_TERRAINTR" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="WEST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_TERRAINL" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="NORTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_TERRAINL" />
+                  <Neighbour Element="" ID="C_GROUND" />
+                  <Neighbour Element="" ID="C_TERRAIN" />
+                  <Neighbour Element="" ID="C_PLATFORMS" />
+                </Neighbours>
+              </Constraint>
+            </Constraints>
+          </Tile>
+          <Tile ID="C_GORGE" RH="False" RV="False" N_IN="True" N_OUT="False" E_IN="False" E_OUT="False" S_IN="False" S_OUT="True" W_IN="False" W_OUT="False" Frequency="3">
+            <Prefab Element="" Path="Prefabs/Chunks/Level 3/Cave/C_Gorge" />
+            <Constraints List="">
+              <Constraint Type="SOUTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_TERRAINL" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="VERTICAL">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="PASSAGE" />
+                  <Neighbour Element="" ID="C_GORGE" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="HORIZONTAL">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_GROUND" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="EAST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_TERRAINL" />
+                  <Neighbour Element="" ID="C_GORGE" />
+                  <Neighbour Element="" ID="PASSAGE" />
+                  <Neighbour Element="" ID="C_GROUND" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="WEST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_GORGE" />
+                  <Neighbour Element="" ID="C_DEADEND" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="NORTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_TERRAINTR" />
+                </Neighbours>
+              </Constraint>
+            </Constraints>
+          </Tile>
+          <Tile ID="C_DEADEND" RH="True" RV="False" N_IN="False" N_OUT="False" E_IN="False" E_OUT="False" S_IN="False" S_OUT="False" W_IN="True" W_OUT="True" Frequency="3">
+            <Prefab Element="" Path="Prefabs/Chunks/Level 3/Cave/C_DeadEnd" />
+            <Constraints List="">
+              <Constraint Type="WEST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="START" />
+                  <Neighbour Element="" ID="C_TERRAIN" />
+                  <Neighbour Element="" ID="C_PLATFORMS" />
+                  <Neighbour Element="" ID="C_TERRAINTR" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="SOUTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="END" />
+                  <Neighbour Element="" ID="C_GROUND" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="NORTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="END" />
+                  <Neighbour Element="" ID="C_TERRAINL" />
+                  <Neighbour Element="" ID="C_GROUND" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="EAST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="PASSAGE" />
+                  <Neighbour Element="" ID="C_TERRAINL" />
+                  <Neighbour Element="" ID="C_GORGE" />
+                  <Neighbour Element="" ID="C_GROUND" />
+                </Neighbours>
+              </Constraint>
+            </Constraints>
+          </Tile>
+          <Tile ID="C_GROUND" RH="False" RV="False" N_IN="False" N_OUT="False" E_IN="False" E_OUT="False" S_IN="False" S_OUT="False" W_IN="False" W_OUT="False" Frequency="1">
+            <Prefab Element="" Path="Prefabs/Chunks/Level 3/Cave/C_Ground" />
+            <Constraints List="">
+              <Constraint Type="NORTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="START" />
+                  <Neighbour Element="" ID="C_TERRAINL" />
+                  <Neighbour Element="" ID="C_DEADEND" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="N_EAST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="END" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="HORIZONTAL">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="PASSAGE" />
+                  <Neighbour Element="" ID="C_GORGE" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="EAST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_TERRAINL" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="SOUTH">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_TERRAINTR" />
+                  <Neighbour Element="" ID="C_DEADEND" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="WEST">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_DEADEND" />
+                  <Neighbour Element="" ID="C_GORGE" />
+                  <Neighbour Element="" ID="PASSAGE" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="VERTICAL">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_TERRAIN" />
+                  <Neighbour Element="" ID="C_PLATFORMS" />
+                </Neighbours>
+              </Constraint>
+              <Constraint Type="ALL">
+                <Neighbours List="">
+                  <Neighbour Element="" ID="C_GROUND" />
+                </Neighbours>
+              </Constraint>
+            </Constraints>
+          </Tile>
+        </Tiles>
+      </WFC>
+    </Level>
   </Levels>
 </Root>

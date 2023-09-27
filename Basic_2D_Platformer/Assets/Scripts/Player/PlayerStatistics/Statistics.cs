@@ -28,11 +28,13 @@ namespace GMDG.Basic2DPlatformer.PlayerStatistics
             spriteRenderer.color = statisticsData.LifeColors[statisticsData.MaxHealth - 1];
 
             EventManager.Instance.Subscribe(Event.OnFallDamageTaken, TakeDamage);
+            EventManager.Instance.Subscribe(Event.OnTrapHit, TakeDamage);
         }
 
         private void OnDisable()
         {
             EventManager.Instance.Unsubscribe(Event.OnFallDamageTaken, TakeDamage);
+            EventManager.Instance.Unsubscribe(Event.OnTrapHit, TakeDamage);
         }
 
 
@@ -50,7 +52,6 @@ namespace GMDG.Basic2DPlatformer.PlayerStatistics
             if (invincibilityTimer > 0) return;
 
             health -= 1;
-            EventManager.Instance.Publish(Event.OnPlayerHit);
 
             if (health <= 0)
             {

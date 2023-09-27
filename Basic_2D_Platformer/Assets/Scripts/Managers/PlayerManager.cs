@@ -72,7 +72,8 @@ namespace GMDG.Basic2DPlatformer.System
 
         private void SpawnPlayer(object[] args)
         {
-            Vector2 position = GameObject.FindGameObjectWithTag("Spawn").transform.position;
+            GameObject go = GameObject.FindGameObjectWithTag("Spawn");
+            Vector2 position = go.transform.position;
 
             _playerTransform.position = position;
             _player.SetActive(true);

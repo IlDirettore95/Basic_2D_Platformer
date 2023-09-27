@@ -24,13 +24,13 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
             _collapsedPositions = new Dictionary<Vector2, int>();
         }
 
-        public IEnumerator Generate(int iterationsLimit, float timeout, bool isSimulated, bool isHardSimulated)
+        public IEnumerator Generate(int iterationsLimit, float timeout, bool isSimulated, bool isHardSimulated, int Seed)
         {
-            if (isSimulated) yield return _caller.StartCoroutine(SolverProcedure(iterationsLimit, timeout, isSimulated, isHardSimulated));
-            else SolverProcedure(iterationsLimit, timeout, isSimulated, isHardSimulated).MoveNext();
+            if (isSimulated) yield return _caller.StartCoroutine(SolverProcedure(iterationsLimit, timeout, isSimulated, isHardSimulated, Seed));
+            else SolverProcedure(iterationsLimit, timeout, isSimulated, isHardSimulated, Seed).MoveNext();
         }
 
-        public IEnumerator SolverProcedure(int iterationsLimit, float timeout, bool isSimulated, bool isHardSimulated)
+        public IEnumerator SolverProcedure(int iterationsLimit, float timeout, bool isSimulated, bool isHardSimulated, int Seed)
         {
             if (isHardSimulated) yield return _caller.StartCoroutine(Initialize(timeout, isSimulated, isHardSimulated));
             else Initialize(timeout, isSimulated, isHardSimulated).MoveNext();
@@ -55,14 +55,16 @@ namespace GMDG.Basic2DPlatformer.PCG.WFC
             if (AreAllPositionsCollapsed())
             {
 #if UNITY_EDITOR
-                Debug.Log("Finished!");
+                Debug.Log("Finished! Seed: " + Seed);
 #endif
+                EventManager.Instance.Publish(Event.OnLevelGenerated, _data);
             }
             else
             {
 #if UNITY_EDITOR
-                Debug.Log("Failed!");
+                Debug.LogError("Failed! Seed: " + Seed);
 #endif
+                EventManager.Instance.Publish(Event.OnPCGFailed);
             }
 
             if (isSimulated)

@@ -10,6 +10,7 @@ namespace GMDG.Basic2DPlatformer.Objects
         {
             if (collision.gameObject.tag.Equals("Player"))
             {
+                GameObject.FindGameObjectWithTag("Spawn").SetActive(false);
                 EventManager.Instance.Publish(Event.OnLevelCompleted);
             }
         }

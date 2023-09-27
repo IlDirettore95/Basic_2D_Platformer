@@ -98,6 +98,7 @@ namespace GMDG.Basic2DPlatformer.System
         OnButtonOver,
 
         // PCG
+        OnPCGFailed,
         OnPCGUpdated,
         OnLevelGenerated,
 
@@ -107,7 +108,7 @@ namespace GMDG.Basic2DPlatformer.System
         OnPlayerSpawn,
         OnPlayerDespawn,
         OnFallDamageTaken,
-        OnPlayerHit,
+        OnTrapHit,
         OnPlayerDeath
     }
 }

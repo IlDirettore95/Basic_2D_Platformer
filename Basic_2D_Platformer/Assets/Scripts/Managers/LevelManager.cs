@@ -1,6 +1,7 @@
 using GMDG.Basic2DPlatformer.PCG;
 using GMDG.Basic2DPlatformer.PCG.WFC;
 using GMDG.Basic2DPlatformer.Utility;
+using System.Collections;
 using System.Collections.Generic;
 using System.Xml;
 using UnityEngine;
@@ -10,7 +11,8 @@ namespace GMDG.Basic2DPlatformer.System
 {
     public class LevelManager : MonoBehaviour
     {
-        public int IterationLimit;
+        public int Seed = -1;
+        public int IterationLimit = -1;
         public float Timeout;
         public bool IsSimulated;
         public bool IsHardSimulated;
@@ -43,6 +45,7 @@ namespace GMDG.Basic2DPlatformer.System
             // Gameplay
             EventManager.Instance.Subscribe(Event.OnGameplay, LoadFirstLevel);
             EventManager.Instance.Subscribe(Event.OnLevelCompleted, LoadNextLevel);
+            EventManager.Instance.Subscribe(Event.OnPCGFailed, GenerateLevel);
         }
 
         private void OnDisable()
@@ -54,6 +57,7 @@ namespace GMDG.Basic2DPlatformer.System
             // Gameplay
             EventManager.Instance.Unsubscribe(Event.OnGameplay, LoadFirstLevel);
             EventManager.Instance.Unsubscribe(Event.OnLevelCompleted, LoadNextLevel);
+            EventManager.Instance.Unsubscribe(Event.OnPCGFailed, GenerateLevel);
         }
 
         private void OnDestroy()
@@ -74,7 +78,7 @@ namespace GMDG.Basic2DPlatformer.System
         {
             _currentLevel = 0;
 
-            GenerateLevel();
+            GenerateLevel(null);
         }
 
         private void LoadNextLevel(object[] args)
@@ -82,7 +86,7 @@ namespace GMDG.Basic2DPlatformer.System
             _currentLevel += 1;
             if (_currentLevel < _numberOfLevels)
             {
-                GenerateLevel();
+                GenerateLevel(null);
             }
             else
             {
@@ -125,13 +129,20 @@ namespace GMDG.Basic2DPlatformer.System
             StopAllCoroutines();
         }
 
-        private void GenerateLevel()
+        private void GenerateLevel(object[] args)
         {
             Delete();
 
+            bool randomSeed = Seed == -1;
+            int currentSeed = -1;
+            if (Seed == -1) currentSeed = Random.Range(1, int.MaxValue);
+            else currentSeed = Seed;
+
+            Random.InitState(currentSeed);
+
             PCGData data = _dataLoader.LoadData(_currentLevel, this);
-            if (IsSimulated) StartCoroutine(new LevelGenerator().Generation?.Invoke(this, data, IterationLimit, Timeout, IsSimulated, IsHardSimulated));
-            else new LevelGenerator().Generation?.Invoke(this, data, IterationLimit, Timeout, IsSimulated, IsHardSimulated).MoveNext();
+            if (IsSimulated) StartCoroutine(new LevelGenerator().Generation?.Invoke(this, data, IterationLimit, Timeout, IsSimulated, IsHardSimulated, currentSeed));
+            else new LevelGenerator().Generation?.Invoke(this, data, IterationLimit, Timeout, IsSimulated, IsHardSimulated, currentSeed).MoveNext();
         }
     }
 }
