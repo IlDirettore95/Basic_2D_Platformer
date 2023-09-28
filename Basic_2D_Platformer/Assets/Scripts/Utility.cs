@@ -2,7 +2,8 @@ using UnityEngine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor;
+using TMPro;
+using System.Linq;
 
 namespace GMDG.NoProduct.Utility
 {
@@ -167,10 +168,8 @@ namespace GMDG.NoProduct.Utility
 
         public void Tick()
         {
-            var transition = GetTransition();
-            if (transition != null)
-                SetState(transition.To);
-
+            Transition transition = GetTransition();
+            if (transition != null) SetState(transition.To);
             _currentState?.Tick();
         }
 
@@ -184,14 +183,15 @@ namespace GMDG.NoProduct.Utility
             if (state == _currentState)
                 return;
 
-            _currentState?.OnExit();
+            _currentState?.OnExit(state);
+            IState oldState = _currentState;
             _currentState = state;
 
             _transitions.TryGetValue(_currentState.GetType(), out _currentTransitions);
             if (_currentTransitions == null)
                 _currentTransitions = EmptyTransitions;
 
-            _currentState.OnEnter();
+            _currentState.OnEnter(oldState);
         }
 
         public void AddTransition(IState from, IState to, Func<bool> predicate)
@@ -225,12 +225,17 @@ namespace GMDG.NoProduct.Utility
         private Transition GetTransition()
         {
             foreach (var transition in _anyTransitions)
-                if (transition.Condition())
-                    return transition;
+            {
+                if (!transition.Condition()) continue;
+                
+                return transition;
+            }
 
             foreach (var transition in _currentTransitions)
-                if (transition.Condition())
-                    return transition;
+            {
+                if (!transition.Condition()) continue;
+                return transition;
+            }
 
             return null;
         }
@@ -239,8 +244,8 @@ namespace GMDG.NoProduct.Utility
     public interface IState
     {
         void Tick();
-        void OnEnter();
-        void OnExit();
+        void OnEnter(IState from);
+        void OnExit(IState to);
     }
 
     #endregion
@@ -551,14 +556,14 @@ namespace GMDG.NoProduct.Utility
 
     public class Utility2D
     {
-        public class Grid2D
+        public class Grid2D<T>
         {
             public Vector2[,] CellsPositions { get; }
             public Vector2Int GridSize { get; }
             public Vector2 CellSize { get; }
             public Vector2 GridPosition { get; }
 
-            private Cell2D[,] cells;
+            private Cell2D<T>[,] cells;
 
             public Grid2D(Vector2Int gridSize, Vector2 cellSize, Vector2 gridPosition)
             {
@@ -566,7 +571,7 @@ namespace GMDG.NoProduct.Utility
                 CellSize = cellSize;
                 GridPosition = gridPosition;
 
-                cells = new Cell2D[gridSize.y, gridSize.x];
+                cells = new Cell2D<T>[gridSize.y, gridSize.x];
                 CellsPositions = new Vector2[gridSize.y, gridSize.x];
 
                 float yTranslation = (gridSize.y - 1) * cellSize.y / 2;
@@ -577,7 +582,8 @@ namespace GMDG.NoProduct.Utility
                     for (int j = 0; j < gridSize.x; j++)
                     {
                         Vector2 cellPosition = new Vector2(j * cellSize.x - xTranslation, i * cellSize.y - yTranslation) + gridPosition;
-                        cells[i, j] = new Cell2D(cellSize, cellPosition, new Vector2Int(i, j));
+                        cells[i, j] = new Cell2D<T>(cellSize, cellPosition, new Vector2Int(i, j));
+                        cells[i, j].Content = default(T);
                         CellsPositions[i, j] = cellPosition;
                     }
                 }
@@ -606,6 +612,36 @@ namespace GMDG.NoProduct.Utility
                 return new Vector2Int(-1, -1);
             }
 
+            public T GetElement(int i, int j)
+            {
+                if (i < 0 || j < 0 || i > GridSize.y - 1 || j > GridSize.x - 1)
+                {
+                    throw new ArgumentException();
+                }
+
+                return cells[i, j].Content;
+            }
+
+            public void PlaceElement(int i, int j, T content)
+            {
+                if (i < 0 || j < 0 || i > GridSize.y - 1 || j > GridSize.x - 1)
+                {
+                    throw new ArgumentException();
+                }
+
+                cells[i, j].Content = content;
+            }
+
+            public void PlaceElement(Vector2Int indicies, T content)
+            {
+                if (indicies.y < 0 || indicies.x < 0 || indicies.y > GridSize.y - 1 || indicies.x > GridSize.x - 1)
+                {
+                    throw new ArgumentException();
+                }
+
+                cells[indicies.y, indicies.x].Content = content;
+            }
+
             public void Draw()
             {
                 for (int i = 0; i < cells.GetLength(0); i++)
@@ -617,38 +653,55 @@ namespace GMDG.NoProduct.Utility
                 }
             }
 
-            private class Cell2D
+            public void DrawContent(GameObject parent, Vector2 size, Func<T,Color> colorHeuristic)
             {
-                public Vector2 size;
-                public Vector2 positionInWorld;
-                public Vector2 positionInGrid;
+                for (int i = 0; i < parent.transform.childCount; i++)
+                {
+                    GameObject.Destroy(parent.transform.GetChild(i).gameObject);
+                }
+
+                for (int i = 0; i < GridSize.y; i++)
+                {
+                    for (int j = 0; j < GridSize.x; j++)
+                    {
+                        cells[i, j].DrawContent(parent, size, colorHeuristic);
+                    }
+                }
+            }
+
+            private class Cell2D<S>
+            {
+                public Vector2 Size;
+                public Vector2 PositionInWorld;
+                public Vector2 PositionInGrid;
+                public S Content;
 
                 public Cell2D(Vector2 positionInWorld, Vector2Int positionInGrid)
                 {
-                    size = new Vector2(1, 1);
-                    this.positionInWorld = positionInWorld;
-                    this.positionInGrid = positionInGrid;
+                    Size = new Vector2(1, 1);
+                    PositionInWorld = positionInWorld;
+                    PositionInGrid = positionInGrid;
                 }
 
                 public Cell2D(Vector2 size, Vector2 positionInWorld, Vector2Int positionInGrid)
                 {
-                    this.size = size;
-                    this.positionInWorld = positionInWorld;
-                    this.positionInGrid = positionInGrid;
+                    Size = size;
+                    PositionInWorld = positionInWorld;
+                    PositionInGrid = positionInGrid;
                 }
 
                 public void Draw()
                 {
-                    GUIStyle style = new GUIStyle();
-                    style.alignment = TextAnchor.LowerRight;
-                    style.fontSize = 10;
-                    style.normal.textColor = Color.gray;
-                    Handles.Label(positionInWorld, string.Format("{0},{1}", positionInGrid.x, positionInGrid.y), style);
-                    Handles.color = Color.black;
-                    Handles.DrawLine(positionInWorld + new Vector2(-size.x / 2, size.y / 2), positionInWorld + new Vector2(size.x / 2, size.y / 2));
-                    Handles.DrawLine(positionInWorld + new Vector2(size.x / 2, size.y / 2), positionInWorld + new Vector2(size.x / 2, -size.y / 2));
-                    Handles.DrawLine(positionInWorld + new Vector2(size.x / 2, -size.y / 2), positionInWorld + new Vector2(-size.x / 2, -size.y / 2));
-                    Handles.DrawLine(positionInWorld + new Vector2(-size.x / 2, -size.y / 2), positionInWorld + new Vector2(-size.x / 2, size.y / 2));
+                    Debug.DrawLine(PositionInWorld + new Vector2(-Size.x / 2, Size.y / 2), PositionInWorld + new Vector2(Size.x / 2, Size.y / 2), Color.black);
+                    Debug.DrawLine(PositionInWorld + new Vector2(Size.x / 2, Size.y / 2), PositionInWorld + new Vector2(Size.x / 2, -Size.y / 2), Color.black);
+                    Debug.DrawLine(PositionInWorld + new Vector2(Size.x / 2, -Size.y / 2), PositionInWorld + new Vector2(-Size.x / 2, -Size.y / 2), Color.black);
+                    Debug.DrawLine(PositionInWorld + new Vector2(-Size.x / 2, -Size.y / 2), PositionInWorld + new Vector2(-Size.x / 2, Size.y / 2), Color.black);
+                }
+
+                public void DrawContent(GameObject parent, Vector2 size, Func<S, Color> colorHeuristic)
+                {
+                    Color color = colorHeuristic.Invoke(Content);
+                    TextUtility.CreateWorldText(Content.ToString(), 6, PositionInWorld, size, color, parent.transform);
                 }
             }
         }
@@ -701,6 +754,28 @@ namespace GMDG.NoProduct.Utility
             { Direction2D.WEST, new Vector2Int(0, -1) }
         };
     }
+
+    #region Text
+
+    public class TextUtility
+    {
+        public static GameObject CreateWorldText(string text, int fontSize, Vector3 position, Vector2 Size, Color color, Transform parent)
+        {
+            GameObject go = new GameObject("WorldText", typeof(TextMeshPro));
+            go.transform.position = position - Vector3.forward;
+            ((RectTransform)go.transform).sizeDelta = Size;
+            go.transform.SetParent(parent);
+            TextMeshPro textComponent = go.GetComponent<TextMeshPro>();
+            textComponent.text = text;
+            textComponent.color = color;
+            textComponent.fontSize = fontSize;
+            textComponent.alignment = TextAlignmentOptions.Center;
+
+            return go;
+        }
+    }
+
+    #endregion
 
     #region SpriteAnimation
 
@@ -755,6 +830,7 @@ namespace GMDG.NoProduct.Utility
             }
         }
     }
+    
     #endregion
 
     #region General
@@ -781,6 +857,21 @@ namespace GMDG.NoProduct.Utility
             }
 
             behaviour.enabled = true;
+        }
+    }
+
+    public class DataStructureUtility
+    {
+        public static string DebugDicitonary<T, S>(Dictionary<T, S> dictionary)
+        {
+            string text = string.Empty;
+
+            foreach (T key in dictionary.Keys) 
+            {
+                text += key + ": ( " + dictionary[key] + " )" + Environment.NewLine;
+            }
+
+            return text;
         }
     }
 

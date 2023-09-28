@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: afa96912234010047863bbe0b9f2602f, type: 3}
+  m_Name: MovementData
+  m_EditorClassIdentifier: 
+  WalkingSpeed: 8.5
+  WalkingBuildUpSpeed: 4
+  FallingSpeed: 7.5
+  FallingBuildUpSpeed: 0.75
+  Gravity: 10
+  GravityMultiplier: 4
+  MaxYSpeed: 45
+  JumpForce: 8.5
+  JumpBufferTime: 0.1
+  JumpCoyoteTime: 0.2
+  FallDamageYThreshold: 16
+  CollisionThreashold: 0.05

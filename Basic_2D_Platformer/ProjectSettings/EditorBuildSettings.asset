@@ -15,9 +15,6 @@ EditorBuildSettings:
     path: Assets/Scenes/Managers.unity
     guid: 15990a084b03edc4c84091825bdb466c
   - enabled: 1
-    path: Assets/Scenes/LevelGenerator.unity
-    guid: 701872b33ff65b44a97351e9219c2442
-  - enabled: 1
     path: Assets/Scenes/Debug.unity
     guid: fb6dbd8ccea88904ab45ed484ddb8081
   m_configObjects: {}
