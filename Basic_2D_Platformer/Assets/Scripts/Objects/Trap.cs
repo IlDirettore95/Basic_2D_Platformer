@@ -10,7 +10,6 @@ namespace GMDG.Basic2DPlatformer.Objects
     {
         private void OnTriggerStay2D(Collider2D collision)
         {
-            Debug.Log("Trigger");
             if (collision.gameObject.tag.Equals("Player"))
             {
                 EventManager.Instance.Publish(Event.OnTrapHit);

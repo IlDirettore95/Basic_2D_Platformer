@@ -18,7 +18,7 @@ namespace GMDG.Basic2DPlatformer.PlayerStatistics
 
         private void Awake()
         {
-            spriteRenderer = GetComponent<SpriteRenderer>();
+            spriteRenderer = GetComponentInChildren<SpriteRenderer>();
         }
 
 

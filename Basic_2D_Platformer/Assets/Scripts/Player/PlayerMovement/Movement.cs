@@ -9,18 +9,21 @@ namespace GMDG.Basic2DPlatformer.PlayerMovement
 {
     public class Movement : MonoBehaviour
     {
+        public Vector2 Velocity { get { return _velocity; } }
+        public Sensors Sensors { get; private set; }
+
         [SerializeField] MovementData _data;
 
         private Kinematic2D _kinematicStatus;
-        private Sensors _sensors;
         private StateMachine _stateMachine;
 
         private Vector2 _velocity;
 
+
         private void Awake()
         {
             _kinematicStatus = new Kinematic2D(transform);
-            _sensors = new Sensors(_kinematicStatus, GetComponent<CapsuleCollider2D>(), _data);
+            Sensors = new Sensors(_kinematicStatus, GetComponent<CapsuleCollider2D>(), _data);
             _stateMachine = new StateMachine();
             
             BuildStateMachine();
@@ -32,12 +35,12 @@ namespace GMDG.Basic2DPlatformer.PlayerMovement
             Walking walking = new Walking(this);
             Falling falling = new Falling(this);
 
-            _stateMachine.AddTransition(idle, walking, () => _sensors.HorizontalInput != 0 && _sensors.IsGrounded);
-            _stateMachine.AddTransition(walking, idle, () => _sensors.HorizontalInput == 0 && _sensors.IsGrounded);
-            _stateMachine.AddTransition(idle, falling, () => _sensors.HasJustJumped || !_sensors.IsGrounded);
-            _stateMachine.AddTransition(falling, idle, () => _sensors.HorizontalInput == 0 && _sensors.IsGrounded);
-            _stateMachine.AddTransition(walking, falling, () => _sensors.HasJustJumped || !_sensors.IsGrounded);
-            _stateMachine.AddTransition(falling, walking, () => _sensors.HorizontalInput != 0 && _sensors.IsGrounded);
+            _stateMachine.AddTransition(idle, walking, () => Sensors.HorizontalInput != 0 && Sensors.IsGrounded);
+            _stateMachine.AddTransition(walking, idle, () => Sensors.HorizontalInput == 0 && Sensors.IsGrounded);
+            _stateMachine.AddTransition(idle, falling, () => Sensors.HasJustJumped || !Sensors.IsGrounded);
+            _stateMachine.AddTransition(falling, idle, () => Sensors.HorizontalInput == 0 && Sensors.IsGrounded);
+            _stateMachine.AddTransition(walking, falling, () => Sensors.HasJustJumped || !Sensors.IsGrounded);
+            _stateMachine.AddTransition(falling, walking, () => Sensors.HorizontalInput != 0 && Sensors.IsGrounded);
 
             _stateMachine.SetState(idle);
         }
@@ -71,7 +74,7 @@ namespace GMDG.Basic2DPlatformer.PlayerMovement
 
         private void UpdateSensors()
         {
-            _sensors.Update();
+            Sensors.Update();
         }
 
         private void UpdateStateMachine()
@@ -81,8 +84,8 @@ namespace GMDG.Basic2DPlatformer.PlayerMovement
 
         private void CheckForCollisions()
         {
-            _velocity.x = _sensors.CheckForCollisions(Vector2.right *_velocity.x).x;
-            _velocity.y = _sensors.CheckForCollisions(Vector2.up * _velocity.y).y;
+            _velocity.x = Sensors.CheckForCollisions(Vector2.right *_velocity.x).x;
+            _velocity.y = Sensors.CheckForCollisions(Vector2.up * _velocity.y).y;
         }
 
         private void ExecuteMovement()
@@ -136,6 +139,8 @@ namespace GMDG.Basic2DPlatformer.PlayerMovement
                 {
                     _oldSpeed = _movement._data.FallingSpeed;
                 }
+
+                EventManager.Instance.Publish(Event.OnPlayerWalking, _movement);
             }
 
             public void OnExit(IState to) { }
@@ -144,7 +149,7 @@ namespace GMDG.Basic2DPlatformer.PlayerMovement
             {
                 _currentBuildUp += _movement._data.WalkingBuildUpSpeed * Time.deltaTime;
                 _currentSpeed = Mathf.Lerp(_oldSpeed, _movement._data.WalkingSpeed, _currentBuildUp);
-                _movement._velocity = Vector2.right * _movement._sensors.HorizontalInput * _currentSpeed;
+                _movement._velocity = Vector2.right * _movement.Sensors.HorizontalInput * _currentSpeed;
             }
         }
 
@@ -181,7 +186,7 @@ namespace GMDG.Basic2DPlatformer.PlayerMovement
             {
                 if (to is Idle || to is Walking)
                 {
-                    if (_movement._sensors.FallDistance > _movement._data.FallDamageYThreshold) 
+                    if (_movement.Sensors.FallDistance > _movement._data.FallDamageYThreshold) 
                     {
                         EventManager.Instance.Publish(Event.OnFallDamageTaken);
                     }
@@ -190,13 +195,13 @@ namespace GMDG.Basic2DPlatformer.PlayerMovement
 
             public void Tick() 
             {
-                if (_movement._sensors.HasJustJumped)
+                if (_movement.Sensors.HasJustJumped)
                 {
                     _movement._velocity = new Vector2(_movement._velocity.x, _movement._data.JumpForce);
                 }
 
                 float gravityMultiplier = 0;
-                if (_movement._sensors.IsPerformingALongJump)
+                if (_movement.Sensors.IsPerformingALongJump)
                 {
                     gravityMultiplier = 1;
                 }
@@ -214,7 +219,7 @@ namespace GMDG.Basic2DPlatformer.PlayerMovement
 
                 _currentBuildUp += _movement._data.FallingBuildUpSpeed * Time.deltaTime;
                 _currentSpeed = Mathf.Lerp(_oldSpeed, _movement._data.FallingSpeed, _currentBuildUp);
-                _movement._velocity.x = _movement._sensors.HorizontalInput * _currentSpeed;
+                _movement._velocity.x = _movement.Sensors.HorizontalInput * _currentSpeed;
             }
         }
 

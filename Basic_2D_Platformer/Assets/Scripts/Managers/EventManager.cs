@@ -109,6 +109,9 @@ namespace GMDG.Basic2DPlatformer.System
         OnPlayerDespawn,
         OnFallDamageTaken,
         OnTrapHit,
-        OnPlayerDeath
+        OnPlayerDeath,
+
+        // PlayerMovement
+        OnPlayerWalking
     }
 }
