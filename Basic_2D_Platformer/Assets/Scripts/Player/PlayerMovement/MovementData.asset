@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: MovementData
   m_EditorClassIdentifier: 
   WalkingSpeed: 8.5
-  WalkingBuildUpSpeed: 4
+  WalkingBuildUpSpeed: 2
   FallingSpeed: 7.5
   FallingBuildUpSpeed: 0.75
   Gravity: 10
